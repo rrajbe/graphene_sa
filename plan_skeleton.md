@@ -1,3 +1,12 @@
+# User Prompt
+I want to make a plan for this activity; give me an executive summary of the plan and a skeleton or sections and subsections that we should cover?
+
+We have a client who is interested in understanding Graphene OS.
+
+In this first stage they are interested in understanding the general Graphene security offering, and which parts of the platform would be worth to look into first e.g. which parts of Graphene raise some eyebrows and would warrant a deeper dive.
+
+can you make documentation about a real secure phone based on Graphene. It should only take a few hours to put together this initial document with your current understanding of it.
+
 # GrapheneOS Security Assessment — Plan & Document Skeleton (v2)
 
 > **Status:** Draft plan · **Date:** 2026-11-23 · **Owner:** Raj
