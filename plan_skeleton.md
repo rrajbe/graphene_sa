@@ -10,7 +10,9 @@
 - **Goal:** Give the client a complete first view of what GrapheneOS secures, how
   it does it, and which parts deserve a deeper review first.
 - **Format:** An initial assessment built around a **reference secure phone** (a
-  supported Pixel running GrapheneOS with a hardened configuration). Every device
+  supported Pixel running GrapheneOS with a hardened configuration). As of
+  2026-11-23 that is a **Pixel 10-series** device: the newer Pixel 11 is not yet
+  supported by GrapheneOS. Every device
   from the Pixel 8 to the newest supported model is compared in one matrix.
 - **Why Pixel 8 is the floor:** It is the first generation with hardware memory
   tagging (MTE) and Google's 7-year support commitment. Pixel 6/7 are still
@@ -59,10 +61,10 @@ change quickly *before* anything is written on top of them.
 | #   | Task                   | Details                                                                                                         | Owner | Depends on | Est.  | Done |
 | --- | ---------------------- | --------------------------------------------------------------------------------------------------------------- | ----- | ---------- | ----- | ---- |
 | 1.1 | Reference profiles     | Define profiles A/B/C (doc §2.1) and map personas P1–P5, tiers T1–T4 and deployment models onto them (doc §2.2) | Raj   | –          | 20 m  | [ ]  |
-| 1.2 | Device facts           | Supported devices list, support end dates, Pixel 10a and Pixel 11 series status and specs, Titan M2 and MTE per generation (doc §5) | Raj   | –          | 30 m  | [ ]  |
-| 1.3 | Upstream facts         | Google device-tree and source-release changes, security bulletin cadence, OEM partnership status (doc §4.7, §9.3) | Raj   | –          | 20 m  | [ ]  |
-| 1.4 | Project facts          | Governance, team, infrastructure hosting and jurisdiction, any recent relocation (doc §3.1)                     | Raj   | –          | 10 m  | [ ]  |
-| 1.5 | Assumption register    | Every unconfirmed assumption, with an ID, the impact if wrong, and how to confirm it (Appendix A)               | Raj   | 1.1–1.4    | 10 m  | [ ]  |
+| 1.2 | Device facts           | Supported devices list, support end dates, Pixel 10a and Pixel 11 series status and specs, Titan M2 and MTE per generation (doc §5) | Raj   | –          | 30 m  | [x]  |
+| 1.3 | Upstream facts         | Google device-tree and source-release changes, security bulletin cadence, OEM partnership status (doc §4.7, §9.3) | Raj   | –          | 20 m  | [x]  |
+| 1.4 | Project facts          | Governance, team, infrastructure hosting and jurisdiction, any recent relocation (doc §3.1)                     | Raj   | –          | 10 m  | [x]  |
+| 1.5 | Assumption register    | Every unconfirmed assumption, with an ID, the impact if wrong, and how to confirm it (Appendix A)               | Raj   | 1.1–1.4    | 10 m  | [x]  |
 
 *Tasks 1.1–1.4 can run in parallel.*
 
@@ -112,6 +114,55 @@ someone other than the author.
 - GrapheneOS docs may lag behind recent changes, especially support for the newest devices
 - Google's upstream policy changes may invalidate parts of the analysis
 
+### Phase 1 Findings — Fact Check (2026-11-23)
+
+Sources: grapheneos.org (FAQ, releases, features) read 2026-11-23, plus press
+coverage. **Primary** = GrapheneOS or Google; **Secondary** = press only.
+
+**Device facts (task 1.2)**
+
+| Fact | Finding | Source |
+| --- | --- | --- |
+| Supported Pixels in scope | Pixel 8, 8 Pro, 8a, 9, 9 Pro, 9 Pro XL, 9 Pro Fold, 9a, 10, 10 Pro, 10 Pro XL, 10 Pro Fold, 10a all officially supported | Primary |
+| Older Pixels | Pixel 6a, 7, 7 Pro, 7a, Fold, Tablet still supported; Pixel 6/6 Pro on legacy extended support (patch level frozen) | Primary |
+| Support end dates | As in doc §5.1; corrections: 9 Pro Fold **Aug 2031** confirmed, 10 Pro Fold **Oct 2032** (not Aug), 10a **Mar 2033** | Primary |
+| **Pixel 11 series** | **Not supported by GrapheneOS yet** (absent from FAQ). Delay attributed to missing MTE enablement; GrapheneOS said on 2026-11-18 it now meets requirements and will be supported after Android 17 QPR2 lands in AOSP | Secondary |
+| Pixel 11 hardware | Tensor G6; **MediaTek M90 modem** (first non-Exynos Pixel modem); PowerVR C-Series GPU; **Titan M3** secure element; ultrasonic fingerprint on non-Fold models; announced 2026-08-12 | Secondary |
+| Pixel 10a | Released 2026-03-05; **Tensor G4** (previous-gen SoC, Mali GPU); **Exynos 5400** modem (Google-confirmed); optical fingerprint (one review) | Primary + Secondary |
+| Pixel 10 | Exynos 5400 modem carried over; PowerVR DXT-48-1536 GPU; Titan M2 still present | Secondary (Titan: Google) |
+| MTE | GrapheneOS uses MTE by default for the base OS and known-compatible user apps on 8th-gen and later Pixels; MTE is a hard requirement for new devices | Primary |
+| Latest release | 2026111800, Android 17 QPR2, 2026-11-05 Pixel security patch level, kernel based on Linux 6.18 | Primary |
+| Feature defaults | Auto-reboot **18 h** (10 min–72 h or off); USB-C **charging-only when locked**; duress PIN/password present | Primary |
+
+**Upstream facts (task 1.3)**
+
+| Fact | Finding | Source |
+| --- | --- | --- |
+| Device trees | With Android 16 (2025) Google moved the AOSP reference target to Cuttlefish and stopped publishing Pixel device trees and driver binaries | Secondary |
+| Kernel source | Pixel kernel sources now obtained via a request form and Drive link with squashed history (GrapheneOS claim); base kernel tree still in AOSP | Secondary |
+| AOSP cadence | From 2026 Google publishes AOSP source only in **Q2 and Q4**; Pixel monthly patches unchanged | Primary (Google statement via press) |
+| Security bulletins | Risk-Based Update System since 2025: monthly bulletins carry only high-risk fixes; full bulletin is **quarterly** (first Sep 2025) | Primary (Android Enterprise notice) |
+| OEM partner | **Motorola**, announced at MWC on 2026-03-01. First device **Motorola Signature 27** (Snapdragon, MTE, 7-year support); launch date and GrapheneOS availability not confirmed. Motorola provides engineers, not funding. 2027 Razr foldables next | Secondary |
+
+**Project facts (task 1.4)**
+
+| Fact | Finding | Source |
+| --- | --- | --- |
+| Legal entity | GrapheneOS Foundation, Canadian non-profit (not a registered charity), created March 2023, Toronto | Primary |
+| Team | Roughly 10 full-time developers (figures vary 6–10; self-reported) | Primary (forum) |
+| Funding | Mainly donations; company collaborations; Motorola is not a funder | Primary + Secondary |
+| Infrastructure | Nov 2025: left France and OVH, citing French pressure on encryption. Update mirrors on sponsored servers (US, temporarily London); DNS on Vultr/BuyVM anycast; remaining services (email, Matrix, forum, Mastodon, **attestation**) moving to Netcup then Toronto colocation. Whether the move is complete in 2026 is **unverified** | Primary (project post) |
+| Update integrity | Updates verified by signature and downgrade protection at three layers (updater, update_engine, verified boot), so mirror hosting is an availability risk more than an integrity risk | Primary |
+
+**What this changes in the document**
+- The "latest" device (Pixel 11) is **not yet supported**. The reference secure phone
+  should be a Pixel 10-series device until Pixel 11 support ships.
+- Pixel 11 introduces **three new security components at once** (MediaTek modem,
+  Titan M3, new PowerVR generation) — added to §5.2 and §11.
+- Pixel 10a is a G4 device (Mali, not PowerVR), so the GPU split is by SoC, not by
+  model year.
+- Motorola Signature 27 is a credible non-Pixel option to track (doc §4.7).
+
 ---
 
 ## 3. Document Skeleton
@@ -158,40 +209,49 @@ someone other than the author.
 ### 4. Platform Foundations & Trust Model
 - 4.1 Why Pixel only: hardware requirements GrapheneOS enforces
 - 4.2 Verified boot with custom AVB keys, re-locked bootloader, rollback protection
-- 4.3 Titan M2 secure element: Weaver throttling, insider attack resistance,
-  StrongBox; confirm it is unchanged on Tensor G5 and newer
+- 4.3 Titan secure element: Weaver throttling, insider attack resistance,
+  StrongBox; Titan M2 through Pixel 10a, Titan M3 on Pixel 11
 - 4.4 Storage encryption: file-based plus metadata encryption, key derivation
 - 4.5 Baseband/modem and peripheral isolation (IOMMU), proprietary firmware still trusted
 - 4.6 Trust boundaries diagram: Google HW/FW → AOSP → GrapheneOS → apps → network/carrier
-- 4.7 Planned non-Pixel OEM device: status and implications
+- 4.7 Motorola partnership (announced March 2026): Signature 27 as first non-Pixel
+  device; Qualcomm MTE and secure element; Motorola engineers port, no funding;
+  implications for single-vendor dependency on Google
 
 ### 5. Device Generation Analysis (Pixel 8 → Latest)
 
 **5.1 Device matrix** († = confirm in Phase 1, task 1.2)
 
-| Device                        | SoC              | Modem        | GPU                    | Fingerprint     | UWB        | Released  | Support end | Notes                                                                               |
-| ----------------------------- | ---------------- | ------------ | ---------------------- | --------------- | ---------- | --------- | ----------- | ----------------------------------------------------------------------------------- |
-| Pixel 8 / 8 Pro               | Tensor G3        | Exynos 5300  | Mali                   | Optical         | 8 Pro only | Oct 2023  | Oct 2030    | First gen with MTE; oldest in scope                                                 |
-| Pixel 8a                      | Tensor G3        | Exynos 5300  | Mali                   | Optical         | No         | May 2024  | May 2031    | Budget G3; same security baseline                                                   |
-| Pixel 9 / 9 Pro / 9 Pro XL    | Tensor G4        | Exynos 5400  | Mali                   | Ultrasonic      | Pro only   | Aug 2024  | Aug 2031    | Satellite SOS modem path                                                            |
-| Pixel 9 Pro Fold              | Tensor G4        | Exynos 5400  | Mali                   | Side capacitive | Yes        | Sep 2024  | Aug 2031†   | Foldable; two displays                                                              |
-| Pixel 9a                      | Tensor G4        | Exynos 5300  | Mali                   | Optical         | No         | Apr 2025  | Apr 2032    | Older modem than the rest of the 9 line                                             |
-| Pixel 10 / 10 Pro / 10 Pro XL | Tensor G5 (TSMC) | Exynos 5400† | PowerVR (Imagination)† | Ultrasonic      | Pro only   | Aug 2025  | Aug 2032    | New fab, new GPU driver stack; Titan M2 and MTE status†; arrived after Google stopped publishing device trees |
-| Pixel 10 Pro Fold             | Tensor G5        | Exynos 5400† | PowerVR†               | Side capacitive | Yes        | Oct 2025† | Aug 2032†   | Foldable                                                                            |
-| Pixel 10a                     | †                | †            | †                      | †               | †          | 2026†     | †           | Confirm specs and GrapheneOS support                                                |
-| Pixel 11 series               | Tensor G6†       | †            | †                      | †               | †          | Aug 2026† | †           | Likely the "latest" device in scope; confirm specs and GrapheneOS support first     |
+| Device                        | SoC              | Modem          | GPU                       | Secure element | Fingerprint     | UWB        | Released | Support end | GrapheneOS     | Notes                                                                 |
+| ----------------------------- | ---------------- | -------------- | ------------------------- | -------------- | --------------- | ---------- | -------- | ----------- | -------------- | --------------------------------------------------------------------- |
+| Pixel 8 / 8 Pro               | Tensor G3        | Exynos 5300    | Mali                      | Titan M2       | Optical         | 8 Pro only | Oct 2023 | Oct 2030    | Supported      | First gen with MTE; oldest in scope                                   |
+| Pixel 8a                      | Tensor G3        | Exynos 5300    | Mali                      | Titan M2       | Optical         | No         | May 2024 | May 2031    | Supported      | Budget G3; same security baseline                                     |
+| Pixel 9 / 9 Pro / 9 Pro XL    | Tensor G4        | Exynos 5400    | Mali                      | Titan M2       | Ultrasonic      | Pro only   | Aug 2024 | Aug 2031    | Supported      | Satellite SOS modem path                                              |
+| Pixel 9 Pro Fold              | Tensor G4        | Exynos 5400    | Mali                      | Titan M2       | Side capacitive | Yes        | Sep 2024 | Aug 2031    | Supported      | Foldable; two displays                                                |
+| Pixel 9a                      | Tensor G4        | Exynos 5300    | Mali                      | Titan M2       | Optical         | No         | Apr 2025 | Apr 2032    | Supported      | Older modem than the rest of the 9 line                               |
+| Pixel 10 / 10 Pro / 10 Pro XL | Tensor G5 (TSMC) | Exynos 5400    | PowerVR DXT-48-1536       | Titan M2       | Ultrasonic      | Pro only†  | Aug 2025 | Aug 2032    | Supported      | New fab and GPU driver stack; first gen after device trees stopped    |
+| Pixel 10 Pro Fold             | Tensor G5        | Exynos 5400    | PowerVR                   | Titan M2       | Side capacitive | Yes†       | Oct 2025 | Oct 2032    | Supported      | Foldable                                                              |
+| Pixel 10a                     | Tensor G4        | Exynos 5400    | Mali                      | Titan M2†      | Optical†        | No†        | Mar 2026 | Mar 2033    | Supported      | Previous-gen SoC; gains satellite SOS via 5400 modem                  |
+| Pixel 11 / 11 Pro / 11 Pro XL | Tensor G6        | MediaTek M90†  | PowerVR C-Series†         | Titan M3       | Ultrasonic      | †          | Aug 2026 | Aug 2033†   | **Not yet**    | New modem vendor, new secure element, new GPU gen; support pending Android 17 QPR2 in AOSP |
+| Pixel 11 Pro Fold             | Tensor G6        | MediaTek M90†  | PowerVR C-Series†         | Titan M3†      | Side capacitive†| †          | 2026†    | †           | **Not yet**    | Foldable                                                              |
+
+*Non-Pixel to track: Motorola Signature 27 (Snapdragon, MTE, 7-year support) — first GrapheneOS partner device; availability unconfirmed (§4.7).*
 
 **5.2 Security-relevant differences**
 - 5.2.1 MTE: availability and default enforcement per generation
 - 5.2.2 GPU driver: Mali (G3/G4) has a long record of in-the-wild exploitation by
   commercial spyware; PowerVR (G5) is a new kernel attack surface with little
   public history. Known-exploited vs unknown, not "safe" vs "risky"
-- 5.2.3 Modem: Exynos 5300 vs 5400; satellite messaging/SOS paths; known baseband CVEs
-- 5.2.4 Fingerprint sensor type: spoofing resistance and how it affects fingerprint + PIN unlock
-- 5.2.5 Radios: UWB, Thread, satellite, NFC; extra attack surface on Pro models
-- 5.2.6 Support window remaining (procurement lifetime value)
-- 5.2.7 Foldables: extra display/hinge sensors, larger driver surface
-- 5.2.8 Time from device launch to GrapheneOS support (Pixel 10 and Pixel 11 case studies)
+- 5.2.3 Modem: Exynos 5300 vs 5400 vs **MediaTek M90 (Pixel 11)** — first change of
+  modem vendor; satellite messaging/SOS paths; known baseband CVEs for each vendor
+- 5.2.4 Secure element: Titan M2 (Pixel 8–10a) vs **Titan M3 (Pixel 11)** — new
+  firmware and Weaver/StrongBox implementation with little public research
+- 5.2.5 Fingerprint sensor type: spoofing resistance and how it affects fingerprint + PIN unlock
+- 5.2.6 Radios: UWB, Thread, satellite, NFC; extra attack surface on Pro models
+- 5.2.7 Support window remaining (procurement lifetime value)
+- 5.2.8 Foldables: extra display/hinge sensors, larger driver surface
+- 5.2.9 Time from device launch to GrapheneOS support: Pixel 10 (disrupted by the
+  late-2025 infrastructure move) and Pixel 11 (3+ months and counting, MTE gating)
 
 **5.3 Device recommendation by profile**
 
@@ -221,8 +281,8 @@ someone other than the author.
 
 ### 8. Physical & Forensic Resistance
 - 8.1 BFU vs AFU states and why they matter
-- 8.2 Auto-reboot timer (default and how to tune it)
-- 8.3 USB-C port control while locked
+- 8.2 Auto-reboot timer (18 h default; 10 min–72 h range)
+- 8.3 USB-C port control while locked (default: charging-only when locked)
 - 8.4 Duress PIN/password wipe
 - 8.5 PIN scrambling, fingerprint + PIN two-factor unlock
 - 8.6 Titan M2 brute-force throttling
@@ -256,19 +316,20 @@ costing only. Ratings below are working hypotheses, to be re-scored in Phase 3.
 
 | #   | Area                                  | Why it raises eyebrows                                                                           | Risk | Verify effort | Devices           | Profiles | Proposed Stage 2 test                                  |
 | --- | ------------------------------------- | ------------------------------------------------------------------------------------------------ | ---- | ------------- | ----------------- | -------- | ------------------------------------------------------ |
-| 1   | Upstream dependency on Google         | Device trees no longer published, changes to source/patch cadence, closed firmware               | H    | M             | All; G5+ most     | A, B, C  | Patch-lag timeline analysis; upstream diff tracking    |
+| 1   | Upstream dependency on Google         | Device trees no longer published; AOSP source only Q2/Q4; quarterly bulletins; closed firmware  | H    | M             | All; G5+ most     | A, B, C  | Patch-lag timeline analysis; upstream diff tracking    |
 | 2   | Supply chain, governance & infrastructure | Small team, signing-key custody, bus factor, reproducible builds; hosting jurisdiction and relocation | H | M          | All               | B, C     | Build-reproducibility test; governance and hosting review |
-| 3   | Baseband / cellular stack             | Largest closed surface left; satellite paths; how strong the IOMMU isolation is                  | H    | H             | All; 5400 vs 5300 | B        | Firmware RE scope (IDA); CVE history review            |
+| 3   | Baseband / cellular stack             | Largest closed surface left; satellite paths; IOMMU isolation; vendor switch to MediaTek on Pixel 11 | H | H           | All; Pixel 11 new | B        | Firmware RE scope (IDA); CVE history review            |
 | 4   | GPU driver (Mali and PowerVR)         | Mali: known-exploited history on G3/G4. PowerVR on G5: new stack, little public research          | H    | H             | All; G5+ unknown  | B, C     | Mali CVE review; PowerVR attack-surface mapping; fuzzing scope |
-| 5   | Detection & incident response         | No root, no MTD agent; compromise may go unseen; Auditor proves OS integrity only               | M    | M             | All               | B, C     | IR playbook dry run; log and triage options review     |
-| 6   | Browser / WebView patch lag           | Vanadium vs upstream Chromium on in-the-wild 0-days                                              | M    | L             | All               | A, B     | Historical patch-latency study                         |
-| 7   | Sandboxed Play shim                   | Compatibility code with an IPC surface; eSIM provisioning path                                   | M    | M             | All               | A, C     | Shim code review; IPC fuzzing                          |
-| 8   | App sourcing supply chain             | App stores and direct installs are a larger real-world risk than the OS                          | M    | L             | All               | A, B, C  | Store trust-model review; recommended app list         |
-| 9   | MTE / hardened_malloc opt-outs        | Per-app weakening; how fail-open behaves in practice                                             | M    | L             | All               | A, B     | Opt-out census of common apps                          |
-| 10  | Forensic claims                       | BFU and auto-reboot hold up on paper; need validation against current tools                      | M    | H             | All               | A, B     | Lab extraction test per generation                     |
-| 11  | Enterprise manageability              | No fleet console; MDM gaps; attestation at scale                                                 | M    | M             | All               | C        | MDM compatibility matrix                               |
-| 12  | Default network behaviour             | Metadata exposure to GrapheneOS servers                                                          | L    | L             | All               | A, B     | Traffic capture and analysis                           |
-| 13  | Biometric differences                 | Optical vs ultrasonic vs capacitive spoofing resistance                                          | L    | M             | Per device        | A, B     | Spoof testing                                          |
+| 5   | Pixel 11 new components        | Titan M3 and MediaTek M90 arrive together, plus a new PowerVR generation; GrapheneOS support pending | M | H | Pixel 11 | B | Readiness review once supported; SE and modem research scope |
+| 6   | Detection & incident response         | No root, no MTD agent; compromise may go unseen; Auditor proves OS integrity only               | M    | M             | All               | B, C     | IR playbook dry run; log and triage options review     |
+| 7   | Browser / WebView patch lag           | Vanadium vs upstream Chromium on in-the-wild 0-days                                              | M    | L             | All               | A, B     | Historical patch-latency study                         |
+| 8   | Sandboxed Play shim                   | Compatibility code with an IPC surface; eSIM provisioning path                                   | M    | M             | All               | A, C     | Shim code review; IPC fuzzing                          |
+| 9   | App sourcing supply chain             | App stores and direct installs are a larger real-world risk than the OS                          | M    | L             | All               | A, B, C  | Store trust-model review; recommended app list         |
+| 10  | MTE / hardened_malloc opt-outs        | Per-app weakening; how fail-open behaves in practice                                             | M    | L             | All               | A, B     | Opt-out census of common apps                          |
+| 11  | Forensic claims                       | BFU and auto-reboot hold up on paper; need validation against current tools                      | M    | H             | All               | A, B     | Lab extraction test per generation                     |
+| 12  | Enterprise manageability              | No fleet console; MDM gaps; attestation at scale                                                 | M    | M             | All               | C        | MDM compatibility matrix                               |
+| 13  | Default network behaviour             | Metadata exposure to GrapheneOS servers                                                          | L    | L             | All               | A, B     | Traffic capture and analysis                           |
+| 14  | Biometric differences                 | Optical vs ultrasonic vs capacitive spoofing resistance                                          | L    | M             | Per device        | A, B     | Spoof testing                                          |
 
 ### 12. Reference Secure-Phone Configurations
 - **12.1 Hardware selection**
@@ -307,7 +368,20 @@ costing only. Ratings below are working hypotheses, to be re-scored in Phase 3.
 - 14.4 Open questions for the client (from the assumption register)
 
 ### Appendices
-- **A.** Assumption register (ID · assumption · impact if wrong · how to confirm)
+- **A.** Assumption register (ID · assumption · impact if wrong · how to confirm).
+  Seeded from the Phase 1 fact check:
+
+  | ID  | Assumption | Impact if wrong | How to confirm |
+  | --- | ---------- | --------------- | -------------- |
+  | A01 | The client wants a phone they can deploy now, so the reference device is a supported Pixel 10-series model, not Pixel 11 | Recommendation changes to "wait for Pixel 11" | Ask client; re-check GrapheneOS FAQ before delivery |
+  | A02 | Pixel 11 uses a MediaTek M90 modem and PowerVR C-Series GPU (press reports only) | §5.2 and §11 #3–#5 change | Google spec sheet or teardown |
+  | A03 | Pixel 11 GrapheneOS support follows Android 17 QPR2 in AOSP, within weeks | Pixel 11 stays out of scope for longer | GrapheneOS releases page / announcements |
+  | A04 | Pixel 10a has an optical fingerprint sensor and Titan M2 (one review) | §5.2.5 biometric comparison | Google spec sheet or teardown |
+  | A05 | Infrastructure move off OVH (Nov 2025) has completed | §3.1 and §11 #2 risk rating | GrapheneOS announcements; DNS/IP ownership lookup |
+  | A06 | Team size is about 10 full-time developers (self-reported, figures vary) | Bus-factor rating in §11 #2 | Public statements; commit-author analysis |
+  | A07 | Motorola Signature 27 will ship with GrapheneOS support in 2026–2027 | §4.7 and non-Pixel recommendation | Motorola / GrapheneOS announcements |
+  | A08 | Pixel monthly patches continue despite quarterly AOSP bulletins, so GrapheneOS patch level stays current | §9.3 patch-lag analysis | Compare GrapheneOS patch levels against Pixel bulletins over 6 months |
+  | A09 | The client is not restricted to US/EU-sourced hardware or to a specific carrier | §12.1 device choice | Ask client |
 - **B.** Persona, threat-tier and deployment-model definitions
   - Personas: P1 Executive/VIP · P2 Journalist/activist/high-risk individual ·
     P3 Security/IT staff · P4 Field/operational staff · P5 Privacy-conscious user
