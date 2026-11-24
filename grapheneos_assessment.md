@@ -16,7 +16,56 @@
 
 ## 0. Executive Summary
 
-_To be written last (plan task 4.3)._
+**Verdict.** GrapheneOS on a supported Google Pixel is one of the most
+technically secure phone platforms available today. It is a strong fit for
+**high-risk individuals** (executives, journalists, activists) facing commercial
+spyware and forensic extraction. It can serve a **managed fleet**, but only with
+compensating controls, because it offers no fleet console, no vendor support and
+little visibility into compromise. **No profile is proof against a determined
+nation-state**: the modem and firmware below the OS remain trusted and closed.
+
+**Top strengths**
+- **Exploit mitigation well beyond stock Android:** a hardened memory allocator,
+  hardware memory tagging on by default, per-app randomization and kernel
+  hardening make software bugs much harder to exploit. (§6)
+- **Strong physical and forensic resistance:** auto-reboot returns devices to
+  their encrypted "before first unlock" state, USB data is blocked while locked,
+  a duress PIN wipes the device, and the secure element limits PIN guessing.
+  Leaked Cellebrite material reportedly shows no access to locked GrapheneOS
+  Pixels. (§4, §8)
+- **Privacy controls and no built-in Google services:** per-app network and
+  sensor permissions, scoped storage and contacts, and Google Play only as an
+  optional, unprivileged app. (§7)
+- **Well-designed updates:** signed, rollback-protected, installed even before
+  first unlock, with frequent releases. (§3.4)
+
+**Top areas to examine first** (§11)
+1. **Dependence on Google** for hardware, firmware, patches and source code,
+   which Google has recently made harder to obtain.
+2. **Trust concentrated in a small team:** about ten developers, donation
+   funded, no published signing-key custody or succession plan, no commercial
+   support.
+3. **Baseband (modem):** the largest closed attack surface.
+4. **GPU drivers:** Mali has a record of real-world spyware exploitation;
+   the newer PowerVR stack is largely unstudied.
+5. **Detection and incident response:** compromise may go unseen.
+
+**Device recommendation** (§5.3, §12.1)
+
+| Profile | Device |
+| --- | --- |
+| Baseline individual / managed fleet | Pixel 10a (supported to March 2033) |
+| High-risk | Pixel 10 or 10 Pro (supported to August 2032) |
+| Pixel 11 | Not yet supported by GrapheneOS; re-evaluate after support ships |
+
+**Recommended next step.** A **Tier 1 Stage 2 engagement of about 16–26 analyst
+days** (§14.2) covering patch-lag analysis, governance and signing-key custody,
+incident-response design and MDM fit. This answers "can we trust and operate
+this?" before committing to deeper technical research on the modem and GPU.
+
+**Open questions for the client** are listed in §14.4. The main ones: which user
+groups are in scope, whether certified products are required, and which MDM and
+mandatory apps must work.
 
 ## 1. Scope, Method & Confidence
 
@@ -50,6 +99,11 @@ knowledge. Fast-moving facts were checked on 2026-11-23/24.
 | **[S] Secondary** | Press or third-party reporting only |
 | **[O] Observed** | First-hand testing (none in Stage 1) |
 | **[A] Assumed** | Analyst judgement; listed in the assumption register |
+
+**Confidence profile of this draft** (tag count, 2026-11-24): about 117
+Documented, 30 Secondary, 43 Assumed, 0 Observed. Descriptive sections (§3–§10)
+are mostly Documented. The judgements in §5.3, §11, §12, §13 and §14 are analyst
+assessments throughout, as stated at the top of each.
 
 ### 1.5 Out of Scope for Stage 1
 
@@ -216,7 +270,7 @@ phones, with a first Motorola device announced.
   Play as ordinary sandboxed apps with no special privileges (§7.4). [D]
 - **No root access.** GrapheneOS does not provide a way to run apps as root,
   because it would break the verified boot and sandbox guarantees the design
-  depends on. [A] — confirm wording in plan task 4.1.
+  depends on. Users who want root must make their own unsupported builds. [S]
 - **App compatibility is preserved where possible.** Hardening that breaks apps is
   offered as per-app toggles rather than removed, which creates opt-outs worth
   examining (§6.7, §11). [D]
@@ -227,9 +281,9 @@ phones, with a first Motorola device announced.
 | --- | --- | --- |
 | A "de-Googled privacy ROM" like /e/OS or CalyxOS | It is a hardening project first; privacy follows from sandboxing. It also allows sandboxed Google Play, which pure de-Googled ROMs don't | [D] |
 | Runs on many devices, like LineageOS | Runs only on devices that meet its hardware requirements: currently Pixel 6 and newer (Pixel 6/6 Pro on legacy extended support), with Motorola to follow | [D] |
-| Can be rooted or customized freely | No root access; the bootloader is re-locked with GrapheneOS keys after install | [A] / [D] |
+| Can be rooted or customized freely | No root access (root would break verified boot and the security model; users who want it must make unsupported custom builds); the bootloader is re-locked with GrapheneOS keys after install | [S] / [D] |
 | An anonymity tool | It does not hide your identity from the mobile network, carrier or the services you sign into. Anonymity needs separate measures (e.g. Tor, careful account use) | [A] |
-| A certified or accredited product | No known Common Criteria, FIPS 140 or government accreditation. The FAQ discusses external review, not certification | [A] |
+| A certified or accredited product | No Common Criteria, FIPS 140 or government accreditation found in any source checked. The FAQ discusses external review, not certification | [A] (absence of evidence) |
 | An enterprise product with vendor support | No commercial support, SLA, fleet console or management service. It supports Android Enterprise work profiles via standard MDM (§10) | [D] / [A] |
 | Independent of Google | It depends on Google for hardware, firmware, security patches and AOSP source releases (§4, §9.3) | [D] |
 
@@ -759,13 +813,13 @@ should use a passphrase. [A]
 
 | Leak | What it reportedly shows | Tag |
 | --- | --- | --- |
-| April 2024 Cellebrite documents | GrapheneOS devices with patches from late 2022 onward not supported for extraction | [A] (analyst recollection of press reporting; source to add in Phase 4) |
-| Oct 2025 Cellebrite "Android OS Access Support Matrix" (leaked from a sales briefing) | Stock Pixel 6–9 extractable in BFU, AFU and unlocked states; **locked GrapheneOS Pixels: no access**, apart from builds older than about 2022; possible loss of full extraction even on unlocked GrapheneOS devices | [S] |
+| Oct 2025 Cellebrite "Android OS Access Support Matrix" (screenshotted from a sales briefing; reported by 404 Media; Cellebrite declined to comment) | Stock Pixel 6–9 extractable in BFU, AFU and unlocked states; **locked GrapheneOS Pixels: no access**, apart from builds older than about 2022; possible loss of full extraction even on unlocked GrapheneOS devices | [S] |
 
 **Limits:** These are leaked sales documents, not tests. They cover one vendor,
 are months old by the time they surface, and show capability the vendor offers
 widely — not what a state agency might have privately. Absence of a capability in
-a matrix is evidence, not proof. Lab validation is §11 area #10.
+a matrix is evidence, not proof. Lab validation is §11 area #10. (An earlier draft cited April 2024 Cellebrite
+documents; the reporting found covers iPhones only, so that row was removed.)
 
 ### 8.8 Coercion and Border Scenarios
 
@@ -792,8 +846,10 @@ unlock; signed with downgrade protection; no deferral setting. [D]
   but does **not publish** where or how the OS signing keys are stored, who holds
   them, or how a compromise would be handled. [D] (absence)
 - Anyone can **build GrapheneOS from source**. [D] Whether official builds are
-  **independently reproducible** (byte-for-byte) is not stated on the features
-  page and needs checking. [A13]
+  **reproducible**: the project states official builds can be rebuilt and
+  compared file by file, excluding signatures, and publishes SSH-signed source
+  tags. [S] (project forum) Proprietary firmware cannot be rebuilt, so this
+  verifies the OS only. Independent reproduction is still worth doing (A13, WP2).
 - Kernel modules are signed with per-build keys that are discarded. [D]
 
 > **Assessment note.** Key custody is the single most important trust question
@@ -901,9 +957,9 @@ provisioning tool. [D] / [A] Compensating controls:
 | --- | --- | --- |
 | Android Auto | Supported via sandboxed Play compatibility layer | [D] |
 | eSIM | Existing eSIMs work; adding eSIMs needs an opt-in toggle | [D] |
-| Google Wallet tap-to-pay | Not available (fails Play Integrity) | [A] |
-| RCS (Google Messages) | Works for many users with sandboxed Play; not guaranteed | [A] |
-| Wear OS | Partial; depends on companion apps and Play | [A] |
+| Google Wallet tap-to-pay | Not available: requires a Google-certified OS. Some bank apps and Curve Pay offer NFC payments instead | [S] |
+| RCS (Google Messages) | Works via sandboxed Play, including end-to-end encrypted chats, but can break with carrier or Google changes | [S] |
+| Wear OS | Mixed user reports; some watches (incl. Pixel Watch) work with sandboxed Play | [S] |
 | Push notifications | Via sandboxed Play (FCM) or app-specific alternatives | [D] / [A] |
 
 ### 10.5 Usability vs Security by Profile
@@ -936,7 +992,7 @@ client input and Stage 2 results.
 | # | Area | Why it raises eyebrows | L | I | Risk | Verify effort | Devices | Profiles | Proposed Stage 2 test |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Upstream dependency on Google | Device trees no longer published; Pixel kernel source by request; AOSP source only Q2/Q4; full bulletins quarterly; all firmware closed (§9.3) | H | H | **H** | M | All; G5+ most | A, B, C | Patch-lag timeline over 12 months; track upstream changes and porting delays |
-| 2 | Supply chain, governance & infrastructure | ~10-person donation-funded team; **signing-key custody not published**; reproducibility unconfirmed; no succession plan; infrastructure relocated under legal pressure (§3.1, §9.2) | M | H | **H** | M | All | B, C | Governance and key-custody interview; reproducible-build test; hosting review |
+| 2 | Supply chain, governance & infrastructure | ~10-person donation-funded team; **signing-key custody not published**; reproducibility claimed but not independently confirmed; no succession plan; infrastructure relocated under legal pressure (§3.1, §9.2) | M | H | **H** | M | All | B, C | Governance and key-custody interview; reproducible-build test; hosting review |
 | 3 | Baseband / cellular stack | Largest closed attack surface; nation-state target; satellite path on 5400; MediaTek on Pixel 11 (§4.5, §5.2.3) | M | H | **H** | H | All; Pixel 11 new | B | Modem CVE history per generation; IOMMU isolation review; firmware RE scope |
 | 4 | GPU driver (Mali and PowerVR) | Mali: repeated in-the-wild spyware use; PowerVR: new stack, little public research (§5.2.2) | M | H | **H** | H | All | B, C | Mali patch-status review; PowerVR attack-surface mapping and fuzzing scope |
 | 5 | Detection & incident response | No root, no MTD agent; compromise may go unseen; Auditor proves OS integrity only (§9.7) | H | M | **M** | M | All | B, C | IR runbook dry run; evaluate log, MTE crash and MVT triage options |
@@ -1116,9 +1172,10 @@ Ratings are relative and qualitative (analyst judgement, [A]) unless tagged.
 - **iOS strengths:** integrated hardware/software from one vendor; Apple's
   Secure Enclave; Lockdown Mode cuts attack surface (message attachments,
   JIT, wired connections when locked); commercial support; wide app and MDM
-  support; inactivity reboot (added in iOS 18).
+  support; inactivity reboot after 3 days (iOS 18.1). [S]
 - **GrapheneOS strengths:** MTE across the OS and most apps (Apple's comparable
-  Memory Integrity Enforcement arrived only with iPhone 17 hardware [A]);
+  Memory Integrity Enforcement — Apple's MTE-based equivalent — arrived only
+  with iPhone 17 / iPhone Air hardware and cannot be backported [S]);
   per-app network and sensor control; no mandatory vendor account; user
   control of auto-reboot timing; duress PIN; open source.
 - **Both** remain targets of nation-state 0-click chains; neither is proof
@@ -1237,14 +1294,114 @@ Taken from the assumption register (Appendix A):
 
 ## Appendices
 
-- **A.** Assumption register — see plan; to be transferred at delivery
-- **B.** Persona, threat-tier and deployment-model definitions
-- **C.** Glossary
-- **D.** Device specification detail
-- **E.** Hardening settings reference
-- **F.** References and sources
+## Appendix A — Assumption Register
 
-### Sources used so far
+Every assumption that could change a conclusion. Confirming these with the
+client is the first step of Stage 2.
+
+| ID  | Assumption | Impact if wrong | How to confirm |
+| --- | ---------- | --------------- | -------------- |
+| A01 | The client wants a phone they can deploy now, so the reference device is a supported Pixel 10-series model, not Pixel 11 | Recommendation changes to "wait for Pixel 11" | Ask client; re-check GrapheneOS FAQ before delivery |
+| A02 | Pixel 11 uses a MediaTek M90 modem and PowerVR C-Series GPU (press reports only) | §5.2 and §11 #3–#5 change | Google spec sheet or teardown |
+| A03 | Pixel 11 GrapheneOS support follows Android 17 QPR2 in AOSP, within weeks | Pixel 11 stays out of scope for longer | GrapheneOS releases page / announcements |
+| A04 | Pixel 10a has an optical fingerprint sensor and Titan M2 (one review) | §5.2.5 biometric comparison | Google spec sheet or teardown |
+| A05 | Infrastructure move off OVH (Nov 2025) has completed | §3.1 and §11 #2 risk rating | GrapheneOS announcements; DNS/IP ownership lookup |
+| A06 | Team size is about 10 full-time developers (self-reported, figures vary) | Bus-factor rating in §11 #2 | Public statements; commit-author analysis |
+| A07 | Motorola Signature 27 will ship with GrapheneOS support in 2026–2027 | §4.7 and non-Pixel recommendation | Motorola / GrapheneOS announcements |
+| A08 | Pixel monthly patches continue despite quarterly AOSP bulletins, so GrapheneOS patch level stays current | §9.3 patch-lag analysis | Compare GrapheneOS patch levels against Pixel bulletins over 6 months |
+| A09 | The client is not restricted to US/EU-sourced hardware or to a specific carrier | §12.1 device choice | Ask client |
+| A10 | Highest credible tier per persona is as in §2.3 (e.g. P1 at T3, P2 at T4) | Profile assignment and §11 priorities shift | Ask client which personas they actually have |
+| A11 | Organization-owned devices can be issued to high-risk staff instead of BYOD | C+B and the BYOD "not recommended" guidance may not be acceptable | Ask client about device ownership policy |
+| A12 | The client has no hard requirement for certified products (Common Criteria, FIPS 140, government accreditation) | GrapheneOS may be ruled out for regulated uses regardless of technical strength | Ask client about compliance obligations |
+| A13 | Official GrapheneOS builds are reproducible from source (not stated on the features page) | §9.2 and §11 #2 rating; build-verification Stage 2 work package | GrapheneOS build docs; attempt a reproducible build in Stage 2 |
+| A14 | Device-owner (fully managed) MDM provisioning works on GrapheneOS | Profile C design changes to work-profile-only | Test with the client's MDM in Stage 2 |
+
+## Appendix B — Personas, Threat Tiers and Deployment Models
+
+**Personas**
+
+| ID | Persona | Typical concerns |
+| --- | --- | --- |
+| P1 | Executive / VIP | Corporate espionage, travel risk, high-value communications |
+| P2 | Journalist / activist / high-risk individual | Targeted spyware, border seizure, source protection |
+| P3 | Security / IT staff | Admin credentials, MFA devices, privileged access |
+| P4 | Field / operational staff | Device loss, coercion, operational data |
+| P5 | Privacy-conscious individual | Tracking, data brokers, theft |
+
+**Threat tiers**
+
+| ID | Tier | Typical capability |
+| --- | --- | --- |
+| T1 | Opportunistic theft / loss | Physical access, no exploits |
+| T2 | Commercial forensic extraction | Commercial tools (e.g. Cellebrite, GrayKey) after seizure, at borders or in legal process |
+| T3 | Commercial spyware vendor | 1-click and 0-click exploit chains sold to governments and others |
+| T4 | Nation-state | Private 0-click chains, baseband and firmware attacks, supply-chain interdiction |
+
+**Deployment models**
+
+| ID | Model | Notes |
+| --- | --- | --- |
+| D1 | Individually owned, user-managed | Full user control |
+| D2 | Organization-owned, managed fleet | Organization sets device-wide policy |
+| D3 | BYOD with work profile | Organization controls only the work profile |
+| D4 | Minimal / communications-only | Single-purpose device, few apps |
+
+## Appendix C — Glossary
+
+| Term | Meaning |
+| --- | --- |
+| AFU | After First Unlock: encryption keys are in memory even when locked |
+| AOSP | Android Open Source Project, Google's open-source Android base |
+| ASLR | Address Space Layout Randomization |
+| Auditor | GrapheneOS app that verifies a device's OS using hardware attestation |
+| AVB | Android Verified Boot: checks at boot that the OS is signed by the enrolled key |
+| Baseband | The cellular modem processor and its firmware |
+| BFU | Before First Unlock: after reboot, before the PIN is entered; user data keys are not in memory |
+| CFI | Control-Flow Integrity: blocks hijacking of program control flow |
+| Duress PIN | A PIN that wipes the device when entered |
+| Exec spawning | Starting each app as a fresh process instead of forking a shared template (zygote) |
+| hardened_malloc | GrapheneOS's hardened memory allocator |
+| IOMMU | Hardware that limits which memory a peripheral (e.g. the modem) can access |
+| MDM | Mobile Device Management |
+| MTE | Memory Tagging Extension: ARM hardware feature that detects memory-safety bugs |
+| MVT | Mobile Verification Toolkit, a forensic triage tool for spyware |
+| Play Integrity | Google API that apps use to check a device is Google-certified |
+| QPR | Quarterly Platform Release of Android |
+| Sandboxed Google Play | Google Play services run as ordinary, unprivileged apps |
+| StrongBox | Android keystore backed by a separate secure element |
+| Titan M2 / M3 | Google's secure element chips in Pixels |
+| Vanadium | GrapheneOS's hardened Chromium-based browser and WebView |
+| Weaver | Secure-element service that throttles unlock attempts |
+
+## Appendix D — Device Specification Detail
+
+See the device matrix in §5.1. Pixel 11 entries marked † rely on press reports
+and should be re-checked against Google's published specifications before
+procurement (A02, A04).
+
+## Appendix E — Hardening Settings Reference
+
+Settings locations for the controls in §12.7. Paths quoted from GrapheneOS
+documentation are marked [D]; the rest are approximate and should be checked on
+a device in Stage 2.
+
+| Control | Path |
+| --- | --- |
+| USB-C port | Settings > Security & privacy > Exploit protection [D] |
+| Duress PIN/password | Settings > Security & privacy > Device unlock > Duress Password [D] |
+| Secure app spawning | Settings > Security & privacy > Exploit protection > Secure app spawning [D] |
+| Sensors permission default | Settings > Security & privacy > More security & privacy [D] |
+| eSIM support | Settings > Network & internet > eSIM support [D] |
+| Android Auto permissions | Settings > Apps > Sandboxed Google Play > Android Auto [D] |
+| Auto-reboot | Settings > Security & privacy > Exploit protection (approx.) |
+| PIN scrambling | Settings > Security & privacy > Device unlock (approx.) |
+| Per-app exploit protection | Settings > Apps > (app) (approx.) |
+| System Updater | Settings > System > System update (approx.) |
+
+## Appendix F — References and Sources
+
+All URLs accessed 2026-11-23/24. Each claim in the body carries its confidence tag.
+
 
 - GrapheneOS history: https://grapheneos.org/history/
 - GrapheneOS releases: https://grapheneos.org/releases
@@ -1266,3 +1423,10 @@ Taken from the assumption register (Appendix A):
 - TechSpot, Pixel 11 / Tensor G6 / Titan M3: https://www.techspot.com/news/113458-google-unveils-pixel-11-series-featuring-tensor-g6.html
 - Android Authority, AOSP twice a year: https://www.androidauthority.com/aosp-source-code-schedule-3630018/
 - Android Enterprise, bulletin cadence: https://www.androidenterprise.community/kb/announcements/change-in-cadence-of-android-security-bulletins/12154
+- 404 Media, Cellebrite Teams call leak (Oct 2025): https://www.404media.co/someone-snuck-into-a-cellebrite-microsoft-teams-call-and-leaked-phone-unlocking-details/
+- GrapheneOS build documentation: https://grapheneos.org/build
+- GrapheneOS forum, reproducible builds: https://discuss.grapheneos.org/d/23877-reproducible-builds
+- TechTimes, GrapheneOS daily driver / Google Pay blocked (Jul 2026): https://www.techtimes.com/articles/322270/20260730/grapheneos-passes-daily-driver-test-most-apps-work-google-pay-permanently-blocked.htm
+- Android Authority, GrapheneOS RCS support: https://androidauthority.com/grapheneos-messaging-rcs-support-secure-paste-3708317
+- Apple Security Research, Memory Integrity Enforcement: https://security.apple.com/blog/memory-integrity-enforcement
+- TechCrunch, iOS inactivity reboot: https://techcrunch.com/2024/11/14/new-apple-security-feature-reboots-iphones-after-3-days-researchers-confirm

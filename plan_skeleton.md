@@ -103,9 +103,9 @@ someone other than the author.
 
 | #   | Task                     | Details                                                                                   | Owner         | Depends on | Est.  | Done |
 | --- | ------------------------ | ----------------------------------------------------------------------------------------- | ------------- | ---------- | ----- | ---- |
-| 4.1 | Check feature facts      | Current defaults: auto-reboot, USB-C mode, duress, eSIM handling, Auditor                 | Raj           | 2.4–2.7    | 20 m  | [ ]  |
-| 4.2 | Claimed vs verified pass | Tag every claim Documented / Secondary / Observed / Assumed; re-check anything Phase 1 left as †      | Raj           | 4.1        | 20 m  | [ ]  |
-| 4.3 | Executive summary        | Write doc §0 last, from §11 and §12                                                       | Raj           | 4.2        | 15 m  | [ ]  |
+| 4.1 | Check feature facts      | Current defaults: auto-reboot, USB-C mode, duress, eSIM handling, Auditor                 | Raj           | 2.4–2.7    | 20 m  | [x]  |
+| 4.2 | Claimed vs verified pass | Tag every claim Documented / Secondary / Observed / Assumed; re-check anything Phase 1 left as †      | Raj           | 4.1        | 20 m  | [x]  |
+| 4.3 | Executive summary        | Write doc §0 last, from §11 and §12                                                       | Raj           | 4.2        | 15 m  | [x]  |
 | 4.4 | Peer read                | Accuracy, tone, and that the core cut stands on its own                                   | _Reviewer TBD_ | 4.3       | 20 m  | [ ]  |
 | 4.5 | Deliver                  | Add classification and limitations disclaimer; attach assumption register                 | Raj           | 4.4        | 5 m   | [ ]  |
 
@@ -431,7 +431,7 @@ costing only. Ratings below are working hypotheses, to be re-scored in Phase 3.
   | A10 | Highest credible tier per persona is as in §2.3 (e.g. P1 at T3, P2 at T4) | Profile assignment and §11 priorities shift | Ask client which personas they actually have |
   | A11 | Organization-owned devices can be issued to high-risk staff instead of BYOD | C+B and the BYOD "not recommended" guidance may not be acceptable | Ask client about device ownership policy |
   | A12 | The client has no hard requirement for certified products (Common Criteria, FIPS 140, government accreditation) | GrapheneOS may be ruled out for regulated uses regardless of technical strength | Ask client about compliance obligations |
-  | A13 | Official GrapheneOS builds are reproducible from source (not stated on the features page) | §9.2 and §11 #2 rating; build-verification Stage 2 work package | GrapheneOS build docs; attempt a reproducible build in Stage 2 |
+  | A13 | Official GrapheneOS builds are reproducible from source (project states so on its forum; not independently confirmed) | §9.2 and §11 #2 rating; build-verification Stage 2 work package | GrapheneOS build docs; attempt a reproducible build in Stage 2 |
   | A14 | Device-owner (fully managed) MDM provisioning works on GrapheneOS | Profile C design changes to work-profile-only | Test with the client's MDM in Stage 2 |
 - **B.** Persona, threat-tier and deployment-model definitions
   - Personas: P1 Executive/VIP · P2 Journalist/activist/high-risk individual ·
