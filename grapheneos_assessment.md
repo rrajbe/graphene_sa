@@ -75,9 +75,9 @@ The main strengths, and where each is covered:
 | Strength | What it means | See |
 | --- | --- | --- |
 | **Exploit mitigation well beyond stock Android** | These measures make software bugs much harder to exploit:<br>• a hardened memory allocator<br>• hardware memory tagging (Memory Tagging Extension, MTE), on by default for the base OS and known-compatible user apps (optional for other apps)<br>• per-app randomisation<br>• kernel hardening | §6 |
-| **Strong physical and forensic resistance** | • Auto-reboot returns devices to their encrypted "before first unlock" state<br>• Universal Serial Bus (USB) data is blocked while the device is locked<br>• a duress personal identification number (PIN) wipes the device<br>• the secure element limits PIN guessing<br>Leaked forensic-vendor material supports this resistance for Pixel 6–9 (Pixel 10a not covered; §8.7) | §4, §8 |
+| **Strong physical and forensic resistance** | • auto-reboot returns devices to their encrypted "before first unlock" state<br>• Universal Serial Bus (USB) data is blocked while the device is locked<br>• a duress personal identification number (PIN) wipes the device<br>• the secure element limits PIN guessing<br>Leaked forensic-vendor material supports this resistance for Pixel 6–9 (Pixel 10a not covered; §8.7) | §4, §8 |
 | **Persistence resistance** | Verified boot and rollback protection stop an implant surviving a reboot by modifying the OS. Auto-reboot therefore also limits how long a memory-resident implant lasts | §4, §9.7 |
-| **Privacy controls and no built-in Google services** | • Per-app network and sensor permissions<br>• scoped storage and contacts<br>• Google Play only as an optional, unprivileged app | §7 |
+| **Privacy controls and no built-in Google services** | • per-app network and sensor permissions<br>• scoped storage and contacts<br>• Google Play only as an optional, unprivileged app | §7 |
 | **Well-designed updates** | Updates are:<br>• signed<br>• rollback-protected<br>• installed even before first unlock<br>• released frequently | §9.1 |
 
 **Top areas to examine first**
@@ -104,9 +104,9 @@ Constraints that may decide adoption regardless of technical strength:
 | **No certification** | None of these was found:<br>• Common Criteria<br>• Federal Information Processing Standards (FIPS) 140<br>• government accreditation<br>GrapheneOS does not inherit the stock Pixel's US National Information Assurance Partnership (NIAP) certification (§13.1) | §3.3, §13.1; assumption A12 |
 | **Limited fleet control** | A fleet cannot enforce or fully verify device-wide settings. There is also no device-wide remote wipe | §10.2 |
 | **Legal exposure** | Wiping a device during a lawful search can lead to prosecution (a pending US case, §8.8); refusing to unlock is an offence in the UK in some settings and can be in France (§10.6) | §8.8, §10.6 |
-| **Credible alternatives** | • Stock Pixel with Advanced Protection<br>• iOS with Lockdown Mode<br>• certified purpose-built secure phones | §13, §13.5 |
+| **Credible alternatives** | • stock Pixel with Advanced Protection<br>• iOS with Lockdown Mode<br>• certified purpose-built secure phones | §13, §13.5 |
 | **Reversible** | Devices can return to stock Android, typically in under an hour per device [Assessed] | §12.8 |
-| **Not solved by GrapheneOS** | • App or account compromise<br>• phishing<br>• carrier metadata<br>• code running inside a compromised messenger | §7.8, §7.11, §9.7 |
+| **Not solved by GrapheneOS** | • app or account compromise<br>• phishing<br>• carrier metadata<br>• code running inside a compromised messenger | §7.8, §7.11, §9.7 |
 
 **Device recommendation** (§5.3)
 
@@ -221,10 +221,10 @@ source types are:
 | --- | --- |
 | **First-party statements:** GrapheneOS website | Pages on the grapheneos.org site:<br>• frequently asked questions (FAQ)<br>• features<br>• usage guide<br>• releases<br>• history<br>• build guide |
 | **First-party statements:** GrapheneOS developers | Developer posts (marked "project statement" where useful) on:<br>• its forum<br>• X<br>• Mastodon<br>• Bluesky |
-| **First-party statements:** Google | • Security bulletins<br>• store specification pages<br>• security blogs<br>• Project Zero<br>• Google Threat Intelligence Group (GTIG) |
-| **First-party statements:** other vendors | • Arm<br>• Imagination<br>• MediaTek<br>• Apple<br>• Samsung<br>• Motorola |
+| **First-party statements:** Google | • security bulletins<br>• store specification pages<br>• security blogs<br>• project Zero<br>• Google Threat Intelligence Group (GTIG) |
+| **First-party statements:** other vendors | • Arm<br>• imagination<br>• MediaTek<br>• Apple<br>• Samsung<br>• Motorola |
 | **Vulnerability catalogues** | CISA KEV and NVD |
-| **Original research publications** | • Peer-reviewed papers<br>• conference talks<br>• technical reports by non-governmental organisations (NGOs), such as Amnesty Security Lab or Citizen Lab |
+| **Original research publications** | • peer-reviewed papers<br>• conference talks<br>• technical reports by non-governmental organisations (NGOs), such as Amnesty Security Lab or Citizen Lab |
 
 **Special cases**
 - **Absence claims** are written "[Assessed] (absence — searched <what>,
@@ -270,8 +270,8 @@ Each profile pairs a user group with the threats it is built to resist:
 | Profile | Users | Threats |
 | --- | --- | --- |
 | **A — Baseline** | A privacy-conscious individual | Opportunistic theft and commercial forensics (T1 opportunistic theft or loss; T2 commercial forensic extraction) |
-| **B — High-risk** | • Executives and very important persons (VIPs)<br>• journalists<br>• activists | • Targeted spyware (T3 commercial spyware)<br>• nation-state attack (T4 nation-state)<br>• coercion and border seizure |
-| **C — Managed fleet** | Security and information technology (IT) staff, and field staff. Their devices are organisation-owned or bring your own device (BYOD) | • Loss and theft (T1 opportunistic theft or loss)<br>• commercial forensics (T2 commercial forensic extraction)<br>• also coercion and credential theft |
+| **B — High-risk** | • executives and very important persons (VIPs)<br>• journalists<br>• activists | • targeted spyware (T3 commercial spyware)<br>• nation-state attack (T4 nation-state)<br>• coercion and border seizure |
+| **C — Managed fleet** | Security and information technology (IT) staff, and field staff. Their devices are organisation-owned or bring your own device (BYOD) | • loss and theft (T1 opportunistic theft or loss)<br>• commercial forensics (T2 commercial forensic extraction)<br>• also coercion and credential theft |
 
 Users of profile C who face T3, such as privileged administrators, get C+B.
 
@@ -301,11 +301,11 @@ profile:
 
 | Persona | Main assets | Likely adversaries | Highest credible tier | Default profile |
 | --- | --- | --- | --- | --- |
-| P1 Executive or very important person (VIP) | • Deal data<br>• board communications<br>• contacts<br>• location | • Competitors<br>• commercial spyware customers<br>• states | T3 (T4 for some roles) | B, or C+B on a fleet |
-| P2 High-risk person (for example journalist or activist) | • Sources<br>• unpublished material<br>• contacts<br>• location | • Commercial spyware customers<br>• states<br>• border agents | T4 | B |
-| P3 Security or IT staff | • Administrator credentials<br>• multi-factor authentication (MFA) tokens<br>• internal access | • Criminal groups<br>• access brokers<br>• states via supply chain | T2 (T3 for privileged administrators) | C (C+B for privileged administrators) |
-| P4 Field or operational staff | • Operational data<br>• location<br>• organisation access | • Thieves<br>• local authorities<br>• coercion | T2 | C |
-| P5 Privacy-conscious individual | • Personal data<br>• accounts<br>• location history | • Thieves<br>• data brokers<br>• ad tracking | T1–T2 | A |
+| P1 Executive or very important person (VIP) | • deal data<br>• board communications<br>• contacts<br>• location | • competitors<br>• commercial spyware customers<br>• states | T3 (T4 for some roles) | B, or C+B on a fleet |
+| P2 High-risk person (for example journalist or activist) | • sources<br>• unpublished material<br>• contacts<br>• location | • commercial spyware customers<br>• states<br>• border agents | T4 | B |
+| P3 Security or IT staff | • administrator credentials<br>• multi-factor authentication (MFA) tokens<br>• internal access | • criminal groups<br>• access brokers<br>• states via supply chain | T2 (T3 for privileged administrators) | C (C+B for privileged administrators) |
+| P4 Field or operational staff | • operational data<br>• location<br>• organisation access | • thieves<br>• local authorities<br>• coercion | T2 | C |
+| P5 Privacy-conscious individual | • personal data<br>• accounts<br>• location history | • thieves<br>• data brokers<br>• ad tracking | T1–T2 | A |
 
 ### 2.4 Persona × Deployment Model → Profile
 
@@ -380,10 +380,10 @@ controls (§12.4) in place. [Assessed]
 | Tier or area | Residual risk |
 | --- | --- |
 | T1 Opportunistic theft or loss | Negligible |
-| T2 Commercial forensic extraction | • After-first-unlock window up to the auto-reboot timer (1 hour)<br>• vendor counter-measures to auto-reboot (§8.2) |
+| T2 Commercial forensic extraction | • after-first-unlock window up to the auto-reboot timer (1 hour)<br>• vendor counter-measures to auto-reboot (§8.2) |
 | T3 Commercial spyware | Zero-day exploit chains remain possible in:<br>• the browser and WebView<br>• messaging and media parsers<br>• drivers<br>Their cost is raised, not removed |
-| T4 Nation-state | • Baseband and firmware attacks (now including an exploited Pixel modem bug, §4.5)<br>• supply-chain compromise<br>• signing-key compromise |
-| Operational | • Settings drift<br>• no remote wipe<br>• app or account compromise |
+| T4 Nation-state | • baseband and firmware attacks (now including an exploited Pixel modem bug, §4.5)<br>• supply-chain compromise<br>• signing-key compromise |
+| Operational | • settings drift<br>• no remote wipe<br>• app or account compromise |
 
 ---
 
@@ -404,7 +404,7 @@ The project's main milestones:
 | Period | Event | Confidence |
 | --- | --- | --- |
 | Late 2014 | Founded by Daniel Micay as a solo hardening project | [Documented] |
-| 2015–2018 | • Known as **CopperheadOS** while a company sponsored it<br>• split from that company in 2018 in a contested dispute<br>• the project's account of the split is one-sided and unverified | [Documented] (one-sided) |
+| 2015–2018 | • known as **CopperheadOS** while a company sponsored it<br>• split from that company in 2018 in a contested dispute<br>• the project's account of the split is one-sided and unverified | [Documented] (one-sided) |
 | 2018–2019 | Renamed AndroidHardening, then **GrapheneOS**. The site does not date the GrapheneOS name, so 2019 is inferred | [Documented] / [Assessed] |
 | March 2023 | **GrapheneOS Foundation** created as a Canadian non-profit | [Documented] |
 | November 2025 | Left France and the hosting provider OVH, citing French pressure on encryption and device access | [Documented] |
@@ -450,7 +450,7 @@ signing, update trust and jurisdiction:
 | Attestation service | netcup (Nuremberg, Germany) | [Documented] |
 | Move status | No OVH servers are listed, so the move off OVH appears complete. Long-term Toronto colocation is only partly in place | [Assessed] (assumption A05) |
 | Build and signing | Builds are made and signed on "hardened local machines" under the project's physical control [Documented]. Their location and jurisdiction are not published | [Documented] / [Assessed] (absence — searched grapheneos.org, 2026-11) |
-| Update verification | Updates are verified by signature, with downgrade protection, at three points:<br>• System Updater (over the air)<br>• recovery (sideloaded updates)<br>• verified boot | [Documented] |
+| Update verification | Updates are verified by signature, with downgrade protection, at three points:<br>• system Updater (over the air)<br>• recovery (sideloaded updates)<br>• verified boot | [Documented] |
 | Mirror trust | The project states that "the update server isn't a trusted party". **A compromised or seized mirror could delay updates, but could not push malicious ones** unless the signing keys were also compromised | [Documented] |
 | **Legal compulsion** | The legal entity is Canadian. The project says it builds and signs on local machines under its physical control, but does not publish where they are or under which jurisdiction (§9.2) | [Documented] / [Assessed] |
 | Effect of compulsion or a stolen key | Per-device (serial-locked) update packages are rejected (§9.1). A signing-key holder, or someone compelling the project, could still deliver a signed malicious build selectively (§9.2) | [Assessed] |
@@ -486,8 +486,8 @@ How GrapheneOS hardens the Android security model:
 
 | Part | Includes |
 | --- | --- |
-| The model it keeps | • The app sandbox<br>• verified boot<br>• the permission system |
-| The strengthening (§6, §7) | • A hardened memory allocator<br>• hardware memory tagging<br>• a stricter app sandbox<br>• extra permissions<br>• reduced attack surface |
+| The model it keeps | • the app sandbox<br>• verified boot<br>• the permission system |
+| The strengthening (§6, §7) | • a hardened memory allocator<br>• hardware memory tagging<br>• a stricter app sandbox<br>• extra permissions<br>• reduced attack surface |
 
 ### 3.3 What GrapheneOS Is Not
 
@@ -495,9 +495,9 @@ Common assumptions about GrapheneOS, set against what it actually is:
 
 | Common assumption | Reality | Confidence |
 | --- | --- | --- |
-| A de-Googled, privacy-focused replacement Android build, like /e/OS or CalyxOS | • It is a hardening project first<br>• privacy follows from sandboxing<br>• it also allows sandboxed Google Play, which pure de-Googled replacement builds do not | [Documented] |
-| Runs on many devices, like LineageOS | • It runs only on devices that meet its hardware requirements<br>• currently that means Pixel 6 and newer (Pixel 6 and 6 Pro on legacy extended support)<br>• the Motorola Signature 27 is confirmed as the first non-Pixel device (project statement); GrapheneOS has indicated 2027 for Motorola devices [Secondary] | [Documented] |
-| Can be rooted or customised freely | • No root access<br>• root would break verified boot and the security model<br>• users who want root must make unsupported custom builds<br>• the bootloader is re-locked with GrapheneOS keys after install | [Documented] (project statements) |
+| A de-Googled, privacy-focused replacement Android build, like /e/OS or CalyxOS | • it is a hardening project first<br>• privacy follows from sandboxing<br>• it also allows sandboxed Google Play, which pure de-Googled replacement builds do not | [Documented] |
+| Runs on many devices, like LineageOS | • it runs only on devices that meet its hardware requirements<br>• currently that means Pixel 6 and newer (Pixel 6 and 6 Pro on legacy extended support)<br>• the Motorola Signature 27 is confirmed as the first non-Pixel device (project statement); GrapheneOS has indicated 2027 for Motorola devices [Secondary] | [Documented] |
+| Can be rooted or customised freely | • no root access<br>• root would break verified boot and the security model<br>• users who want root must make unsupported custom builds<br>• the bootloader is re-locked with GrapheneOS keys after install | [Documented] (project statements) |
 | An anonymity tool | It does not hide your identity from:<br>• the mobile network<br>• the carrier<br>• the services you sign into<br>Anonymity needs separate measures, for example Tor and careful account use | [Assessed] |
 | A certified or accredited product | None of these was found:<br>• Common Criteria<br>• Federal Information Processing Standards (FIPS) 140<br>• government accreditation<br>The FAQ discusses external review, not certification. GrapheneOS does not inherit the stock Pixel's US National Information Assurance Partnership (NIAP) certification (§13.1) | [Assessed] (absence — searched grapheneos.org and public certification listings, 2026-11) |
 | An enterprise product with vendor support | It has no:<br>• commercial support<br>• SLA<br>• fleet console<br>• management service<br>It supports Android Enterprise work profiles through standard mobile device management (MDM); see §10 | [Documented] / [Assessed] |
@@ -519,7 +519,7 @@ The release channels and what each is for:
 | **Beta** | Pushed shortly after Alpha. Releases with problems are aborted and replaced by a new Beta release | [Documented] |
 | **Stable** | Promoted after users on Beta have tested it. The project advises Stable for anyone who "cannot tolerate dealing with temporary issues" | [Documented] |
 | **Security preview** | Opt-in releases carrying early AOSP patches ahead of the bulletins (for example 2026111801) | [Documented] |
-| **Legacy extended support** | • Stopgap releases for end-of-life devices (currently Pixel 6 and 6 Pro)<br>• patch level frozen at 2026-11-01<br>• the project recommends ending use of these devices | [Documented] |
+| **Legacy extended support** | • stopgap releases for end-of-life devices (currently Pixel 6 and 6 Pro)<br>• patch level frozen at 2026-11-01<br>• the project recommends ending use of these devices | [Documented] |
 
 **Versioning and cadence**
 
@@ -2026,7 +2026,7 @@ and profiles affected, and the proposed Stage 2 test.
 | 1. Upstream dependency on Google | • every fix comes from Google, from firmware and drivers up to the platform<br>• Google has cut back the source and bulletins it publishes<br>• live now: Pixel 11 support is waiting on Google's Android 17 Quarterly Platform Release 2 (QPR2) platform source<br>(§5.2.9, §9.3) | All; Tensor G5 and later most affected | All | Patch-lag timeline over 12 months; track upstream changes and porting delays |
 | 2. Graphics processing unit (GPU) and accelerator drivers | • repeated in-the-wild spyware use of Mali drivers, including on Pixel<br>• MTE does not cover memory the GPU reaches through its own page tables<br>• little public research on the PowerVR stack in Pixel 10 and Pixel 11<br>• Project Zero's 2026 Pixel 10 zero-click chain used the new video-accelerator driver<br>(§5.2.1, §6.3) | All | B, C | • Mali and PowerVR patch-status review<br>• accelerator-driver attack-surface mapping: video processing unit (VPU) and BigWave<br>• fuzzing scope and harness design |
 | 3. Baseband and IP Multimedia Subsystem (IMS) | • largest closed attack surface<br>• Pixel modem bug CVE-2026-58704 (a Common Vulnerabilities and Exposures identifier), an elevation of privilege with no published attack vector, is under limited, targeted exploitation<br>• a remote path to the modem through IMS needs only the phone number<br>• new MediaTek modem on Pixel 11<br>(§4.5, §5.2.2) | All; Pixel 11 new | B | • modem CVE history and patch status per generation<br>• IMS call-path testing on a software-defined radio (SDR) network<br>• input–output memory management unit (IOMMU) isolation review<br>• firmware reverse-engineering scope |
-| 4. Supply chain, governance and vulnerability handling | • small, donation-funded team with no published succession plan<br>• **Signing-key custody not published**<br>• reproducible builds not independently confirmed<br>• a signing-key holder, or someone compelling the project, could serve a signed malicious build only to chosen Internet Protocol (IP) addresses<br>• no bug bounty found<br>• no disclosure policy found<br>• no published independent audit report found<br>(§3.1, §9.2) | All | B, C | • governance and key-custody interview, including the disclosure process<br>• reproducible-build test<br>• hosting review<br>• advisory and fix history |
+| 4. Supply chain, governance and vulnerability handling | • small, donation-funded team with no published succession plan<br>• **signing-key custody not published**<br>• reproducible builds not independently confirmed<br>• a signing-key holder, or someone compelling the project, could deliver a signed malicious build selectively (§9.2)<br>• no bug bounty found<br>• no disclosure policy found<br>• no published independent audit report found<br>(§3.1, §9.2) | All | B, C | • governance and key-custody interview, including the disclosure process<br>• reproducible-build test<br>• hosting review<br>• advisory and fix history |
 | 5. Messaging and media parser zero-click surface | • of the 2025 messaging cases, two were on Android and one on iOS and macOS, all with the same messenger-plus-parser pattern<br>• media parsing runs inside the messaging app's own process<br>• no operating-system-provided equivalent of Apple's BlastDoor exists on Pixel or GrapheneOS for third-party messengers<br>• hardened_malloc and MTE apply but are untested against these exploits<br>(§7.11) | All | All | Attack-surface review of the client's messengers and their bundled parsers; per-profile isolation design |
 | 6. Detection and incident response | • no root access and no mobile threat defence agent<br>• a compromise may well go unnoticed<br>• Auditor proves operating system (OS) integrity only<br>• a reboot clears memory-resident implants but destroys volatile evidence<br>(§9.7) | All | B, C | • incident-response runbook dry run<br>• evaluate log and MTE crash-report options<br>• evaluate Mobile Verification Toolkit (MVT) triage |
 | 7. Enterprise manageability | • no fleet console and no staged rollout<br>• fully managed mobile device management (MDM) is undocumented<br>• a work profile cannot enforce device-wide settings, and Auditor misses some of them<br>• no device-wide remote wipe from a work-profile MDM<br>• Play Integrity blocks some apps<br>(§10.2, §10.3) | All | C | • MDM compatibility matrix with the client's MDM<br>• corporate app tests<br>• configuration-verification and remote-wipe options |
@@ -2048,7 +2048,7 @@ exceptions shown as their own rows.
 
 | Band or area | Why it ranks here |
 | --- | --- |
-| **High band (areas 1–6)** | • area 1 ranks first: its likelihood is High, and it decides whether GrapheneOS can be adopted at all. The Pixel 11 wait shows the dependency causing problems now<br>• areas 2 and 3 are rated High likelihood: both have current in-the-wild exploitation on Pixel hardware (CVE-2026-58704 for the modem)<br>• area 4 leads the Medium-likelihood group, because it decides whether the client can trust the project<br>• area 5 follows as the most common 2025 entry point |
+| **High band (areas 1–6)** | • area 1 ranks first: its likelihood is High, and it decides whether GrapheneOS can be adopted at all. The Pixel 11 wait shows the dependency causing problems now<br>• areas 2 and 3 are rated High likelihood: both have current in-the-wild exploitation on Pixel hardware (CVE-2026-58704 for the modem)<br>• area 4 leads the Medium-likelihood group, because it decides whether the client can trust the project<br>• area 5 follows as a leading 2025 zero-click entry point (§7.11) |
 | **Area 6 (High band)** | Rated Medium likelihood rather than High, because it matters only once another area has been exploited. The impact is High because a compromise may well go unnoticed |
 | **Medium band (areas 7–14)** | • area 7 has the highest likelihood in the band: its gaps exist on every fleet device, and it decides whether Profile C (managed fleet) is practical<br>• area 11 ends the Medium-likelihood group: Pixel 11 cannot be deployed yet, and verifying it takes the most work<br>• areas 12–14, the Low-likelihood areas, follow, lowest verification effort first |
 | **Area 10 (Medium band)** | • likelihood is Medium for staff who live in or travel to the countries with live legal examples (§8.8): one pending prosecution and two unlock-offence regimes<br>• impact is Medium: the harm is legal or regulatory exposure for a person or the organisation, not device compromise or data loss<br>• recording obligations apply on any platform, so the area shapes policy rather than deciding adoption |
@@ -2291,8 +2291,7 @@ Stock Pixel and GrapheneOS share:
 - the same secure element;
 - the same verified boot design.
 
-The table sets out stock Advanced Protection, certification and where
-GrapheneOS differs.
+The table gives the detail for each point.
 
 | Item | Detail | Confidence |
 | --- | --- | --- |
@@ -2574,7 +2573,7 @@ Stage 2 is complete when every criterion in the table that applies is met.
 | 1 | Every Tier 1 work package has reported against its threshold in §14.2 | Always |
 | 2 | Each §11 area covered by a Tier 1 work package has revised §11.1 ratings | Always |
 | 3 | The client has a go or no-go decision for each profile it needs (the profiles are defined in §2.1), with any conditions written down | Always |
-| 4 | These assumptions (Appendix A) are confirmed or replaced:<br>• a01<br>• a10<br>• a11<br>• a12<br>• a14 | Always |
+| 4 | These assumptions (Appendix A) are confirmed or replaced:<br>• A01<br>• A10<br>• A11<br>• A12<br>• A14 | Always |
 | 5 | The dependencies to monitor (Appendix A) have an owner | Always |
 | 6 | Profile B has a signed-off duress-PIN and messaging policy | If Profile B is needed |
 | 7 | Profile C has a tested MDM configuration | If Profile C is needed |
@@ -3006,7 +3005,7 @@ Evidence for area 1:
 | --- | --- | --- |
 | Every fix comes from Google, from firmware and drivers up to the platform. If Google withholds or delays fixes, GrapheneOS ships them late or not at all | [Assessed] | §9.3 |
 | Google has reduced what it publishes:<br>• device trees are no longer published<br>• Pixel kernel source is harder to obtain<br>• Android Open Source Project (AOSP) source is released only twice a year<br>• full security bulletins are quarterly | • device trees and kernel source: [Secondary]<br>• AOSP schedule and bulletins: [Documented] / [Secondary] | §9.3 |
-| All firmware is closed | [Documented] | §9.3 |
+| All firmware is closed | [Documented] | §4.5 |
 | Live example: Pixel 11 support is waiting for Google to publish the Android 17 Quarterly Platform Release 2 (QPR2) platform source. GrapheneOS says Google "has not pushed the QPR2 sources as promised" | [Documented] (project statement) | §5.2.9, §9.3 |
 
 **Area 2 — Graphics processing unit (GPU) and accelerator drivers**
