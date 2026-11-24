@@ -20,11 +20,108 @@ _To be written last (plan task 4.3)._
 
 ## 1. Scope, Method & Confidence
 
-_To be written._
+### 1.1 Purpose and Audience
+
+A first, desk-based view of GrapheneOS for a client considering it as the basis
+of a secure phone: what it protects, how, where it is weak, and which areas
+deserve a deeper review first (§11). Written for security leadership and
+technical reviewers.
+
+### 1.2 Device Scope
+
+Pixel 8 series to the newest Pixel (Pixel 11 series). The Pixel 8 is the floor
+because it is the first generation with hardware memory tagging (MTE) and a
+7-year support commitment. Pixel 6 and 7 are still supported by GrapheneOS but
+are out of scope; Pixel 6/6 Pro are on legacy extended support and should be
+replaced. A non-Pixel device (Motorola Signature 27) is announced and noted in
+§4.7.
+
+### 1.3 Method
+
+Review of GrapheneOS documentation, Google and press sources, published
+security research and leaked forensic-vendor material, plus analyst
+knowledge. Fast-moving facts were checked on 2026-11-23/24.
+
+### 1.4 Confidence Labels
+
+| Tag | Meaning |
+| --- | --- |
+| **[D] Documented** | Stated by GrapheneOS or Google |
+| **[S] Secondary** | Press or third-party reporting only |
+| **[O] Observed** | First-hand testing (none in Stage 1) |
+| **[A] Assumed** | Analyst judgement; listed in the assumption register |
+
+### 1.5 Out of Scope for Stage 1
+
+Hands-on testing, source-code audit, reverse engineering, forensic extraction
+tests, and client-specific app or MDM testing. These are proposed as Stage 2
+work packages (§14).
+
+### 1.6 Assumptions
+
+Every assumption that could change a conclusion is listed in Appendix A with
+its impact and how to confirm it. The open questions for the client are in §14.4.
+
+---
 
 ## 2. Reference Profiles
 
-_To be transferred from the plan (§2.1–§2.5)._
+The client could not be consulted, so the document is written against three
+reference profiles that cover the realistic personas, threat tiers and
+deployment models. Persona-to-tier assignments are analyst judgement (A10).
+
+### 2.1 Profiles used throughout the document
+- **A — Baseline:** privacy-conscious individual; opportunistic theft and
+  commercial forensics (T1–T2)
+- **B — High-risk:** executive/VIP, journalist, activist; targeted spyware and
+  nation-state (T3–T4); coercion and border seizure
+- **C — Managed fleet:** security/IT staff and field staff on organization-owned
+  or BYOD devices; loss, coercion, credential theft (T1–T3)
+### 2.2 How a profile is chosen (two questions, applied in order)
+1. **Threat tier sets the hardening level:** highest credible tier T1–T2 → A
+   controls; T3–T4 → B controls.
+2. **Ownership sets the management model:** organization-managed (fleet or
+   BYOD) → C. If the user also faces T3–T4, apply B controls inside C, written
+   **C+B**.
+- BYOD at T3–T4 is **not recommended**: a work profile cannot enforce
+  device-wide controls (auto-reboot, USB-C mode, no Play, duress PIN), so issue
+  a dedicated device instead.
+
+### 2.3 Persona summary (full definitions in Appendix B)
+
+| Persona                               | Main assets                                         | Likely adversaries                                       | Highest credible tier  | Default profile               |
+| ------------------------------------- | --------------------------------------------------- | -------------------------------------------------------- | ---------------------- | ----------------------------- |
+| P1 Executive / VIP                    | Deal data, board communications, contacts, location | Competitors, commercial spyware customers, states        | T3 (T4 for some roles) | B, or C+B on a fleet          |
+| P2 Journalist / activist / high-risk  | Sources, unpublished material, contacts, location   | Commercial spyware customers, states, border agents      | T4                     | B                             |
+| P3 Security / IT staff                | Admin credentials, MFA tokens, internal access      | Criminal groups, access brokers, states via supply chain | T3                     | C (C+B for privileged admins) |
+| P4 Field / operational staff          | Operational data, location, organization access     | Thieves, local authorities, coercion                     | T2                     | C                             |
+| P5 Privacy-conscious individual       | Personal data, accounts, location history           | Thieves, data brokers, ad tracking                       | T1–T2                  | A                             |
+
+### 2.4 Persona × deployment model → profile
+
+| Persona | D1 Individually owned | D2 Organization-owned fleet | D3 BYOD with work profile         | D4 Minimal / comms-only |
+| ------- | --------------------- | --------------------------- | --------------------------------- | ----------------------- |
+| P1      | B                     | C+B                         | Not recommended → issue D2 device | B                       |
+| P2      | B                     | C+B (newsroom / NGO fleet)  | Not recommended → issue D2 device | B                       |
+| P3      | A                     | C (C+B if privileged admin) | C                                 | n/a                     |
+| P4      | A                     | C                           | C                                 | C (stripped-down)       |
+| P5      | A                     | n/a                         | A plus work profile               | A                       |
+
+### 2.5 Threat tier coverage by profile (what each profile is designed to resist)
+
+| Tier                               | A Baseline | B High-risk | C Managed fleet | C+B      |
+| ---------------------------------- | ---------- | ----------- | --------------- | -------- |
+| T1 Opportunistic theft / loss      | Yes        | Yes         | Yes             | Yes      |
+| T2 Commercial forensic extraction  | Yes        | Yes         | Partial¹        | Yes      |
+| T3 Commercial spyware (1-/0-click) | Partial²   | Yes         | Partial²        | Yes      |
+| T4 Nation-state                    | No         | Partial³    | No              | Partial³ |
+
+¹ Fleet usability settings (longer auto-reboot, sandboxed Play for work apps)
+widen the after-first-unlock window.
+² Exploit mitigations apply in every profile, but A and C keep more attack
+surface (Play services, more apps, more radios on).
+³ No profile fully addresses T4: baseband, firmware and supply-chain attacks sit
+below the OS. B raises the cost; it does not remove the risk.
 
 ---
 
@@ -325,7 +422,7 @@ the firmware beneath it.
 > **Assessment note.** GrapheneOS can only be as strong as the hardware and
 > firmware under it. The client's deeper review should focus on what sits below
 > the OS: modem firmware and drivers (§11 #3), GPU drivers (#4) and the new Pixel 11
-> components (#5).
+> components (#9).
 
 ---
 
@@ -408,7 +505,7 @@ GrapheneOS support.** [D] / [S]
 
 **Pixel 11:** Re-evaluate once GrapheneOS support ships **and** has been through
 two or three monthly releases. Its new modem, secure element and GPU generation
-deserve a specific review before high-risk use (§11 #5).
+deserve a specific review before high-risk use (§11 #9).
 
 ---
 
@@ -472,7 +569,7 @@ protection. [D]
   apps (with global and per-app toggles), and WebView **does not support site
   isolation** — all instances share one sandbox. [D]
 - Vanadium tracks upstream Chromium; patch latency for in-the-wild Chromium 0-days
-  is §11 area #7.
+  is §11 area #6.
 
 ### 6.7 Per-App Compatibility Toggles
 
@@ -485,7 +582,7 @@ protection. [D]
 
 > **Assessment note.** These toggles are necessary for app compatibility, but each
 > one is a silent opt-out. An organization should know how many of its required
-> apps need compatibility mode, and should prefer apps that don't (§11 #10).
+> apps need compatibility mode, and should prefer apps that don't (§11 #12).
 
 ### 6.8 Coverage by Device Generation
 
@@ -668,7 +765,7 @@ should use a passphrase. [A]
 **Limits:** These are leaked sales documents, not tests. They cover one vendor,
 are months old by the time they surface, and show capability the vendor offers
 widely — not what a state agency might have privately. Absence of a capability in
-a matrix is evidence, not proof. Lab validation is §11 area #11.
+a matrix is evidence, not proof. Lab validation is §11 area #10.
 
 ### 8.8 Coercion and Border Scenarios
 
@@ -763,7 +860,7 @@ unlock; signed with downgrade protection; no deferral setting. [D]
   runbook (Profile C). [A]
 
 > **Assessment note.** This is a gap for any organization with a security
-> operations function. It is §11 area #6.
+> operations function. It is §11 area #5.
 
 ---
 
@@ -821,11 +918,182 @@ provisioning tool. [D] / [A] Compensating controls:
 
 ## 11. Areas to Examine First (Ranked)
 
-_To be written (plan task 3.1)._
+### 11.1 How Areas Are Rated
+
+- **Likelihood (L)** — how plausible it is that the weakness is exploited or
+  matters in practice, given §4–§10.
+- **Impact (I)** — what happens if it does: device compromise, data exposure,
+  fleet-wide failure, or loss of the security guarantees the client is buying.
+- **Risk = L × I**, rated High / Medium / Low. **Risk sets the rank.**
+- **Verify effort** — how much Stage 2 work it takes to confirm or rule out. It
+  feeds costing (§14) and does **not** affect rank.
+
+All ratings are analyst judgement from desk research [A], to be revised with
+client input and Stage 2 results.
+
+### 11.2 Ranked Areas
+
+| # | Area | Why it raises eyebrows | L | I | Risk | Verify effort | Devices | Profiles | Proposed Stage 2 test |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Upstream dependency on Google | Device trees no longer published; Pixel kernel source by request; AOSP source only Q2/Q4; full bulletins quarterly; all firmware closed (§9.3) | H | H | **H** | M | All; G5+ most | A, B, C | Patch-lag timeline over 12 months; track upstream changes and porting delays |
+| 2 | Supply chain, governance & infrastructure | ~10-person donation-funded team; **signing-key custody not published**; reproducibility unconfirmed; no succession plan; infrastructure relocated under legal pressure (§3.1, §9.2) | M | H | **H** | M | All | B, C | Governance and key-custody interview; reproducible-build test; hosting review |
+| 3 | Baseband / cellular stack | Largest closed attack surface; nation-state target; satellite path on 5400; MediaTek on Pixel 11 (§4.5, §5.2.3) | M | H | **H** | H | All; Pixel 11 new | B | Modem CVE history per generation; IOMMU isolation review; firmware RE scope |
+| 4 | GPU driver (Mali and PowerVR) | Mali: repeated in-the-wild spyware use; PowerVR: new stack, little public research (§5.2.2) | M | H | **H** | H | All | B, C | Mali patch-status review; PowerVR attack-surface mapping and fuzzing scope |
+| 5 | Detection & incident response | No root, no MTD agent; compromise may go unseen; Auditor proves OS integrity only (§9.7) | H | M | **M** | M | All | B, C | IR runbook dry run; evaluate log, MTE crash and MVT triage options |
+| 6 | Browser / WebView | Vanadium patch latency vs Chromium 0-days; **WebView keeps JIT on and lacks site isolation** (§6.6) | M | M | **M** | L | All | A, B | Patch-latency study; WebView usage census of required apps |
+| 7 | Enterprise manageability | No fleet console; fully managed MDM undocumented; no staged rollout; Play Integrity blocks some apps (§10) | H | M | **M** | M | All | C | MDM compatibility matrix with client's MDM; corporate app tests |
+| 8 | Sandboxed Play compatibility layer | GrapheneOS code bridging closed Play services and the OS; IPC surface; eSIM path (§7.4) | L | H | **M** | M | All | A, C | Code review of the compatibility layer; IPC fuzzing |
+| 9 | Pixel 11 new components | Titan M3, MediaTek M90 and new PowerVR arrive together; not yet supported (§5.2) | M | M | **M** | H | Pixel 11 | B | Readiness review after support ships; secure element and modem research scope |
+| 10 | Forensic claims | Strong on paper and in leaks, but vendors are adapting (e.g. claimed "Safeguard Mode") (§8) | L | H | **M** | H | All | A, B | Lab extraction tests per generation at default and hardened settings |
+| 11 | App sourcing supply chain | Apps, not the OS, are the usual compromise path; store trust models differ (§7.9) | M | M | **M** | L | All | A, B, C | Store trust review; approved-app list |
+| 12 | MTE / hardened_malloc opt-outs | Per-app compatibility mode silently drops protections (§6.7) | M | L | **L** | L | All | A, B | Opt-out census of the client's required apps |
+| 13 | Default network behaviour | GrapheneOS servers see IP addresses and timing (§7.6, §7.10) | M | L | **L** | L | All | A, B | Traffic capture and analysis |
+| 14 | Biometric differences | Sensor types differ, but 5-attempt cap and 2-factor unlock limit the risk (§5.2.5) | L | L | **L** | M | Per device | A, B | Spoof testing per sensor type |
+
+**Changes from the working hypothesis in the plan:**
+- **Detection & IR** moved up (from #6 to #5) because likelihood is high: by
+  design there is no way to see a compromise.
+- **Enterprise manageability** moved up (from #12 to #7) because it decides
+  whether Profile C is practical at all.
+- **Pixel 11** moved down (from #5 to #9): it cannot be deployed yet, so it is a
+  future risk.
+- **Browser / WebView** reframed after finding that WebView is weaker than the
+  browser.
+- **MTE opt-outs** lowered to Low: impact is limited to the apps that use the
+  opt-out.
+
+### 11.3 Areas by Profile
+
+How much each area matters to each profile (High / Medium / Low / —):
+
+| # | Area | A Baseline | B High-risk | C Managed fleet | C+B |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Upstream dependency on Google | M | H | H | H |
+| 2 | Supply chain & governance | L | H | H | H |
+| 3 | Baseband | L | H | L | H |
+| 4 | GPU driver | M | H | M | H |
+| 5 | Detection & IR | L | H | H | H |
+| 6 | Browser / WebView | M | H | M | H |
+| 7 | Enterprise manageability | — | — | H | H |
+| 8 | Sandboxed Play layer | M | L (no Play) | H | M |
+| 9 | Pixel 11 components | L | M | L | M |
+| 10 | Forensic claims | M | H | M | H |
+| 11 | App sourcing | H | H | M | M |
+| 12 | MTE opt-outs | M | L (no opt-outs) | M | L |
+| 13 | Default network behaviour | L | M | L | M |
+| 14 | Biometrics | L | L (fingerprint off or 2FA) | L | L |
+
+**Reading the table:** for **Profile B**, the deeper review should start with
+areas 1–6 and 10. For **Profile C**, areas 1, 2, 5 and 7 decide whether a
+GrapheneOS fleet is viable at all.
+
+---
 
 ## 12. Reference Secure-Phone Configurations
 
-_To be written (plan task 3.3)._
+These are starting configurations to be tailored with the client. Settings paths
+follow current GrapheneOS menus and may move between releases.
+
+### 12.1 Hardware Selection
+
+| Profile | Device | Why |
+| --- | --- | --- |
+| A Baseline | Pixel 10a | Longest support (Mar 2033), lowest cost, mature components |
+| B High-risk | Pixel 10 or 10 Pro | Newest supported flagship generation, support to Aug 2032 |
+| C Managed fleet | Pixel 10a (one model fleet-wide) | Long support, cost, one attestation baseline |
+| C+B | Pixel 10 | As B, standardized |
+
+**Procurement:**
+- Buy **unlocked** units directly from Google or a trusted retailer; never
+  carrier-locked (Verizon) or second-hand for Profile B.
+- Profile B: buy in person or through an intermediary, and keep chain of custody
+  until install.
+- Install before first connection to any network where possible.
+
+### 12.2 Installation and Verification
+
+1. Enable OEM unlocking (Settings > System > Developer options), then use the
+   **GrapheneOS web installer** from a trusted computer.
+2. Flash, then **re-lock the bootloader**; disable OEM unlocking again.
+3. Check the **boot-key hash** shown at boot against the published value.
+4. Pair with **Auditor** (local pairing between two devices, or the remote
+   attestation service for fleets) and record the first attestation.
+5. Apply the profile settings (§12.7), then check for and install updates.
+
+### 12.3 Profile A — Baseline
+
+For privacy-conscious individuals and P3/P4 staff on personal devices. Keeps
+defaults where they are already strong; adds app discipline. Sandboxed Play
+is allowed where apps need it.
+
+### 12.4 Profile B — High-risk
+
+For P1 and P2. Minimises attack surface and the AFU window:
+- **No Google Play** in the Owner profile; if unavoidable, put it in a
+  **secondary profile** and end that session when not in use.
+- **USB-C: Charging-only** at all times.
+- **Auto-reboot: 1 hour** (30 minutes while travelling).
+- **Duress PIN** set and practised.
+- **LTE-only** mode; 2G off.
+- **Always-on VPN with "block connections without VPN"**.
+- Strong passphrase; fingerprint **off**, or on with two-factor PIN.
+- Network and Sensors permissions **off by default** for new apps.
+- WebView JIT **off globally**; no exploit-protection compatibility mode.
+
+### 12.5 Profile C — Managed Fleet
+
+For P3 and P4 on organization devices:
+- **Work profile** managed by the organization's MDM, with sandboxed Play
+  installed **only in the work profile** if the MDM or apps need it.
+- **Attestation:** enrol each device in Auditor/attestation.app with alerting.
+- **Compensating controls:** written build standard, hardening checklist (§12.7),
+  approved-app list, and **2–3 pilot devices on the Beta channel** as early
+  warning.
+- **Incident response runbook:** suspected compromise → isolate, revoke
+  credentials, reflash and re-enrol; record lost-device and duress-wipe procedure.
+- **C+B variant:** apply the Profile B device settings in §12.7 to fleet devices
+  issued to P1/P2 and privileged P3 users.
+
+### 12.6 App Policy
+
+| Profile | Google Play | Approved sources | Rule |
+| --- | --- | --- | --- |
+| A | Allowed (Owner profile) | GrapheneOS App Store, Accrescent, Play | Install only what is needed; review permissions |
+| B | Not in Owner profile; optional in an ended secondary profile | GrapheneOS App Store, Accrescent; named exceptions | Approved list only; Network permission off at install, grant per app |
+| C | Work profile only | As MDM policy; GrapheneOS App Store | Org apps via MDM; personal apps in the Owner profile at user's risk |
+
+Messaging: prefer **Signal** (or Molly) for sensitive communications across all
+profiles. [A]
+
+### 12.7 Hardening Checklist
+
+| Setting | A Baseline | B High-risk | C Managed fleet |
+| --- | --- | --- | --- |
+| Device | Pixel 10a | Pixel 10 / 10 Pro | Pixel 10a |
+| Lock credential | 6+ digit PIN | Passphrase (6+ random words) | 6+ digit PIN (MDM-enforced) |
+| Fingerprint | Allowed | Off, or two-factor with PIN | Two-factor with PIN |
+| PIN scrambling | Optional | On | On |
+| Duress PIN | Optional | **On** | Per policy (on for C+B) |
+| Auto-reboot | 18 h (default) or 8 h | **1 h** (30 min when travelling) | 8–12 h |
+| USB-C port | Charging-only when locked (default) | **Charging-only** | Charging-only when locked |
+| Screen-lock timeout | 1 min | 30 s | 1 min (MDM) |
+| Lock-screen notifications | Hide sensitive content | Hide all | Hide sensitive content |
+| Sandboxed Google Play | If needed | None in Owner profile | Work profile only |
+| Exploit-protection compatibility mode | Only if an app needs it | Never | Exception list only |
+| WebView JIT | Default | Off globally | Off by default |
+| Network permission for new apps | Default (on) | Off at install | Default |
+| Sensors permission for new apps | Default (on) | Off by default | Default |
+| Cellular | 2G off | **LTE-only** | 2G off |
+| Wi-Fi MAC | Per-connection random (default) | Per-connection random | Per-connection random |
+| Bluetooth / NFC / UWB | As needed | Off when not in use | As needed |
+| Location | As needed | Off by default; SUPL off | As needed |
+| VPN | Optional | **Always-on, block without VPN** | Org VPN always-on in work profile |
+| Private DNS | Optional | On (if VPN doesn't cover DNS) | Per org policy |
+| Updates | Automatic, Stable | Automatic, Stable | Automatic, Stable; pilots on Beta |
+| Auditor / attestation | Optional | Local pairing or remote with alerts | Remote attestation with alerts |
+| Secondary profiles | Optional | Used for risky apps; end session after use | Work profile |
+
+---
 
 ## 13. Comparative Positioning
 
@@ -892,7 +1160,78 @@ Ratings are relative and qualitative (analyst judgement, [A]) unless tagged.
 
 ## 14. Recommendations & Proposed Stage 2
 
-_To be written (plan task 3.4)._
+### 14.1 Key Findings
+
+1. **Technically, GrapheneOS is among the strongest mobile platforms available.**
+   Its exploit mitigations (hardened_malloc, MTE by default, exec spawning,
+   kernel hardening) and physical protections (auto-reboot, USB-C control,
+   duress PIN, secure-element throttling) go well beyond stock Android. Leaked
+   forensic-vendor documents are consistent with this. (§6, §8)
+2. **Its biggest risks sit outside its own code.** It depends on Google for
+   hardware, firmware, patches and source releases, and Google has recently made
+   that harder (no device trees, twice-yearly AOSP source, quarterly bulletins).
+   (§4, §9.3)
+3. **Trust concentrates in a small team.** About ten developers, donation
+   funding, no published key-custody or succession arrangements, and no
+   commercial support. (§3.1, §9.2)
+4. **What lies beneath the OS is the main technical unknown:** modem firmware,
+   GPU drivers, and on Pixel 11 a new modem vendor, secure element and GPU
+   generation. (§4.5, §5.2)
+5. **It suits high-risk individuals better than managed fleets.** There is no
+   fleet console, no staged rollout, limited detection, and Play Integrity blocks
+   some apps. A fleet is possible but needs compensating controls. (§9.7, §10)
+6. **The reference device today is a Pixel 10-series phone.** Pixel 11 is not yet
+   supported. (§5)
+
+### 14.2 Stage 2 Work Packages
+
+Effort is in analyst days, indicative only [A]. Tiers reflect §11 risk and
+which profiles the client turns out to need.
+
+| WP | §11 area | Scope | Effort (days) | Tier |
+| --- | --- | --- | --- | --- |
+| WP1 | 1 Upstream dependency | 12-month patch-lag timeline (Google bulletin → Pixel → GrapheneOS); impact of AOSP schedule change; porting-delay history | 3–5 | **1** |
+| WP2 | 2 Supply chain & governance | Key-custody and governance questionnaire/interview; reproducible-build attempt; infrastructure and jurisdiction review | 5–8 | **1** |
+| WP3 | 5 Detection & IR | Design and dry-run an IR runbook; test MVT, MTE crash reporting and log options on GrapheneOS | 3–5 | **1** |
+| WP4 | 7 Enterprise manageability | MDM compatibility matrix with the client's MDM (work profile and fully managed); corporate-app and Play Integrity tests | 5–8 | **1** (if Profile C) |
+| WP5 | 4 GPU driver | Mali patch-status review; PowerVR driver attack-surface mapping; fuzzing scope and harness design | 10–20 | 2 |
+| WP6 | 3 Baseband | Exynos 5300/5400 CVE history and patch status; IOMMU isolation review; firmware RE scoping | 15–25 | 2 (Profile B) |
+| WP7 | 6 Browser / WebView | Vanadium patch latency vs Chromium in-the-wild 0-days; WebView use in required apps | 2–3 | 2 |
+| WP8 | 8 Sandboxed Play layer | Source review of the compatibility layer; IPC fuzzing | 5–10 | 2 |
+| WP9 | 10 Forensic claims | Lab extraction tests per generation at default and Profile B settings (needs access to commercial forensic tools) | 10–15 | 2 |
+| WP10 | 11, 12 Apps | Approved-app list; compatibility-mode and WebView census of required apps | 2–4 | 2 |
+| WP11 | 9 Pixel 11 | Readiness review after GrapheneOS support ships; Titan M3 and MediaTek modem research scope | 5–10 | 3 (later) |
+| WP12 | 13 Network | Traffic capture of default connections per profile | 2 | 3 |
+| WP13 | 14 Biometrics | Spoof testing per sensor type | 3–5 | 3 |
+
+**Suggested first engagement:** Tier 1 (WP1–WP4), about **16–26 days**. It
+answers "can we trust and operate this?" before spending on deep technical
+research (Tier 2, about 44–77 days).
+
+### 14.3 Lab Requirements
+
+| Item | Purpose |
+| --- | --- |
+| One device per SoC generation: **Pixel 8** (G3), **Pixel 9 or 10a** (G4), **Pixel 10** (G5), **Pixel 11** (G6, once supported) | Generation differences (§5) |
+| A **stock-OS twin** for each test device | Baseline for comparison |
+| Locally built GrapheneOS **userdebug** images | Dynamic instrumentation (Frida, debuggers) needs root, which production builds don't allow |
+| IDA Pro / Ghidra; Frida; AFL++ / syzkaller | Reverse engineering, instrumentation, fuzzing |
+| Commercial forensic tooling (or a partner lab with it) | WP9; access is usually restricted to law enforcement |
+| RF-shielded enclosure and a software-defined radio test network (e.g. srsRAN) | Baseband testing without touching live networks (WP6) |
+| The client's MDM tenant and required apps | WP4, WP10 |
+
+### 14.4 Open Questions for the Client
+
+Taken from the assumption register (Appendix A):
+
+1. Which personas and deployment models do you actually have? (A10, A11)
+2. Do you need a device now (Pixel 10) or can you wait for Pixel 11? (A01)
+3. Are certified products (Common Criteria, FIPS 140) required? (A12)
+4. Which MDM do you use, and do you need fully managed devices? (A14)
+5. Any restrictions on hardware origin, carriers or regions of use? (A09)
+6. Which apps are mandatory (banking, corporate, messaging)? (§10.3, WP10)
+7. Is there a security operations function that would need device telemetry?
+   (§9.7)
 
 ---
 

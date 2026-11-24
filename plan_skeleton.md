@@ -92,10 +92,10 @@ noting how each applies to each profile and device generation.
 
 | #   | Task                     | Details                                                                                                         | Owner | Depends on | Est.  | Done |
 | --- | ------------------------ | --------------------------------------------------------------------------------------------------------------- | ----- | ---------- | ----- | ---- |
-| 3.1 | Rate each area           | **Risk** = likelihood × impact (H/M/L) sets the rank. **Verification effort** (H/M/L) is a separate column that feeds Stage 2 costing, not the rank. Mark device generations affected (doc §11) | Raj   | Phase 2    | 30 m  | [ ]  |
-| 3.2 | Map to profiles          | Which areas matter for which profile (A/B/C)                                                                    | Raj   | 3.1, 1.1   | 10 m  | [ ]  |
-| 3.3 | Reference configurations | Profile A, B, C hardening configurations (doc §12)                                                              | Raj   | Phase 2    | 30 m  | [ ]  |
-| 3.4 | Stage 2 proposal         | Work packages, effort, tooling (IDA Pro, Frida, lab Pixels per generation, forensic tooling) (doc §14)          | Raj   | 3.1        | 20 m  | [ ]  |
+| 3.1 | Rate each area           | **Risk** = likelihood × impact (H/M/L) sets the rank. **Verification effort** (H/M/L) is a separate column that feeds Stage 2 costing, not the rank. Mark device generations affected (doc §11) | Raj   | Phase 2    | 30 m  | [x]  |
+| 3.2 | Map to profiles          | Which areas matter for which profile (A/B/C)                                                                    | Raj   | 3.1, 1.1   | 10 m  | [x]  |
+| 3.3 | Reference configurations | Profile A, B, C hardening configurations (doc §12)                                                              | Raj   | Phase 2    | 30 m  | [x]  |
+| 3.4 | Stage 2 proposal         | Work packages, effort, tooling (IDA Pro, Frida, lab Pixels per generation, forensic tooling) (doc §14)          | Raj   | 3.1        | 20 m  | [x]  |
 
 ### Phase 4 — Verification & Delivery (~1–1.5 h)
 **Goal:** Remaining claims are checked and tagged; the document is reviewed by
