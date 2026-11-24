@@ -2057,11 +2057,11 @@ Follow these steps in order.
 
 | Step | Action | Check or outcome |
 | --- | --- | --- |
-| 1 | Enable original equipment manufacturer (OEM) unlocking (Settings > System > Developer options). Then use the **GrapheneOS web installer** from a trusted computer. | — |
-| 2 | Flash, then **re-lock the bootloader**. Disable OEM unlocking again. | — |
+| 1 | Enable original equipment manufacturer (OEM) unlocking (Settings > System > Developer options). Then use the **GrapheneOS web installer** from a trusted computer. | None |
+| 2 | Flash, then **re-lock the bootloader**. Disable OEM unlocking again. | None |
 | 3 | Check the **boot-key hash** shown at boot | Matches the published value |
 | 4 | Pair with **Auditor**, either by local pairing between two devices or through the remote attestation service for fleets. Record the first attestation. | The first attestation shows OEM unlocking and Android Debug Bridge (adb) as off (§9.4) |
-| 5 | Apply the profile settings (§12.7), then check for and install updates | — |
+| 5 | Apply the profile settings (§12.7), then check for and install updates | None |
 
 ### 12.3 Profile A — Baseline
 
@@ -2093,19 +2093,19 @@ checklist rows; the Notes column adds reasons and caveats not shown there.
 | Setting | Profile B value | Notes |
 | --- | --- | --- |
 | Sandboxed Google Play | **None** in the Owner profile | If Play is unavoidable, put it in a **secondary profile** and end that session when not in use |
-| Universal Serial Bus Type-C (USB-C) port | **Charging-only** at all times | — |
-| Auto-reboot | **1 hour** (30 minutes while travelling) | — |
-| Duress personal identification number (PIN) | Set and practised | — |
+| Universal Serial Bus Type-C (USB-C) port | **Charging-only** at all times | None |
+| Auto-reboot | **1 hour** (30 minutes while travelling) | None |
+| Duress personal identification number (PIN) | Set and practised | None |
 | Cellular | **Long-Term Evolution (LTE)-only** mode | • LTE-only mode also turns off every other cellular generation, so 5G speeds are lost<br>• Check emergency-call behaviour in LTE-only mode during Stage 2 testing |
 | Voice over LTE (VoLTE) and Wi-Fi calling | **Wi-Fi calling off. VoLTE off where the carrier allows voice without it** | • LTE-only mode does not remove the IP Multimedia Subsystem (IMS) path (§7.7)<br>• On many carriers, LTE-only without VoLTE means **no voice calls**. In that case, either keep VoLTE on and accept the residual risk, or rely on Signal calls over data.<br>• Check emergency calling |
 | Short-range radios | **Bluetooth and near-field communication (NFC) off** when not in use | Set the Bluetooth (and Wi-Fi) auto-off timeout |
-| Virtual private network (VPN) | **Always-on, with "block connections without VPN"** | — |
-| Lock credential | Strong passphrase | — |
-| Fingerprint | **Off**, or on with two-factor PIN | — |
+| Virtual private network (VPN) | **Always-on, with "block connections without VPN"** | None |
+| Lock credential | Strong passphrase | None |
+| Fingerprint | **Off**, or on with two-factor PIN | None |
 | Network permission for new apps | **Off at install** | Grant per app (§12.6) |
-| Sensors permission for new apps | **Off by default** | — |
-| WebView just-in-time (JIT) compilation | **Off globally** | — |
-| Exploit-protection compatibility mode | None | — |
+| Sensors permission for new apps | **Off by default** | None |
+| WebView just-in-time (JIT) compilation | **Off globally** | None |
+| Exploit-protection compatibility mode | None | None |
 
 ### 12.5 Profile C — Managed Fleet
 
@@ -2117,9 +2117,9 @@ elements of Profile C; device settings are in the §12.7 checklist.
 | **Work profile** | Managed by the organisation's mobile device management (MDM). Sandboxed Play is installed **only in the work profile**, if the MDM or apps need it. |
 | **Attestation** | Enrol each device in Auditor and attestation.app, with alerting |
 | **Compensating controls** | • a written build standard<br>• the hardening checklist (§12.7)<br>• an approved-app list<br>• **2–3 pilot devices on the Beta channel** as early warning |
-| **Incident response runbook** | For a suspected compromise, in order (§9.7):<br>• isolate the device (airplane mode; do not reboot)<br>• capture evidence (screenshots, Mobile Verification Toolkit and adb output, Memory Tagging Extension (MTE) crash reports)<br>• revoke credentials<br>• reflash and re-enrol, or replace<br>The runbook also records the lost-device and duress-wipe procedures (§12.8). |
+| **Incident response runbook** | For a suspected compromise, in order (§9.7):<br>• isolate the device (airplane mode; do not reboot)<br>• capture evidence (what to capture: §9.7)<br>• revoke credentials<br>• reflash and re-enrol, or replace<br>The runbook also records the lost-device and duress-wipe procedures (§12.8). |
 | **C+B variant** | Apply the Profile B device settings in §12.7 to fleet devices issued to:<br>• P1 and P2<br>• P3 privileged administrators (the highest-risk P3 group, tier T3, facing commercial spyware vendors)<br>Other P3 staff use Profile C. |
-| **Enforcement limit** | The MDM controls only the work profile. Device-wide settings are user-set; see §10.2 and the last column of §12.7. Auditor shows some of them (auto-reboot timeout, USB-C mode, adb and OEM unlocking; §9.4). These settings cannot be verified:<br>• PIN scrambling<br>• cellular mode<br>• duress PIN<br>• VoLTE and Wi-Fi calling |
+| **Enforcement limit** | The MDM controls only the work profile. Device-wide settings are user-set; see §10.2 and the last column of §12.7. Auditor shows some of them (§9.4):<br>• auto-reboot timeout<br>• USB-C mode<br>• adb and OEM unlocking<br>These settings cannot be verified:<br>• PIN scrambling<br>• cellular mode<br>• duress PIN<br>• VoLTE and Wi-Fi calling |
 
 ### 12.6 App Policy
 
@@ -2252,7 +2252,7 @@ tagged.
 | Inactivity reboot | Fixed 72 hours | Configurable from 10 minutes to 72 hours; 18 hours by default |
 | Universal Serial Bus Type-C (USB-C) port | USB data protection while locked (charging-only for new connections) | Five modes, including always charging-only |
 | 2G and cellular modes | 2G blocked on supported devices | 2G off, or Long-Term Evolution (LTE)-only (4G only) |
-| Wi-Fi | Turns off auto-connect to insecure Wi-Fi networks (Open, Wired Equivalent Privacy (WEP) and Opportunistic Wireless Encryption (OWE)); auto-connect can be turned back on for individual networks | • Per-connection media access control (MAC) address randomisation<br>• Wi-Fi and Bluetooth auto-off timeouts |
+| Wi-Fi | Turns off auto-connect to insecure Wi-Fi networks:<br>• open networks<br>• Wired Equivalent Privacy (WEP)<br>• Opportunistic Wireless Encryption (OWE)<br>Auto-connect can be turned back on for individual networks | • Per-connection media access control (MAC) address randomisation<br>• Wi-Fi and Bluetooth auto-off timeouts |
 | Sideloading | Blocked | Allowed per app through the standard install permission |
 | Play Protect | Kept on | Not present; Google Play is optional and sandboxed |
 | Browser JavaScript optimiser | Chrome's JavaScript optimiser turned off | Vanadium: JavaScript just-in-time (JIT) compilation off by default, with a per-site toggle (§6.6) |
@@ -2503,9 +2503,9 @@ or work package. A dash (—) means none is given.
 | 10 | Which apps are mandatory? | Typical categories:<br>• banking<br>• corporate<br>• messaging | §10.3, WP10 |
 | 11 | Is there a security operations function that would need device telemetry? | — | §9.7 |
 | 12 | Do you need device-wide remote wipe, rather than wiping only a work profile? | — | §11 area 7 |
-| 13 | What platform do staff use today, and what is your risk appetite for moving away from it? | — | — |
+| 13 | What platform do staff use today, and what is your risk appetite for moving away from it? | None | None |
 | 14 | Would you consider funding or contracting with the GrapheneOS project (for example for support or audits)? | Such an arrangement would reduce the §11 area 4 risk | §11 area 4 |
-| 15 | What budget and timeline do you have for Stage 2? | — | — |
+| 15 | What budget and timeline do you have for Stage 2? | None | None |
 
 ### 14.5 Stage 2 Exit Criteria
 
@@ -2597,6 +2597,7 @@ and a one-line plain-English meaning.
 | ACNS | Applied Cryptography and Network Security | Academic security conference, cited in Appendix F |
 | adb | Android Debug Bridge | Developer tool for controlling a phone from a computer; should be off on deployed devices |
 | AFU | After First Unlock | State after the first unlock since boot: encryption keys stay in memory even when the screen is locked |
+| ANGLE | Almost Native Graphics Layer Engine | Graphics translation layer used by Chrome; source of CVE-2025-6558 |
 | ANSSI | Agence nationale de la sécurité des systèmes d'information | French national cybersecurity agency |
 | AOSP | Android Open Source Project | Google's open-source Android base, on which GrapheneOS is built |
 | API | application programming interface | A defined way for one piece of software to call another |
@@ -2692,6 +2693,7 @@ and a one-line plain-English meaning.
 | RCE | remote code execution | An attacker running code on a device over a network, without physical access |
 | RCS | Rich Communication Services | Carrier messaging standard that succeeds plain text messaging |
 | RIPA | UK Regulation of Investigatory Powers Act 2000 | UK law that includes powers to compel disclosure of keys and passwords |
+| RKP | Real-time Kernel Protection | Samsung Knox hypervisor feature that protects kernel memory |
 | RSA | Rivest–Shamir–Adleman | A widely used public-key cryptography algorithm |
 | S&P | IEEE Symposium on Security and Privacy | Academic security conference run by IEEE |
 | Sandboxed Google Play | — | Google Play services run as ordinary, unprivileged apps |
@@ -2725,12 +2727,12 @@ and a one-line plain-English meaning.
 | VoLTE | Voice over LTE | Voice calls carried over IMS on LTE networks |
 | VPN | virtual private network | Encrypted tunnel that routes traffic through a chosen server |
 | VPU | video processing unit | Hardware block that encodes and decodes video |
+| W^X | write-xor-execute | Rule that memory may be writable or executable, but never both at once |
 | Weaver | — | Secure-element service that throttles unlock attempts |
 | WEP | Wired Equivalent Privacy | Obsolete, broken Wi-Fi encryption scheme |
 | WiSec | ACM Conference on Security and Privacy in Wireless and Mobile Networks | Academic conference on wireless and mobile security |
 | WOOT | Workshop on Offensive Technologies | USENIX workshop on attack research |
 | WP | work package | A unit of proposed Stage 2 work in §14.2, numbered WP1 to WP16 |
-| W^X | write-xor-execute | Rule that memory may be writable or executable, but never both at once |
 
 ## Appendix D — Device Specification Detail
 
@@ -2892,6 +2894,9 @@ abbreviations they contain.
 
 **Enterprise, apps and comparators**
 
+- Samsung Newsroom, Samsung Message Guard (February 2023): https://news.samsung.com/global/samsung-message-guard-protects-you-from-new-and-invisible-threats
+- Samsung Knox whitepaper, Knox Vault: https://docs.samsungknox.com/admin/fundamentals/whitepaper/samsung-knox-mobile-security/system-security/knox-vault/
+- Samsung Knox whitepaper, Real-time Kernel Protection: https://docs.samsungknox.com/admin/fundamentals/whitepaper/samsung-knox-mobile-security/system-security/real-time-kernel-protection/
 - Google, Advanced Protection for Android (help page): https://support.google.com/android/answer/16339980
 - Apple, About Lockdown Mode: https://support.apple.com/en-us/105120
 - Apple Newsroom, Apple expands industry-leading commitment to protect users from highly targeted mercenary spyware (Lockdown Mode), July 2022: https://www.apple.com/newsroom/2022/07/apple-expands-commitment-to-protect-users-from-mercenary-spyware/
