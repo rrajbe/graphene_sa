@@ -106,7 +106,7 @@ someone other than the author.
 | 4.1 | Check feature facts      | Current defaults: auto-reboot, USB-C mode, duress, eSIM handling, Auditor                 | Raj           | 2.4–2.7    | 20 m  | [x]  |
 | 4.2 | Claimed vs verified pass | Tag every claim Documented / Secondary / Observed / Assumed; re-check anything Phase 1 left as †      | Raj           | 4.1        | 20 m  | [x]  |
 | 4.3 | Executive summary        | Write doc §0 last, from §11 and §12                                                       | Raj           | 4.2        | 15 m  | [x]  |
-| 4.4 | Peer read                | Independent AI review (20 findings) and source check (15 claims) applied 2026-11-24; **human reviewer still to read** | _Reviewer TBD_ | 4.3       | 20 m  | [ ]  |
+| 4.4 | Peer read                | Round 1: AI review + source check applied. Round 2 (2026-11-24): 2 correctness reviews, completeness review, 4 literature/CVE research streams and a post-merge regression check applied; doc now v0.9. **Human reviewer still to read** | _Reviewer TBD_ | 4.3 | 20 m | [ ] |
 | 4.5 | Deliver                  | Classification, disclaimer, appendices A–F done; choose client format (Word / PDF / shared page) and send | Raj           | 4.4        | 5 m   | [ ]  |
 
 **Outside our control:**
