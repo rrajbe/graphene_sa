@@ -563,9 +563,15 @@ supported. [Documented] The ones that matter most are in the table below.
 | Long-term firmware and driver updates | Without vendor firmware patches, OS patches alone are not enough | Pixel 8 and later: 7 years |
 | Isolation of radios and peripherals (input–output memory management unit, IOMMU) | Stops a compromised modem or Wi-Fi chip reading main memory directly | Pixels |
 
-The published list requires isolated radios, GPU and other components; the FAQ
-explains separately that baseband memory access is partitioned by the IOMMU.
+The published list requires three kinds of component to be isolated:
 [Documented]
+
+- the radios;
+- the graphics processing unit (GPU);
+- other components.
+
+The FAQ explains separately that baseband memory access is partitioned by the
+IOMMU. [Documented]
 
 Few Android original equipment manufacturers (OEMs) meet all of these
 requirements, which is why device support is narrow. The FAQ's view is that for
@@ -582,7 +588,7 @@ signing key.
 | Installation | Three steps:<br>• the bootloader is unlocked<br>• GrapheneOS is flashed<br>• the bootloader is **re-locked with the GrapheneOS signing key enrolled** as the trusted key | [Documented] |
 | Boot verification | From then on, every boot verifies the OS against that key using Android Verified Boot (AVB). A modified system partition fails to boot or is detected | [Documented] |
 | **Rollback protection** | Prevents booting an older, vulnerable signed version | [Documented] |
-| Key hash check | • Pixels show a yellow boot warning with the hash of the enrolled key at every boot<br>• Users can check that hash against the published GrapheneOS value<br>• The Auditor app (§9.4) verifies the hash cryptographically | [Documented] / [Assessed] |
+| Key hash check | • Pixels show a yellow boot warning with the hash of the enrolled key at every boot<br>• users can check that hash against the published GrapheneOS value<br>• the Auditor app (§9.4) verifies the hash cryptographically | [Documented] / [Assessed] |
 
 ### 4.3 Titan Secure Element
 
@@ -592,13 +598,13 @@ about its security record.
 | Item | Detail | Confidence |
 | --- | --- | --- |
 | **Weaver** | The unlock credential is combined with a secret held by the secure element. The chip enforces **escalating delays between failed attempts**, so brute-forcing a personal identification number (PIN) is limited by hardware, not by the OS | [Documented] |
-| **Weaver schedule** (GrapheneOS FAQ) | • Attempts 1 to 4 have no delay<br>• After that, escalating delays apply (schedule below the table)<br>• **Only 20 attempts are allowed in total** | [Documented] |
+| **Weaver schedule** (GrapheneOS FAQ) | • attempts 1 to 4 have no delay<br>• after that, escalating delays apply (schedule below the table)<br>• **only 20 attempts are allowed in total** | [Documented] |
 | Guessing odds | A random 6-digit PIN therefore has about a 1-in-50,000 chance (20 in 1,000,000) of being guessed, provided the secure element holds | [Assessed] (derived from the FAQ schedule) |
 | **Insider attack resistance** | Secure element firmware can only be updated after the owner authenticates. Google or a supplier therefore cannot silently push firmware that weakens throttling on a locked device | [Documented] (Android and Pixel design) |
 | **StrongBox** | Hardware-backed key storage used by apps and by attestation (§9.4) | [Documented] |
-| **Generations** | • Titan M2 is on Pixel 8 to 10a<br>• **Titan M3 is on Pixel 11** (Google store specification pages)<br>• The M3 is new silicon and firmware with little public security research yet | • [Documented] (chips by device)<br>• [Assessed] (research gap) |
+| **Generations** | • Titan M2 is on Pixel 8 to 10a<br>• **Titan M3 is on Pixel 11** (Google store specification pages)<br>• the M3 is new silicon and firmware with little public security research yet | • [Documented] (chips by device)<br>• [Assessed] (research gap) |
 | **Certification** | • Google lists Titan M2 under Common Criteria (protection profile PP0084, TrustCB) through Pixel 10 and 10a<br>• Titan M3's Common Criteria entry is listed as "Ongoing" (Google Pixel certifications page) | [Documented] |
-| **Track record** | The secure element itself has had exploitable bugs:<br>• Quarkslab achieved code execution on the first-generation Titan M<br>• The attack leaked StrongBox-protected keys (Common Vulnerabilities and Exposures (CVE) identifier CVE-2022-20233; Black Hat USA 2022)<br>• That work followed "2021: A Titan M Odyssey" (Black Hat EU 2021)<br>• The attack needed root or Serial Peripheral Interface (SPI) access and did not break Weaver | [Documented] |
+| **Track record** | The secure element itself has had exploitable bugs:<br>• Quarkslab achieved code execution on the first-generation Titan M<br>• the attack leaked StrongBox-protected keys (Common Vulnerabilities and Exposures (CVE) identifier CVE-2022-20233; Black Hat USA 2022)<br>• that work followed "2021: A Titan M Odyssey" (Black Hat EU 2021)<br>• the attack needed root or Serial Peripheral Interface (SPI) access and did not break Weaver | [Documented] |
 | Titan M2 and M3 | No public break of Titan M2 or Titan M3 was found | [Assessed] (absence — searched Titan M2 and M3 vulnerability research and conference talks, 2026-11) |
 | Forensic-vendor data | Leaked forensic-vendor data is consistent with Weaver holding: the vendor reportedly cannot brute-force Pixel passcodes (§8.7) | [Secondary] |
 
@@ -633,7 +639,7 @@ The table sets out how storage encryption works on GrapheneOS.
 | --- | --- | --- |
 | Encryption layers | **File-based encryption** protects user data, and **metadata encryption** protects the file system. Both are standard on modern Android | [Documented] |
 | Key derivation | Keys are derived from the user's lock-screen credential **and** the Weaver secret in the secure element. As a result:<br>• data cannot be decrypted off-device<br>• a weak PIN is protected by hardware throttling | [Documented] |
-| **Before First Unlock (BFU)** | User data is "at rest": it stays encrypted until the credential is entered. This is why GrapheneOS's auto-reboot feature (§8.2) is so effective | [Documented] |
+| **Before First Unlock (BFU)** | User data is "at rest": it stays encrypted until the credential is entered. Auto-reboot (§8.2) returns the device to this state | • [Documented] (encryption state)<br>• [Assessed] (auto-reboot) |
 | Password length | GrapheneOS raises the maximum password length to 128 characters (stock: 16), making a strong passphrase practical | [Documented] |
 
 ### 4.5 Baseband, Firmware and Peripheral Isolation
@@ -643,7 +649,7 @@ hardware confines it.
 
 | Item | Detail | Confidence |
 | --- | --- | --- |
-| **Closed-source firmware** | Several components run it:<br>• the cellular modem<br>• the Wi-Fi and Bluetooth chip<br>• the graphics processing unit (GPU) firmware<br>• other components | [Documented] / [Assessed] |
+| **Closed-source firmware** | Several components run it:<br>• the cellular modem<br>• the Wi-Fi and Bluetooth chip<br>• the GPU firmware<br>• other components | [Documented] / [Assessed] |
 | Firmware suppliers | Google and its vendors supply that firmware. The vendors include:<br>• Samsung<br>• MediaTek (on Pixel 11)<br>• Broadcom<br>• Imagination and Arm | [Documented]; MediaTek on Pixel 11 [Secondary] (assumption A02) |
 | GrapheneOS's role | GrapheneOS ships this firmware unchanged. It cannot audit or fix it | [Documented] / [Assessed] |
 | **IOMMU** isolation | Pixels isolate these components with an IOMMU, so a compromised modem should not be able to read or write main memory directly | [Documented] |
@@ -658,11 +664,17 @@ each item, what it shows, the key details and the source.
 
 | Evidence | What it shows | Detail | Source |
 | --- | --- | --- | --- |
-| **CVE-2026-58704**, Pixel modem elevation of privilege | First Pixel-specific baseband bug Google has marked as exploited; not a forensic bug | • A logic error that bypasses a permission check; the attack vector is not published<br>• Fixed in patch level 2026-09-05<br>• Added to the US Cybersecurity and Infrastructure Security Agency (CISA) Known Exploited Vulnerabilities (KEV) catalogue on 2026-09-16<br>• Google marked it "under limited, targeted exploitation"<br>• Exploitation likely needs a network position, such as a nearby or compromised cellular network [Secondary] | • Pixel Update Bulletin, September 2026<br>• CISA KEV catalogue<br>• Kaspersky and 9to5Google [Secondary] |
-| Project Zero Exynos disclosure through IMS | Remote reach before authentication, with no radio proximity needed | • Project Zero reported 18 bugs<br>• 4 of them gave internet-to-baseband remote code execution through IMS, needing only the phone number<br>• The interim mitigation was turning off Wi-Fi calling and VoLTE, so LTE-only mode alone is not enough | Project Zero, March 2023 |
+| **CVE-2026-58704**, Pixel modem elevation of privilege | First Pixel-specific baseband bug Google has marked as exploited; not a forensic bug | • a logic error that bypasses a permission check; the attack vector is not published<br>• fixed in patch level 2026-09-05<br>• added to the US Cybersecurity and Infrastructure Security Agency (CISA) Known Exploited Vulnerabilities (KEV) catalogue on 2026-09-16 (more below the table) | • Pixel Update Bulletin, September 2026<br>• CISA KEV catalogue<br>• Kaspersky and 9to5Google [Secondary] |
+| Project Zero Exynos disclosure through IMS | Remote reach before authentication, with no radio proximity needed | • Project Zero reported 18 bugs<br>• 4 of them gave internet-to-baseband remote code execution through IMS, needing only the phone number<br>• the interim mitigation was turning off Wi-Fi calling and VoLTE, so LTE-only mode alone is not enough | Project Zero, March 2023 |
 | Google red team modem remote code execution through the 2G stack (CVE-2022-20170) | Supports disabling 2G | Google's red team achieved modem remote code execution through the 2G stack | Black Hat USA 2023 (Karimi et al.) |
-| Compiler hardening of the Exynos baseband | Google is hardening the Samsung modem, with no equivalent for the MediaTek M90 | • Google has applied BoundSan and IntSan (bounds and integer-overflow sanitisers) to the Exynos baseband since December 2023<br>• Google describes the Pixel 9 baseband as the "most hardened", citing stack canaries and auto-initialisation<br>• No equivalent statement exists for the MediaTek M90 on Pixel 11 [Assessed] (absence — searched Google and MediaTek security blogs, 2026-11) | Google Security Blog, December 2023 and October 2024 |
+| Compiler hardening of the Exynos baseband | Google is hardening the Samsung modem, with no equivalent for the MediaTek M90 | • Google has applied BoundSan and IntSan (bounds and integer-overflow sanitisers) to the Exynos baseband since December 2023<br>• Google describes the Pixel 9 baseband as the "most hardened", citing stack canaries and auto-initialisation<br>• no equivalent statement exists for the MediaTek M90 on Pixel 11 [Assessed] (absence — searched Google and MediaTek security blogs, 2026-11) | Google Security Blog, December 2023 and October 2024 |
 | 5G pre-authentication attacks (SNI5GECT; 5GBaseChecker) | Disabling 2G does not make pre-authentication parsing unreachable | • SNI5GECT injected pre-authentication messages without a fake base station (USENIX Security Symposium 2025)<br>• 5GBaseChecker found pre-authentication flaws in commercial 5G basebands (USENIX Security Symposium 2024) | USENIX Security Symposium 2025 and 2024 |
+
+Further detail on CVE-2026-58704:
+
+- Google marked it "under limited, targeted exploitation". [Documented]
+- Exploitation likely needs a network position, such as a nearby or
+  compromised cellular network. [Secondary]
 
 The September 2026 bulletin that fixed CVE-2026-58704 also fixed the bugs
 below. [Documented]
@@ -760,20 +772,20 @@ the sections cited.
 
 | Surface | Reachable when | GrapheneOS-specific control | Residual risk | §11 area |
 | --- | --- | --- | --- | --- |
-| Browser (Vanadium) | • Unlocked<br>• Remote: link, advert or network injection | • Just-in-time (JIT) compilation off by default<br>• Strict site isolation<br>• Reduced web application programming interfaces (APIs) (§6.6) | • Renderer zero-days in non-JIT code<br>• Patch latency unmeasured | Area 8, Browser and WebView |
+| Browser (Vanadium) | • unlocked<br>• remote: link, advert or network injection | • just-in-time (JIT) compilation off by default<br>• strict site isolation<br>• reduced web application programming interfaces (APIs) (§6.6) | • renderer zero-days in non-JIT code<br>• patch latency unmeasured | Area 8, Browser and WebView |
 | WebView in apps | Unlocked; remote through app content | Vanadium WebView; per-app JIT toggle (§6.6) | JIT on by default; no site isolation | Area 8, Browser and WebView |
-| Messaging apps and media or image parsers | • All states once the app runs, including After First Unlock (AFU) while locked<br>• Remote zero-click | • hardened_malloc and MTE in app processes<br>• Profile isolation<br>• Network permission (§6, §7) | • Parser bugs inside the app's own process<br>• Untested against 2025 chains | Area 5, Messaging and media parsers |
-| Cellular radio:<br>• 2G<br>• LTE<br>• 5G pre-authentication | • BFU<br>• AFU<br>• Unlocked<br>• Radio on; nearby or network attacker | • LTE-only mode<br>• 2G off<br>• Airplane mode (§4.5, §7.7) | • Closed firmware<br>• Exploited Pixel modem bug (CVE-2026-58704)<br>• 5G and LTE pre-authentication parsing | Area 3, Baseband and IMS |
-| • IMS (VoLTE and Wi-Fi calling)<br>• Text and multimedia messages<br>• Rich Communication Services (RCS) messages | • BFU<br>• AFU<br>• Unlocked<br>• Remote, with the phone number | VoLTE and Wi-Fi calling toggles (§7.7) | Internet-to-baseband remote code execution class; LTE-only mode does not remove it | Area 3, Baseband and IMS |
-| Wi-Fi | When enabled, all states; nearby | • Toggle<br>• Auto-off timer<br>• Media access control (MAC) address randomisation (§7.7) | Closed Wi-Fi firmware; shared-buffer path past the IOMMU | Area 14, Proximity radio firmware |
+| Messaging apps and media or image parsers | • all states once the app runs, including After First Unlock (AFU) while locked<br>• remote zero-click | • hardened_malloc and MTE in app processes<br>• profile isolation<br>• network permission (§6, §7) | • parser bugs inside the app's own process<br>• untested against 2025 chains | Area 5, Messaging and media parsers |
+| Cellular radio:<br>• 2G<br>• LTE<br>• 5G pre-authentication | • BFU<br>• AFU<br>• unlocked<br>• radio on; nearby or network attacker | • LTE-only mode<br>• 2G off<br>• airplane mode (§4.5, §7.7) | • closed firmware<br>• exploited Pixel modem bug (CVE-2026-58704)<br>• 5G and LTE pre-authentication parsing | Area 3, Baseband and IMS |
+| • IMS (VoLTE and Wi-Fi calling)<br>• text and multimedia messages<br>• Rich Communication Services (RCS) messages | • BFU<br>• AFU<br>• unlocked<br>• remote, with the phone number | VoLTE and Wi-Fi calling toggles (§7.7) | Internet-to-baseband remote code execution class; LTE-only mode does not remove it | Area 3, Baseband and IMS |
+| Wi-Fi | When enabled, all states; nearby | • toggle<br>• auto-off timer<br>• media access control (MAC) address randomisation (§7.7) | Closed Wi-Fi firmware; shared-buffer path past the IOMMU | Area 14, Proximity radio firmware |
 | Bluetooth | When enabled, all states; nearby | Toggle; auto-off timer (§7.7) | Closed firmware and host stack bugs | Area 14, Proximity radio firmware |
 | Near-field communication (NFC) | When enabled; very close range | Toggle (§7.7) | Closed firmware; small attack surface, but reachable before authentication | Area 14, Proximity radio firmware |
 | Universal Serial Bus Type-C (USB-C) port | Physical access, in BFU or in AFU while locked | USB-C port control; charging-only when locked by default (§8.3) | Unlocked-state and charging-path bugs | Area 13, Forensic claims |
-| GPU and accelerator drivers:<br>• Mali<br>• PowerVR<br>• Tensor video processing unit (VPU) | From any compromised app or renderer | MTE on kernel allocators (§6.3); none specific to GPU page tables | • GPU page-table bugs bypass MTE<br>• Accelerator drivers new and unstudied (§5.2.1) | Area 2, GPU and accelerator drivers |
+| GPU and accelerator drivers:<br>• Mali<br>• PowerVR<br>• Tensor video processing unit (VPU) | From any compromised app or renderer | MTE on kernel allocators (§6.3); none specific to GPU page tables | • GPU page-table bugs bypass MTE<br>• accelerator drivers new and unstudied (§5.2.1) | Area 2, GPU and accelerator drivers |
 | Sandboxed Play layer | When installed, as an ordinary app | No privileged Google access (§7.4) | Compromise limited to its profile; dependency on Google code | Area 12, Sandboxed Play layer |
 | App stores and sideloading | User or administrator action | Per-app permissions; GrapheneOS App Store (§7.9) | Malicious or compromised apps | Area 9, App sourcing |
-| Update channel | Periodic, remote | • Signed updates<br>• Verified boot<br>• Rollback protection (§4.2, §9.1) | Signing-key or build compromise | Area 4, Supply chain and governance |
-| Secure element | Physical access, or root on the main OS | Weaver throttling; insider attack resistance (§4.3) | • Titan bugs (Quarkslab, first-generation Titan M)<br>• Titan M3 unstudied | • Area 13, Forensic claims<br>• Area 11, Pixel 11 components |
+| Update channel | Periodic, remote | • signed updates<br>• verified boot<br>• rollback protection (§4.2, §9.1) | Signing-key or build compromise | Area 4, Supply chain and governance |
+| Secure element | Physical access, or root on the main OS | Weaver throttling; insider attack resistance (§4.3) | • Titan bugs (Quarkslab, first-generation Titan M)<br>• Titan M3 unstudied | • area 13, Forensic claims<br>• area 11, Pixel 11 components |
 
 > **Assessment note.** GrapheneOS can only be as strong as the hardware and
 > firmware under it. The client's deeper review should focus on what sits below
@@ -801,7 +813,7 @@ status as of 2026-11-24. † marks press reports only [Secondary].
 | Pixel 9a | Tensor G4 | Exynos 5300 | Mali | Titan M2 | Optical | April 2025 | April 2032 | Supported |
 | • Pixel 10<br>• Pixel 10 Pro<br>• Pixel 10 Pro XL | Tensor G5 | Exynos 5400 | PowerVR DXT† | Titan M2 | Ultrasonic | August 2025 | August 2032 | Supported |
 | Pixel 10 Pro Fold | Tensor G5 | Exynos 5400 | PowerVR† | Titan M2 | Side capacitive | October 2025 | October 2032 | Supported |
-| Pixel 10a | Tensor G4 | Exynos 5400 | Mali | Titan M2 | Optical† | March 2026 | March 2033 | Supported |
+| Pixel 10a | Tensor G4 | Exynos 5400 | Mali | Titan M2 | Optical† (assumption A04) | March 2026 | March 2033 | Supported |
 | • Pixel 11<br>• Pixel 11 Pro<br>• Pixel 11 Pro XL | Tensor G6 | MediaTek M90† | PowerVR C-Series† | Titan M3 | Ultrasonic† | August 2026 | August 2033 | **Not yet** |
 | Pixel 11 Pro Fold | Tensor G6 | MediaTek M90† | PowerVR† | Titan M3 | Side capacitive† | August 2026† | August 2033 | **Not yet** |
 
@@ -825,7 +837,7 @@ The table gives the sources for the Pixel 11 and Pixel 10a entries.
 | Pixel 11 retail availability on 2026-08-20; the Pixel 11 Pro Fold ship date is not confirmed by Google | Press reports | [Secondary] |
 | Pixel 11: Titan M3 and 7-year support (to August 2033) | Google's store specification pages | [Documented] |
 | Pixel 10a: Titan M2 | Google's specification page | [Documented] |
-| Pixel 10a: optical fingerprint sensor type | Reviews | [Secondary] |
+| Pixel 10a: optical fingerprint sensor type | Reviews | [Secondary] (assumption A04) |
 
 ### 5.2 Security-Relevant Differences
 
@@ -839,17 +851,27 @@ driver, with detail and source.
 | **Mali** (Tensor G3 and G4, including Pixel 10a) | Repeated in-the-wild exploitation by commercial spyware [Documented] | Exploited Common Vulnerabilities and Exposures (CVE) identifiers:<br>• CVE-2021-39793 (Pixel 6)<br>• CVE-2022-22706<br>• CVE-2023-4211<br>• CVE-2023-26083<br>• CVE-2024-4610 (Intellexa) | • Pixel Update Bulletin, March 2022<br>• Arm advisories<br>• Google Threat Intelligence Group (GTIG) 2025 zero-day review<br>• GTIG, "Sanctioned but Still Spying" (Intellexa), December 2025 (CVE-2024-4610) |
 | Mali: bypass of the Memory Tagging Extension (MTE) | **CVE-2025-0072** gave kernel code execution on a Pixel 8 with kernel MTE on [Documented] | A Mali use-after-free. It worked because **MTE does not cover memory the GPU reaches through its own page tables** | GitHub Security Lab, May 2025 |
 | Mali: exploitation technique | PhantomMap turns ordinary kernel heap bugs into physical-memory read and write [Documented] | PhantomMap abuses Mali GPU page-table handling | Network and Distributed System Security Symposium (NDSS) 2026 |
-| Mali: hardening | Google and Arm restricted the driver; a joint review found Pixel-specific bugs [Documented] | • Google and Arm restricted Mali input–output control (ioctl) calls with Security-Enhanced Linux (SELinux) (December 2025)<br>• A 2024 joint review found bugs in Pixel-specific driver code (CVE-2023-48409 and CVE-2023-48421) | Google blogs, September 2024 and December 2025 |
-| **PowerVR** (Tensor G5 and G6) | A steady stream of driver CVEs; no published hardening or in-the-wild exploitation found | • A steady stream of driver development kit (DDK) CVEs from 2024 to 2026 (examples below the table) [Documented]<br>• No equivalent published hardening and no public in-the-wild exploitation were found [Assessed] (absence — searched Imagination advisories, US Cybersecurity and Infrastructure Security Agency (CISA) Known Exploited Vulnerabilities (KEV) catalogue and GTIG reports, 2026-11)<br>• Little research is not evidence of robustness [Assessed] | Imagination GPU driver vulnerability page |
+| Mali: hardening | Google and Arm restricted the driver; a joint review found Pixel-specific bugs [Documented] | • Google and Arm restricted Mali input–output control (ioctl) calls with Security-Enhanced Linux (SELinux) (December 2025)<br>• a 2024 joint review found bugs in Pixel-specific driver code (CVE-2023-48409 and CVE-2023-48421) | Google blogs, September 2024 and December 2025 |
+| **PowerVR** (Tensor G5 and G6) | A steady stream of driver CVEs [Documented]; no published hardening or in-the-wild exploitation found [Assessed] | • driver development kit (DDK) CVEs from 2024 to 2026<br>• examples and search scope below the table | Imagination GPU driver vulnerability page |
 | **Tensor G5 video accelerator** (`/dev/vpu`) | Project Zero's Pixel 10 zero-click chain went through the new driver [Documented] | The chain started from a Dolby audio decoder bug (CVE-2025-54957). It went into the new video processing unit (VPU) driver, which could map arbitrary physical memory | Project Zero, May 2026 |
-| Tensor G4 BigWave driver | Pixel 9 chain from a Dolby decoder into the BigWave driver [Documented] | Project Zero also found:<br>• the Dolby fix reached Pixels 82 days after public disclosure (about 6 months after the report to Dolby)<br>• stock MTE was on only under Advanced Protection<br>• stock Pixel kernel address space layout randomisation (KASLR) was effectively absent (§6.5) | Project Zero, January 2026 |
+| Tensor G4 BigWave driver | Pixel 9 chain from a Dolby decoder into the BigWave driver [Documented] | Project Zero also found:<br>• the Dolby fix reached Pixels 82 days after public disclosure (about 6 months after the report to Dolby)<br>• stock MTE was on only under Advanced Protection<br>• stock Pixel kernel address space layout randomisation (KASLR) was effectively absent (Project Zero, November 2025; §6.5) | Project Zero, January 2026 |
 | **Adreno** (Qualcomm; relevant to Motorola, §4.7) | GPU features give physical-memory read and write that bypasses software mitigations [Documented] | The bypassed mitigations are control-flow integrity (CFI) and write-xor-execute (W^X) memory protection | Google Android Red Team, Black Hat USA 2024 |
 
 Examples of the PowerVR driver development kit CVEs [Documented]:
 
 - CVE-2024-43702;
-- CVE-2025-25178, CVE-2025-25179 and CVE-2025-25180;
+- CVE-2025-25178;
+- CVE-2025-25179;
+- CVE-2025-25180;
 - CVE-2025-46707.
+
+Notes on the PowerVR row:
+
+- No equivalent published hardening and no public in-the-wild exploitation
+  were found. [Assessed] (absence — searched Imagination advisories, the US
+  Cybersecurity and Infrastructure Security Agency (CISA) Known Exploited
+  Vulnerabilities (KEV) catalogue and GTIG reports, 2026-11)
+- Little research is not evidence of robustness. [Assessed]
 
 The pattern is consistent: GPU and accelerator drivers give attackers direct
 physical-memory primitives. These primitives sit outside the software
@@ -860,12 +882,12 @@ modems in use and their research record.
 
 | Point | Detail | Confidence |
 | --- | --- | --- |
-| Two Samsung modems are in use | • The Exynos 5300, in the Pixel 8 series (including the 8a) and the Pixel 9a<br>• The Exynos 5400, in the Pixel 9 series (except the 9a) and the Pixel 10 series (including the 10a) | [Documented] |
+| Two Samsung modems are in use | • the Exynos 5300, in the Pixel 8 series (including the 8a) and the Pixel 9a<br>• the Exynos 5400, in the Pixel 9 series (except the 9a) and the Pixel 10 series (including the 10a) | [Documented] |
 | Public vulnerability record | Both Samsung modems have one. The record includes:<br>• Project Zero's 2023 findings in the IP Multimedia Subsystem (IMS), which carries Voice over LTE (VoLTE; LTE is Long-Term Evolution, 4G) and Wi-Fi calling<br>• the exploited CVE-2026-58704 (§4.5) | [Documented] |
 | Satellite | The Exynos 5400 adds **satellite messaging and SOS**, a new radio path | [Secondary] |
 | **Pixel 11 switches to MediaTek** | The first change of modem vendor in the Tensor era | [Secondary] |
 | MediaTek research | Attackers research MediaTek basebands heavily too:<br>• FirmWire emulates them for fuzzing (NDSS 2022)<br>• BaseBridge showed MediaTek baseband remote code execution without an address space layout randomisation (ASLR) bypass (OffensiveCon 2025)<br>• MediaTek's February 2025 bulletin fixed a rogue-base-station remote code execution bug (CVE-2025-20634) | [Documented] |
-| MediaTek M90 | The M90 should not be treated as a less-studied target | [Assessed] |
+| MediaTek M90 | Do not assume obscurity protects the M90: attackers study MediaTek basebands heavily, though the M90 itself has little public research | [Assessed] |
 
 **5.2.3 Secure element.** Titan M2 is used throughout, until the **Titan M3** on
 Pixel 11. [Documented] See §4.3 for track record and certification status.
@@ -894,7 +916,8 @@ satellite. Each radio is extra attack surface; most can be disabled. [Assessed]
 This is one reason §5.3 does not prefer Pro models for high-risk users.
 
 **5.2.7 Support window remaining.** The table shows the support time left
-from today. [Documented]
+as of 2026-11-24. [Documented] (end dates) / [Assessed] (time remaining,
+calculated from 2026-11-24)
 
 | Device | Support time left |
 | --- | --- |
@@ -926,8 +949,9 @@ The table sets out the events for the Pixel 10 and Pixel 11.
 | Pixel 11 | On 2026-09-01 GrapheneOS found that Tensor G6 retains "at least bare minimum support for MTE at a hardware level" | [Documented] (project statement) |
 | Pixel 11 | On 2026-11-11 GrapheneOS said Android 17 Quarterly Platform Release 2 (QPR2), released to Pixels on 2026-11-10, adds MTE support, and that its QPR2 port works on the Pixel 11. GrapheneOS is still evaluating performance and coverage | [Documented] (project statement) |
 | Pixel 11 | Whether that MTE support is adequate is open | [Assessed] (assumption A17) |
-| Supported Pixels (6 to 10a) | GrapheneOS release 2026111800 moved the supported Pixels to QPR2:<br>• firmware<br>• drivers<br>• hardware abstraction layers (HALs)<br>• kernels (6.18 base)<br>This is groundwork for a Pixel 11 build, not a Pixel 11 build | [Documented] (project statement, November 2026) |
-| Pixel 11 | Pixel 11 support **is waiting for Google to publish the QPR2 platform source to AOSP**. GrapheneOS says "Google has not pushed the QPR2 sources as promised" (GrapheneOS on X, https://x.com/GrapheneOS/status/2120727750235574616) | [Documented] (project statement, November 2026) |
+| Supported Pixels (6a to 10a) | GrapheneOS release 2026111800 moved the supported Pixels to QPR2:<br>• firmware<br>• drivers<br>• hardware abstraction layers (HALs)<br>• QPR2 kernels (Pixel 10 series ported from 6.12 to 6.18)<br>This is groundwork for a Pixel 11 build, not a Pixel 11 build | [Documented] (project statement, November 2026) |
+| Pixel 6 and 6 Pro | Moved to legacy extended support in the same release (§3.4) | [Documented] (project statement, November 2026) |
+| Pixel 11 | Pixel 11 support **is waiting for Google to publish the QPR2 platform source to AOSP**. GrapheneOS says "Google has not pushed the QPR2 sources as promised" (GrapheneOS on X) | [Documented] (project statement, November 2026) |
 
 The Pixel 11 wait is a concrete example of the project's dependence on Google's
 release schedule (§11 area 1). **New Pixels should not be planned on day-one
@@ -940,9 +964,9 @@ for each profile; the device advice table below it explains each entry.
 
 | Profile | Recommended | Alternative | Avoid |
 | --- | --- | --- | --- |
-| **Profile A (Baseline)** | Pixel 10a | Pixel 10 (non-Pro) | • Foldables<br>• Pixel 8 series for new purchases<br>• Pixel 11 until supported and settled |
-| **Profile B (High-risk)** | Pixel 10a | Pixel 10 (non-Pro) | • Pro models<br>• Foldables<br>• Pixel 8 series for new purchases<br>• Pixel 11 until supported and settled |
-| **Profile C (Managed fleet)** | Pixel 10a | Pixel 10 (non-Pro) | • Foldables<br>• Pixel 8 series for new purchases<br>• Pixel 11 until supported and settled |
+| **Profile A (Baseline)** | Pixel 10a | Pixel 10 (non-Pro) | • foldables<br>• Pixel 8 series for new purchases<br>• Pixel 11 until supported and settled |
+| **Profile B (High-risk)** | Pixel 10a | Pixel 10 (non-Pro) | • Pro models<br>• foldables<br>• Pixel 8 series for new purchases<br>• Pixel 11 until supported and settled |
+| **Profile C (Managed fleet)** | Pixel 10a | Pixel 10 (non-Pro) | • foldables<br>• Pixel 8 series for new purchases<br>• Pixel 11 until supported and settled |
 | **Profile C+B (managed fleet with high-risk controls)** | Pixel 10a | Pixel 10 (non-Pro) | As for Profile B |
 
 The device advice table states the position on each device group.
@@ -962,7 +986,7 @@ The device advice table states the position on each device group.
 | --- | --- | --- |
 | **Same security core as the Pixel 10** | Same secure element and modem as the Pixel 10 (Titan M2, Exynos 5400); the system on a chip differs (Tensor G4 versus G5) | [Documented] |
 | **Mature GPU stack** | The Mali driver is well studied. It is also actively hardened and patched. The PowerVR driver in the Pixel 10 is new on Pixels and largely unstudied (§5.2.1) | [Assessed] |
-| **No UWB** | • The Pixel 10a has the same radio set as the Pixel 10 non-Pro, including satellite SOS<br>• The Pixel 10a has fewer radios than the Pro models<br>• The Pixel 9a and 8a lack satellite but have shorter support and an older modem (§5.2.6) | [Assessed] |
+| **No UWB** | • the Pixel 10a has the same radio set as the Pixel 10 non-Pro, including satellite SOS<br>• the Pixel 10a has fewer radios than the Pro models<br>• the Pixel 9a and 8a lack satellite but have shorter support and an older modem (§5.2.6) | [Assessed] |
 | **Longest support** | March 2033, the latest end date of any supported device | [Documented] |
 | **Lowest cost** | Also makes a single fleet model and spares practical | [Assessed] |
 
@@ -1017,7 +1041,10 @@ system (OS). [Documented] The table lists its main defences.
 | **Quarantines** | Delay memory reuse, making use-after-free bugs harder to exploit |
 
 **Independent review.** Synacktiv reviewed hardened_malloc in September 2025.
-It is the only independent evaluation found. [Documented]
+[Documented] It is the only independent evaluation found. [Assessed] (absence —
+searched security conference proceedings and publisher sites, 2026-11)
+
+The review's main points: [Documented]
 
 - Synacktiv found hardened_malloc markedly stronger than Android's default
   Scudo allocator, especially against use-after-free.
@@ -1073,7 +1100,7 @@ the trade-offs.
 | Stock Android | Starts apps by forking a pre-initialised "zygote" process, so every app shares the same memory layout | [Documented] |
 | GrapheneOS | Starts each app as a **fresh process**, giving each app its own randomised layout | [Documented] |
 | Risk of a shared layout | Well established. With a shared zygote layout, one address leak in any app defeats address space layout randomisation (ASLR) in every app (Lee et al., "From Zygote to Morula", IEEE Symposium on Security and Privacy 2014) | [Documented] |
-| Costs | • About 200 milliseconds slower app start<br>• More memory | [Documented] |
+| Costs | • about 200 milliseconds slower app start<br>• more memory | [Documented] |
 | Opt-out | Exec-based spawning can be turned off in Settings, which weakens the protection | [Documented] |
 
 ### 6.5 Kernel and Toolchain Hardening
@@ -1097,7 +1124,7 @@ where each measure comes from. All rows are [Documented].
 | --- | --- | --- |
 | **Kernel address space layout randomisation (KASLR)** | Project Zero showed that stock Pixel KASLR was effectively absent, because of a fixed linear map and a fixed kernel load address (Project Zero, November 2025) | [Documented] |
 | KASLR | Google treats the absence as intended | [Documented] |
-| KASLR | GrapheneOS restored linear-map randomisation:<br>• release 2025091000 ("fix linear region randomization by dropping memory hotplug support") for the 6.1, 6.6 and 6.12 kernels<br>• release 2026102100 ("add back linear map randomization downstream") for the 6.18 kernel | [Documented] (GrapheneOS changelog, https://grapheneos.org/releases) |
+| KASLR | GrapheneOS restored linear-map randomisation:<br>• release 2025091000 ("fix linear region randomization by dropping memory hotplug support") for the 6.1, 6.6 and 6.12 kernels<br>• release 2026102100 ("add back linear map randomization downstream") for the 6.18 kernel | [Documented] (GrapheneOS changelog) |
 | KASLR | The Pixel bootloader's fixed physical load address is outside GrapheneOS's control. How much KASLR entropy remains is a Stage 2 question | [Assessed] (assumption A15) |
 | **Data-only kernel attacks** | Dirty Pagetable (N. Wu, 2023) and SLUBStick (USENIX Security Symposium 2024) turn ordinary heap bugs into page-table control | [Documented] |
 | Data-only kernel attacks | These techniques bypass three mitigations:<br>• CFI<br>• PAC<br>• KASLR | [Documented] |
@@ -1111,8 +1138,8 @@ what disabling JIT achieves.
 | Item | Detail | Confidence |
 | --- | --- | --- |
 | **JavaScript JIT disabled by default** | Applies in the browser, with a per-site toggle | [Documented] |
-| Further browser hardening | • **Strict site isolation**<br>• Type-based CFI<br>• Zero-initialised variables | [Documented] |
-| Web features disabled by default | • WebGPU<br>• Third-party cookies<br>• Payments<br>• Background sync<br>• Sensor application programming interfaces (APIs)<br>• Digital rights management (DRM) | [Documented] |
+| Further browser hardening | • **strict site isolation**<br>• type-based CFI<br>• zero-initialised variables | [Documented] |
+| Web features disabled by default | • WebGPU<br>• third-party cookies<br>• payments<br>• background sync<br>• sensor application programming interfaces (APIs)<br>• digital rights management (DRM) | [Documented] |
 | **WebView is weaker than the browser** | • JIT is **enabled by default** for user apps, with global and per-app toggles<br>• WebView lacks the browser's strict site isolation, so all web content loaded by one app shares that app's renderer sandbox | [Documented] |
 | GPU-process sandbox escape | CVE-2025-6558, a Chrome bug in ANGLE (Almost Native Graphics Layer Engine) and the GPU, was exploited in the wild in 2025 to escape the sandbox through the GPU process | [Documented] (US National Vulnerability Database (NVD)) |
 | What JIT-off buys: Edge data | Microsoft's Edge data put about 45% of V8 CVEs in the JIT (2021) | [Documented] |
@@ -1127,7 +1154,7 @@ The table lists the per-app and global toggles and what each one weakens.
 
 | Toggle | What it weakens |
 | --- | --- |
-| Exploit-protection compatibility mode | • MTE<br>• hardened_malloc (falls back to Scudo, §6.3)<br>• Address-space size<br>• Also allows ptrace |
+| Exploit-protection compatibility mode | • MTE<br>• hardened_malloc (falls back to Scudo, §6.3)<br>• address-space size<br>• also allows ptrace |
 | WebView JIT (per app) | Adds JIT attack surface to that app's web content |
 | Secure app spawning (global) | Reverts to zygote forking (shared memory layout) |
 | Network and Sensors permissions | Privacy rather than exploit protection |
