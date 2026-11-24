@@ -11,7 +11,7 @@
   it does it, and which parts deserve a deeper review first.
 - **Format:** An initial assessment built around a **reference secure phone** (a
   supported Pixel running GrapheneOS with a hardened configuration). As of
-  2026-11-23 that is a **Pixel 10-series** device: the newer Pixel 11 is not yet
+  2026-11-24 that is a **Pixel 10a** (all profiles): the newer Pixel 11 is not yet
   supported by GrapheneOS. Every device
   from the Pixel 8 to the newest supported model is compared in one matrix.
 - **Why Pixel 8 is the floor:** It is the first generation with hardware memory
@@ -156,7 +156,7 @@ coverage. **Primary** = GrapheneOS or Google; **Secondary** = press only.
 
 **What this changes in the document**
 - The "latest" device (Pixel 11) is **not yet supported**. The reference secure phone
-  should be a Pixel 10-series device until Pixel 11 support ships.
+  should be a Pixel 10a (decided after peer review) until Pixel 11 support ships.
 - Pixel 11 introduces **three new security components at once** (MediaTek modem,
   Titan M3, new PowerVR generation) — added to §5.2 and §11.
 - Pixel 10a is a G4 device (Mali, not PowerVR), so the GPU split is by SoC, not by
@@ -213,7 +213,7 @@ coverage. **Primary** = GrapheneOS or Google; **Secondary** = press only.
   | ------------------------------------- | --------------------------------------------------- | -------------------------------------------------------- | ---------------------- | ----------------------------- |
   | P1 Executive / VIP                    | Deal data, board communications, contacts, location | Competitors, commercial spyware customers, states        | T3 (T4 for some roles) | B, or C+B on a fleet          |
   | P2 Journalist / activist / high-risk  | Sources, unpublished material, contacts, location   | Commercial spyware customers, states, border agents      | T4                     | B                             |
-  | P3 Security / IT staff                | Admin credentials, MFA tokens, internal access      | Criminal groups, access brokers, states via supply chain | T3                     | C (C+B for privileged admins) |
+  | P3 Security / IT staff                | Admin credentials, MFA tokens, internal access      | Criminal groups, access brokers, states via supply chain | T2 (T3 for privileged admins) | C (C+B for privileged admins) |
   | P4 Field / operational staff          | Operational data, location, organization access     | Thieves, local authorities, coercion                     | T2                     | C                             |
   | P5 Privacy-conscious individual       | Personal data, accounts, location history           | Thieves, data brokers, ad tracking                       | T1–T2                  | A                             |
 
@@ -223,7 +223,7 @@ coverage. **Primary** = GrapheneOS or Google; **Secondary** = press only.
   | ------- | --------------------- | --------------------------- | --------------------------------- | ----------------------- |
   | P1      | B                     | C+B                         | Not recommended → issue D2 device | B                       |
   | P2      | B                     | C+B (newsroom / NGO fleet)  | Not recommended → issue D2 device | B                       |
-  | P3      | A                     | C (C+B if privileged admin) | C                                 | n/a                     |
+  | P3      | A                     | C (C+B if privileged admin) | C (privileged admins: not recommended → issue D2 device) | n/a |
   | P4      | A                     | C                           | C                                 | C (stripped-down)       |
   | P5      | A                     | n/a                         | A plus work profile               | A                       |
 
@@ -419,7 +419,7 @@ costing only. Ratings below are working hypotheses, to be re-scored in Phase 3.
 
   | ID  | Assumption | Impact if wrong | How to confirm |
   | --- | ---------- | --------------- | -------------- |
-  | A01 | The client wants a phone they can deploy now, so the reference device is a supported Pixel 10-series model, not Pixel 11 | Recommendation changes to "wait for Pixel 11" | Ask client; re-check GrapheneOS FAQ before delivery |
+  | A01 | The client wants a phone they can deploy now, so the reference device is a supported Pixel 10a, not Pixel 11 | Recommendation changes to "wait for Pixel 11" | Ask client; re-check GrapheneOS FAQ before delivery |
   | A02 | Pixel 11 uses a MediaTek M90 modem and PowerVR C-Series GPU (press reports only) | §5.2 and §11 #3–#5 change | Google spec sheet or teardown |
   | A03 | Pixel 11 GrapheneOS support follows Android 17 QPR2 in AOSP, within weeks | Pixel 11 stays out of scope for longer | GrapheneOS releases page / announcements |
   | A04 | Pixel 10a has an optical fingerprint sensor and Titan M2 (one review) | §5.2.5 biometric comparison | Google spec sheet or teardown |
