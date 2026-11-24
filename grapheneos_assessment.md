@@ -105,7 +105,7 @@ knowledge. Fast-moving facts were checked on 2026-11-23/24.
 | **[O] Observed** | First-hand testing (none in Stage 1) |
 | **[A] Assumed** | Analyst judgement; listed in the assumption register |
 
-**Confidence profile of this draft:** TAG_COUNTS_PLACEHOLDER
+**Confidence profile of this draft:** tag count in §0–Appendix E on 2026-11-24 — 148 Documented, 29 Secondary, 59 Assumed, 0 Observed (legend entries excluded).
 
 Descriptive sections (§3–§10) are mostly Documented. §5.3, §11, §12, §13 and
 §14 are analyst assessments.
@@ -380,7 +380,7 @@ supported. [D] The ones that matter most:
 | Requirement | Why it matters | Pixels meeting it |
 | --- | --- | --- |
 | Hardware memory tagging (ARM MTE or equivalent) | Catches most memory-corruption bugs at the point they occur (§6.3) | Pixel 8 and later |
-| Secure element with **StrongBox** keystore | Keys live in a separate tamper-resistant chip, not the main processor | Pixel 3 and later (Titan M family) |
+| Secure element with **StrongBox** keystore | Keys live in a separate tamper-resistant chip, not the main processor | Pixel 8 and later in scope (Titan M2/M3); GrapheneOS lists it as a requirement met from Pixel 8 onward |
 | **Weaver** in the secure element | Rate-limits unlock attempts in hardware (§4.3) | Titan M family |
 | Verified boot with **user-installed keys** and a re-lockable bootloader | Lets GrapheneOS sign the OS with its own keys and still get full verified boot | Pixels |
 | Long-term firmware and driver updates | Without vendor firmware patches, OS patches alone are not enough | Pixel 8+: 7 years |
@@ -429,8 +429,9 @@ providing a reasonably secure device". [D]
 - Keys are derived from the user's lock-screen credential **and** the Weaver
   secret in the secure element, so data cannot be decrypted off-device and a weak
   PIN is protected by hardware throttling. [D]
-- **Before First Unlock (BFU)**, user data keys are not in memory at all. This is
-  why GrapheneOS's auto-reboot feature (§8.2) is so effective. [D]
+- **Before First Unlock (BFU)**, user data is "at rest": it stays encrypted
+  until the credential is entered. This is why GrapheneOS's auto-reboot feature
+  (§8.2) is so effective. [D]
 - GrapheneOS raises the maximum password length to 128 characters (stock: 16),
   making a strong passphrase practical. [D]
 
@@ -666,7 +667,7 @@ protection. [D]
 
 **GrapheneOS-specific** ([D] unless noted):
 - 48-bit address space and **33 bits of ASLR entropy** (stock: 24).
-- Extra zeroing of freed and newly allocated kernel memory; heap canaries.
+- Extra zeroing of kernel memory as soon as it is freed; heap canaries.
 - **Forced kernel module signing** with per-build keys; kernel lockdown mode.
 - **ART JIT disabled** in favour of ahead-of-time compilation; dynamic code loading
   blocked for nearly all base OS processes.
@@ -700,7 +701,7 @@ protection. [D]
 
 > **Assessment note.** These toggles are necessary for app compatibility, but each
 > one is an opt-out the organisation cannot see. An organization should know how many of its required
-> apps need compatibility mode, and should prefer apps that don't (§11 #12).
+> apps need compatibility mode, and should prefer apps that don't (§11 #14).
 
 ### 6.8 Coverage by Device Generation
 
@@ -777,7 +778,8 @@ GrapheneOS sends these default connections to **its own servers**: [D]
 
 - **Wi-Fi MAC randomization:** always random for scanning; **a new random MAC for
   each connection** by default, with DHCP state flushed between connections.
-  Stable IPv6 link-local addresses are disabled. [D]
+  Android 11 and later only use stable IPv6 link-local addresses when MAC
+  randomization is off, so with the default setting they are not used. [D]
 - Wi-Fi and Bluetooth scanning for location are off by default. [D]
 - **LTE-only mode** disables 2G, 3G and 5G, cutting cellular radio attack surface
   (legacy protocols and new 5G code) and exposure to fake base stations. It is a
@@ -813,7 +815,7 @@ By default the update, connectivity, time, attestation and location-assist
 servers see the device's **IP address and timing**, and the update server sees
 the installed version. [D] This is far less than stock Android sends to Google,
 but GrapheneOS becomes a party that sees which IP addresses run GrapheneOS
-(§11 #13). Users in Profile B can route traffic through a VPN or switch some
+(§11 #15). Users in Profile B can route traffic through a VPN or switch some
 services off.
 
 ---
@@ -825,8 +827,9 @@ services off.
 - **BFU (Before First Unlock):** after a reboot, before the PIN is entered. User
   data keys are not in memory; data is cryptographically inaccessible without
   the PIN, which the secure element throttles. [D]
-- **AFU (After First Unlock):** keys are in memory even when the screen is
-  locked. An attacker who can exploit the locked device can reach data. [D]
+- **AFU (After First Unlock):** encryption keys stay in memory even when the
+  screen is locked (GrapheneOS's "End session" feature exists to purge them).
+  An attacker who can exploit the locked device can reach data. [D] / [A]
 - Most forensic extraction targets AFU devices. **Getting devices back to BFU is
   the main goal** of the features below.
 
@@ -863,7 +866,8 @@ works when entered as the second factor of fingerprint unlock. [D]
 ### 8.5 PIN Scrambling and Two-Factor Fingerprint Unlock
 
 - **PIN scrambling** randomizes the keypad layout for the lock screen and SIM PIN,
-  defeating shoulder-surfing and smudge attacks. [D]
+  making it harder to work out a PIN from physical proximity or a side channel
+  (e.g. shoulder-surfing). [D]
 - **Two-factor fingerprint unlock** requires a PIN after the fingerprint; wrong
   PINs count toward the normal attempt limit. [D]
 - **Fingerprint attempts are capped at 5** in total (stock: 20). [D]
@@ -906,21 +910,25 @@ a matrix is evidence, not proof. Lab validation is §11 area #10.
 
 ### 9.1 Update Pipeline
 
-Covered in §3.4: Alpha → Beta → Stable; automatic background updates every ~6
-hours; secondary-slot install with rollback; delta updates; works before first
-unlock; signed with downgrade protection; no deferral setting. [D]
+Covered in §3.4: Alpha → Beta → Stable (releases page; users can choose
+Stable or Beta); automatic background updates every ~6 hours; secondary-slot
+install with rollback; delta updates; works before first unlock; signed with
+downgrade protection. [D] No setting to defer updates was found; the updater
+can only be disabled entirely. [A]
 
 ### 9.2 Signing-Key Custody and Build Transparency
 
 - GrapheneOS lists "hardened local build and signing infrastructure" as a feature
   but does **not publish** where or how the OS signing keys are stored, who holds
-  them, or how a compromise would be handled. [D] (absence)
+  them, or how a compromise would be handled. [D] (absence) The one
+  disclosure is that "GrapheneOS servers do not have access to GrapheneOS
+  signing keys" (FAQ). [D]
 - Anyone can **build GrapheneOS from source**. [D] Whether official builds are
   **reproducible**: the project states official builds can be rebuilt and
   compared file by file, excluding signatures, and publishes SSH-signed source
   tags. [S] (project forum) Proprietary firmware cannot be rebuilt, so this
   verifies the OS only. Independent reproduction is still worth doing (A13, WP2).
-- Kernel modules are signed with per-build keys that are discarded. [D]
+- Kernel module signing is forced, with per-build RSA 4096 keys. [D]
 
 > **Assessment note.** Key custody is the single most important trust question
 > for an organization. It is the core of §11 area #2. [A]
@@ -940,10 +948,11 @@ unlock; signed with downgrade protection; no deferral setting. [D]
 ### 9.3 Patch Timing vs Google
 
 - GrapheneOS ships Pixel security patches as Google releases them; the latest
-  release carries the 2026-11-05 patch level. [D]
+  release carries the 2026-11-05 patch level (releases page). [D]
 - Google now publishes **full Android security bulletins quarterly** (monthly
   bulletins carry only high-risk fixes) and **AOSP source only in Q2 and Q4**.
-  Pixel monthly patches continue. [D] / [S]
+  Pixel monthly patches continue. [D] (Google Android Enterprise notice) /
+  [S] (press reports of Google's AOSP statement)
 - Google no longer publishes Pixel device trees, and Pixel kernel source is
   harder to obtain. [S] This makes GrapheneOS's porting work slower and more
   dependent on reverse-engineering Google's releases (§11 area #1).
@@ -955,11 +964,12 @@ unlock; signed with downgrade protection; no deferral setting. [D]
   level. [D]
 - It uses **pairing**: the first verification pins a hardware-backed key, and
   later checks confirm both integrity and that it is the **same device**. [D]
-- Verification can be done **locally** (one phone scanning another's QR code) or
-  through the **attestation.app** service, which can email alerts if a device
-  stops checking in or fails. [D]
+- Verification can be done **locally** (by another Android device running
+  Auditor in auditor mode) or through the **attestation.app** service, which
+  runs scheduled verification with e-mail alerts. [D]
 - For a fleet, the remote service gives a basic integrity dashboard, but it is a
-  GrapheneOS-run service (hosting moving to Canada; §3.1). [D] / [A]
+  GrapheneOS-run service. [D] Its hosting is being moved to Canada per the
+  project's November 2025 infrastructure post (§3.1). [D] / [A05]
 - **Data protection:** attestation.app stores device identifiers, attestation
   history and alert e-mail addresses on GrapheneOS-run infrastructure. [A]
   Organisations may need a data-protection review before using it, or can
@@ -1516,7 +1526,7 @@ client is the first step of Stage 2.
 
 | Term | Meaning |
 | --- | --- |
-| AFU | After First Unlock: encryption keys are in memory even when locked |
+| AFU | After First Unlock: encryption keys stay in memory even when the screen is locked |
 | AOSP | Android Open Source Project, Google's open-source Android base |
 | ASLR | Address Space Layout Randomization |
 | Auditor | GrapheneOS app that verifies a device's OS using hardware attestation |
@@ -1555,16 +1565,16 @@ a device in Stage 2.
 
 | Control | Path |
 | --- | --- |
-| USB-C port | Settings > Security & privacy > Exploit protection [D] |
+| USB-C port | Settings > Security > Exploit protection [D] (as worded in the usage guide; menu may read "Security & privacy") |
 | Duress PIN/password | Settings > Security & privacy > Device unlock > Duress Password [D] |
 | Secure app spawning | Settings > Security & privacy > Exploit protection > Secure app spawning [D] |
 | Sensors permission default | Settings > Security & privacy > More security & privacy [D] |
 | eSIM support | Settings > Network & internet > eSIM support [D] |
 | Android Auto permissions | Settings > Apps > Sandboxed Google Play > Android Auto [D] |
-| Auto-reboot | Settings > Security & privacy > Exploit protection (approx.) |
-| PIN scrambling | Settings > Security & privacy > Device unlock (approx.) |
-| Per-app exploit protection | Settings > Apps > (app) (approx.) |
-| System Updater | Settings > System > System update (approx.) |
+| Auto-reboot | Not documented; check on a device (not the updater's "Automatic reboot" option under System update) |
+| PIN scrambling | Not documented; check on a device |
+| Per-app exploit protection | Settings > Apps > (app) > Exploit protection compatibility mode [D] |
+| System Updater | Settings > System > System update [D] |
 
 ## Appendix F — References and Sources
 
