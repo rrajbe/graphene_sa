@@ -286,7 +286,7 @@ Issue a dedicated device instead.
 
 | Persona | Main assets | Likely adversaries | Highest credible tier | Default profile |
 | --- | --- | --- | --- | --- |
-| P1 Executive or VIP | • Deal data<br>• board communications<br>• contacts<br>• location | • Competitors<br>• commercial spyware customers<br>• states | T3 (T4 for some roles) | B, or C+B on a fleet |
+| P1 Executive or very important person (VIP) | • Deal data<br>• board communications<br>• contacts<br>• location | • Competitors<br>• commercial spyware customers<br>• states | T3 (T4 for some roles) | B, or C+B on a fleet |
 | P2 High-risk person (for example journalist or activist) | • Sources<br>• unpublished material<br>• contacts<br>• location | • Commercial spyware customers<br>• states<br>• border agents | T4 | B |
 | P3 Security or IT staff | • Administrator credentials<br>• multi-factor authentication (MFA) tokens<br>• internal access | • Criminal groups<br>• access brokers<br>• states via supply chain | T2 (T3 for privileged administrators) | C (C+B for privileged administrators) |
 | P4 Field or operational staff | • Operational data<br>• location<br>• organization access | • Thieves<br>• local authorities<br>• coercion | T2 | C |
@@ -519,7 +519,7 @@ on Google Pixel phones, with a first Motorola device confirmed.
 
 | Common assumption | Reality | Tag |
 | --- | --- | --- |
-| A de-Googled privacy read-only memory (ROM) image, meaning a replacement Android build, like /e/OS or CalyxOS | • It is a hardening project first<br>• privacy follows from sandboxing<br>• it also allows sandboxed Google Play, which pure de-Googled ROMs do not | [Documented] |
+| A de-Googled, privacy-focused replacement Android build, like /e/OS or CalyxOS | • It is a hardening project first<br>• privacy follows from sandboxing<br>• it also allows sandboxed Google Play, which pure de-Googled replacement builds do not | [Documented] |
 | Runs on many devices, like LineageOS | • It runs only on devices that meet its hardware requirements<br>• currently that means Pixel 6 and newer (Pixel 6 and 6 Pro on legacy extended support)<br>• the Motorola Signature 27 is confirmed as the first non-Pixel device (project statement), with no availability date yet | [Documented] |
 | Can be rooted or customized freely | • No root access<br>• root would break verified boot and the security model<br>• users who want root must make unsupported custom builds<br>• the bootloader is re-locked with GrapheneOS keys after install | [Documented] (project statements) |
 | An anonymity tool | It does not hide your identity from:<br>• the mobile network<br>• the carrier<br>• the services you sign into<br>Anonymity needs separate measures, for example Tor and careful account use | [Assessed] |
@@ -1059,7 +1059,8 @@ Together these mean a larger attack surface for no security benefit.
     MTE was not enabled in the Pixel 11 firmware. [Documented] (project
     statement)
   - Tensor G6 has hardware MTE. MTE was disabled in launch firmware and enabled
-    in Android 17 QPR2, released to Pixels on 2026-11-10. [Documented]
+    in Android 17 Quarterly Platform Release 2 (QPR2), released to Pixels on
+    2026-11-10. [Documented]
   - GrapheneOS describes this as "at least bare minimum support for MTE at a
     hardware level". GrapheneOS is still evaluating performance and coverage.
     [Documented]
@@ -2871,7 +2872,7 @@ tagged.
 | Fleet management | Low (work-profile MDM only) | High | High | Very high |
 | App compatibility | Medium–High | High (Play apps; sideloading blocked) | Very high | Very high |
 | Certification | None known | Yes: NIAP Common Criteria, Mobile Device Fundamentals Protection Profile; Pixel 9 and 10 on Android 16 [Documented] | Yes (several) | Yes (several) |
-| Vendor support or SLA | None | Yes | Yes | Yes |
+| Vendor support or service-level agreement | None | Yes | Yes | Yes |
 | Supply-chain concentration | Small team and Google | Google | Apple | Samsung |
 
 > **Assessment note.** GrapheneOS leads on technical hardening and privacy. It
@@ -3166,6 +3167,7 @@ and a one-line plain-English meaning.
 | AFU | After First Unlock | State after the first unlock since boot: encryption keys stay in memory even when the screen is locked |
 | AOSP | Android Open Source Project | Google's open-source Android base, on which GrapheneOS is built |
 | API | application programming interface | A defined way for one piece of software to call another |
+| APK | Android Package | The file format used to install Android apps |
 | ART | Android Runtime | The component that runs Android app code |
 | ASLR | address space layout randomisation | Places code and data at unpredictable memory addresses so exploits cannot rely on fixed locations |
 | Auditor | — | GrapheneOS app that verifies a device's operating system using hardware attestation |
@@ -3181,41 +3183,60 @@ and a one-line plain-English meaning.
 | CFI | control-flow integrity | Blocks hijacking of program control flow |
 | CISA | US Cybersecurity and Infrastructure Security Agency | US federal agency that publishes the KEV catalogue |
 | CVE | Common Vulnerabilities and Exposures (identifier) | Public identifier for one specific vulnerability, for example CVE-2026-58704 |
+| DDK | driver development kit | Vendor software package that contains a GPU kernel driver |
 | DE | Device Encrypted (storage) | Storage protected only by device keys, so it is readable before first unlock |
 | DFRWS | Digital Forensics Research Workshop | Digital forensics conference, cited in Appendix F |
+| DHCP | Dynamic Host Configuration Protocol | How a device gets an IP address from a network |
 | DMA | direct memory access | Lets a peripheral read or write memory without the main processor; an IOMMU limits it |
+| DNG | Digital Negative | A raw image file format; malformed DNG files were used in 2025 spyware attacks |
 | DNS | Domain Name System | Internet service that translates names into network addresses |
 | DOJ | US Department of Justice | US federal prosecuting department, cited in Appendix F |
+| DRM | digital rights management | Copy-protection technology for media |
 | Duress PIN | — | A PIN that wipes the device when entered |
 | ePDG | evolved Packet Data Gateway | Carrier network node that connects Wi-Fi calling to the IMS core |
 | eSIM | embedded subscriber identity module | A SIM built into the phone and provisioned by software |
 | Exec spawning | — | Starting each app as a fresh process instead of forking a shared template (zygote) |
 | FAQ | frequently asked questions | A published question-and-answer page |
+| FAU | Friedrich-Alexander-Universität Erlangen-Nürnberg | German university whose researchers published Android memory-forensics work |
 | FBE | file-based encryption | Android encryption that protects files with keys tied to the device and the user's credentials |
 | FCA | UK Financial Conduct Authority | UK regulator of financial firms, including their record-keeping |
+| FCM | Firebase Cloud Messaging | Google service that delivers push notifications to apps |
 | FINRA | US Financial Industry Regulatory Authority | US self-regulatory body for broker-dealers, including communications records |
 | FIPS | Federal Information Processing Standards | US government standards; FIPS 140 certifies cryptographic modules |
+| FROST | Forensic Recovery of Scrambled Telephones | 2013 research showing encryption keys can be recovered from a frozen phone's memory |
+| GDPR | General Data Protection Regulation | EU data-protection law |
+| GNSS | Global Navigation Satellite System | Satellite positioning systems such as GPS and Galileo |
+| GPS | Global Positioning System | US satellite positioning system |
 | GPU | graphics processing unit | Processor for graphics and parallel work; its drivers are a frequent exploit target |
 | GTIG | Google Threat Intelligence Group | Google team that tracks exploited vulnerabilities and threat actors |
 | hardened_malloc | — | GrapheneOS's hardened memory allocator |
 | IEEE | Institute of Electrical and Electronics Engineers | Professional body that runs the S&P symposium |
+| IMEI | International Mobile Equipment Identity | Unique hardware identifier of a phone, visible to the mobile network |
 | IMS | IP Multimedia Subsystem | The carrier service behind VoLTE and Wi-Fi calling, handled by the modem |
+| IMSI | International Mobile Subscriber Identity | Unique subscriber identifier stored on the SIM, visible to the mobile network |
 | IOMMU | input–output memory management unit | Hardware that limits which memory a peripheral (for example the modem) can access |
 | IP | Internet Protocol | Network addressing protocol; an IP address identifies a device's network connection |
 | IPC | inter-process communication | The ways separate processes exchange data; a common attack surface |
+| IT | information technology | Computing and systems administration |
 | JIT | just-in-time (compilation) | Compiling code while it runs; speeds up web pages but adds attack surface |
 | KASLR | kernel address space layout randomisation | ASLR applied to the operating system kernel |
 | KEV | Known Exploited Vulnerabilities (catalogue) | CISA's list of vulnerabilities confirmed as exploited in the wild |
 | LTE | Long-Term Evolution (4G) | Fourth-generation cellular standard |
+| LTS | long-term support | A software release line that receives fixes for an extended period |
 | M.D. Fla. | US District Court for the Middle District of Florida | US federal court, cited in Appendix F |
 | MAC address | media access control address | Hardware identifier of a network interface, visible to nearby networks |
 | MDFPP | Mobile Device Fundamentals Protection Profile | NIAP Common Criteria requirements used to certify phones |
 | MDM | mobile device management | Software that lets an organisation configure and control its phones |
+| MFA | multi-factor authentication | Login that needs more than one proof of identity |
+| MIE | Memory Integrity Enforcement | Apple's memory-tagging protection on iPhone 17 and later |
 | MiFID II | EU Markets in Financial Instruments Directive II | EU rules that include recording of financial communications |
+| MMS | Multimedia Messaging Service | Carrier messaging that carries pictures and other media |
 | MTE | Memory Tagging Extension | Arm hardware feature that detects memory-safety bugs |
 | MVT | Mobile Verification Toolkit | Forensic triage tool for detecting spyware |
+| MWC | Mobile World Congress | Annual mobile industry trade show |
 | NDSS | Network and Distributed System Security Symposium | Academic security conference |
 | NFC | near-field communication | Very short-range radio used for contactless payment and pairing |
+| NGO | non-governmental organisation | A non-profit organisation independent of government |
 | NIAP | US National Information Assurance Partnership | US body that runs Common Criteria certification for national-security use |
 | NVD | US National Vulnerability Database | US government database that describes and scores CVEs |
 | OEM | original equipment manufacturer | The company that builds and ships the device, such as Google for Pixel |
@@ -3223,11 +3244,15 @@ and a one-line plain-English meaning.
 | PAC | Pointer Authentication Code | Arm feature that signs pointers so tampering is detected |
 | PIN | personal identification number | Numeric unlock code |
 | Play Integrity | — | Google application programming interface that apps use to check a device is Google-certified |
+| PSDS | Predicted Satellite Data Service | Downloaded satellite data that speeds up location fixes |
 | PUK | PIN unlock key | Code that unblocks a SIM after too many wrong SIM PIN attempts |
 | QPR | Quarterly Platform Release | Android feature release between major versions, for example QPR2 |
+| QR | Quick Response (code) | Two-dimensional barcode |
 | RAM | random-access memory | Working memory; its contents are lost when power is removed |
+| RBUS | Risk-Based Update System | Google's 2025 change to put only high-risk fixes in monthly Android bulletins |
 | RCS | Rich Communication Services | Carrier messaging standard that succeeds plain text messaging |
 | RIPA | UK Regulation of Investigatory Powers Act 2000 | UK law that includes powers to compel disclosure of keys and passwords |
+| RSA | Rivest–Shamir–Adleman | A widely used public-key cryptography algorithm |
 | S&P | IEEE Symposium on Security and Privacy | Academic security conference run by IEEE |
 | Sandboxed Google Play | — | Google Play services run as ordinary, unprivileged apps |
 | Scudo | — | Stock Android's memory allocator, used by GrapheneOS apps in compatibility mode |
@@ -3236,12 +3261,17 @@ and a one-line plain-English meaning.
 | SIM | subscriber identity module | Card or chip that identifies the subscriber to the mobile carrier |
 | SLA | service-level agreement | A contracted commitment, for example on patch or response times |
 | SMMU | system memory management unit | Arm's name for an IOMMU |
+| SMS | Short Message Service | Carrier text messaging |
 | SoC | system on a chip | The single chip holding the main processor and related hardware; Tensor on Pixel |
 | SoK | Systematization of Knowledge | Academic paper type that surveys a field, cited in Appendix F |
+| SPI | Serial Peripheral Interface | A hardware bus that connects chips, such as the secure element |
+| SSH | Secure Shell | A cryptographic protocol; GrapheneOS uses SSH keys to sign source tags |
 | StrongBox | — | Android keystore backed by a separate secure element |
 | SUPL | Secure User Plane Location | Protocol that fetches location assistance data from a network server |
+| TEE | Trusted Execution Environment | An isolated area of the main processor for sensitive code |
 | Titan M2, Titan M3 | — | Google's secure element chips in Pixels |
 | TLP | Traffic Light Protocol | Labels (for example AMBER) that tell readers how widely they may share a document |
+| TLS | Transport Layer Security | The protocol that encrypts web and DNS-over-TLS traffic |
 | TUF | The Update Framework | A design for secure software-update systems |
 | URL | uniform resource locator | A web address |
 | USB | Universal Serial Bus | Wired data and charging port; USB-C is the connector on current Pixels |
@@ -3249,6 +3279,7 @@ and a one-line plain-English meaning.
 | UWB | ultra-wideband | Short-range radio used to locate nearby devices precisely |
 | Vanadium | — | GrapheneOS's hardened Chromium-based browser and WebView |
 | VID | validation identifier | Number NIAP assigns to a certified product, cited in Appendix F |
+| VIP | very important person | A high-profile individual, such as a senior executive |
 | VoLTE | Voice over LTE | Voice calls carried over IMS on LTE networks |
 | VPN | virtual private network | Encrypted tunnel that routes traffic through a chosen server |
 | VPU | video processing unit | Hardware block that encodes and decodes video |
