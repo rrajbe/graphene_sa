@@ -60,7 +60,7 @@ change quickly *before* anything is written on top of them.
 
 | #   | Task                   | Details                                                                                                         | Owner | Depends on | Est.  | Done |
 | --- | ---------------------- | --------------------------------------------------------------------------------------------------------------- | ----- | ---------- | ----- | ---- |
-| 1.1 | Reference profiles     | Define profiles A/B/C (doc §2.1) and map personas P1–P5, tiers T1–T4 and deployment models onto them (doc §2.2) | Raj   | –          | 20 m  | [ ]  |
+| 1.1 | Reference profiles     | Define profiles A/B/C (doc §2.1) and map personas P1–P5, tiers T1–T4 and deployment models onto them (doc §2.2–§2.5) | Raj   | –          | 20 m  | [x]  |
 | 1.2 | Device facts           | Supported devices list, support end dates, Pixel 10a and Pixel 11 series status and specs, Titan M2 and MTE per generation (doc §5) | Raj   | –          | 30 m  | [x]  |
 | 1.3 | Upstream facts         | Google device-tree and source-release changes, security bulletin cadence, OEM partnership status (doc §4.7, §9.3) | Raj   | –          | 20 m  | [x]  |
 | 1.4 | Project facts          | Governance, team, infrastructure hosting and jurisdiction, any recent relocation (doc §3.1)                     | Raj   | –          | 10 m  | [x]  |
@@ -196,8 +196,51 @@ coverage. **Primary** = GrapheneOS or Google; **Secondary** = press only.
     nation-state (T3–T4); coercion and border seizure
   - **C — Managed fleet:** security/IT staff and field staff on organization-owned
     or BYOD devices; loss, coercion, credential theft (T1–T3)
-- **2.2 Mapping table:** personas P1–P5 × threat tiers T1–T4 × deployment models →
-  profile A/B/C (one table; full definitions in Appendix B)
+- **2.2 How a profile is chosen** (two questions, applied in order)
+  1. **Threat tier sets the hardening level:** highest credible tier T1–T2 → A
+     controls; T3–T4 → B controls.
+  2. **Ownership sets the management model:** organization-managed (fleet or
+     BYOD) → C. If the user also faces T3–T4, apply B controls inside C, written
+     **C+B**.
+  - BYOD at T3–T4 is **not recommended**: a work profile cannot enforce
+    device-wide controls (auto-reboot, USB-C mode, no Play, duress PIN), so issue
+    a dedicated device instead.
+
+- **2.3 Persona summary** (full definitions in Appendix B)
+
+  | Persona                               | Main assets                                         | Likely adversaries                                       | Highest credible tier  | Default profile               |
+  | ------------------------------------- | --------------------------------------------------- | -------------------------------------------------------- | ---------------------- | ----------------------------- |
+  | P1 Executive / VIP                    | Deal data, board communications, contacts, location | Competitors, commercial spyware customers, states        | T3 (T4 for some roles) | B, or C+B on a fleet          |
+  | P2 Journalist / activist / high-risk  | Sources, unpublished material, contacts, location   | Commercial spyware customers, states, border agents      | T4                     | B                             |
+  | P3 Security / IT staff                | Admin credentials, MFA tokens, internal access      | Criminal groups, access brokers, states via supply chain | T3                     | C (C+B for privileged admins) |
+  | P4 Field / operational staff          | Operational data, location, organization access     | Thieves, local authorities, coercion                     | T2                     | C                             |
+  | P5 Privacy-conscious individual       | Personal data, accounts, location history           | Thieves, data brokers, ad tracking                       | T1–T2                  | A                             |
+
+- **2.4 Persona × deployment model → profile**
+
+  | Persona | D1 Individually owned | D2 Organization-owned fleet | D3 BYOD with work profile         | D4 Minimal / comms-only |
+  | ------- | --------------------- | --------------------------- | --------------------------------- | ----------------------- |
+  | P1      | B                     | C+B                         | Not recommended → issue D2 device | B                       |
+  | P2      | B                     | C+B (newsroom / NGO fleet)  | Not recommended → issue D2 device | B                       |
+  | P3      | A                     | C (C+B if privileged admin) | C                                 | n/a                     |
+  | P4      | A                     | C                           | C                                 | C (stripped-down)       |
+  | P5      | A                     | n/a                         | A plus work profile               | A                       |
+
+- **2.5 Threat tier coverage by profile** (what each profile is designed to resist)
+
+  | Tier                               | A Baseline | B High-risk | C Managed fleet | C+B      |
+  | ---------------------------------- | ---------- | ----------- | --------------- | -------- |
+  | T1 Opportunistic theft / loss      | Yes        | Yes         | Yes             | Yes      |
+  | T2 Commercial forensic extraction  | Yes        | Yes         | Partial¹        | Yes      |
+  | T3 Commercial spyware (1-/0-click) | Partial²   | Yes         | Partial²        | Yes      |
+  | T4 Nation-state                    | No         | Partial³    | No              | Partial³ |
+
+  ¹ Fleet usability settings (longer auto-reboot, sandboxed Play for work apps)
+  widen the after-first-unlock window.
+  ² Exploit mitigations apply in every profile, but A and C keep more attack
+  surface (Play services, more apps, more radios on).
+  ³ No profile fully addresses T4: baseband, firmware and supply-chain attacks sit
+  below the OS. B raises the cost; it does not remove the risk.
 
 ### 3. GrapheneOS Overview
 - 3.1 Project background, governance, funding, team size; infrastructure hosting
@@ -339,19 +382,21 @@ costing only. Ratings below are working hypotheses, to be re-scored in Phase 3.
   - Web installer
   - Bootloader re-lock
   - Auditor pairing
-- **12.3 Profile A — Baseline**
-- **12.4 Profile B — High-risk**
+- **12.3 Profile A — Baseline (P5; P3/P4 on their own devices)**
+- **12.4 Profile B — High-risk (P1, P2)**
   - No Play
   - Strict USB mode
   - Short auto-reboot
   - Duress PIN
   - LTE-only
   - Always-on VPN with lockdown
-- **12.5 Profile C — Managed fleet**
+- **12.5 Profile C — Managed fleet (P3, P4)**
   - Work profile
   - Attestation
   - Compensating controls
   - Incident response runbook
+  - **C+B variant:** Profile B device settings on a fleet device, for P1/P2 and
+    privileged P3 users (see §2.2)
 - 12.6 App policy: no Play vs sandboxed Play in a separate profile; approved app sources (links to §7.9)
 - 12.7 Hardening checklist (settings table, per profile)
 
@@ -382,6 +427,8 @@ costing only. Ratings below are working hypotheses, to be re-scored in Phase 3.
   | A07 | Motorola Signature 27 will ship with GrapheneOS support in 2026–2027 | §4.7 and non-Pixel recommendation | Motorola / GrapheneOS announcements |
   | A08 | Pixel monthly patches continue despite quarterly AOSP bulletins, so GrapheneOS patch level stays current | §9.3 patch-lag analysis | Compare GrapheneOS patch levels against Pixel bulletins over 6 months |
   | A09 | The client is not restricted to US/EU-sourced hardware or to a specific carrier | §12.1 device choice | Ask client |
+  | A10 | Highest credible tier per persona is as in §2.3 (e.g. P1 at T3, P2 at T4) | Profile assignment and §11 priorities shift | Ask client which personas they actually have |
+  | A11 | Organization-owned devices can be issued to high-risk staff instead of BYOD | C+B and the BYOD "not recommended" guidance may not be acceptable | Ask client about device ownership policy |
 - **B.** Persona, threat-tier and deployment-model definitions
   - Personas: P1 Executive/VIP · P2 Journalist/activist/high-risk individual ·
     P3 Security/IT staff · P4 Field/operational staff · P5 Privacy-conscious user
