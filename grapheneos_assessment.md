@@ -748,31 +748,37 @@ be set off by default for new apps. [D]
 
 > **Assessment note.** The compatibility layer is GrapheneOS code that sits
 > between Google's closed-source Play services and the OS. It is a sensible
-> design, but it is an IPC surface worth reviewing (§11 #8).
+> design, but it is an IPC surface worth reviewing (§11 #10).
 
 ### 7.5 User Profiles, Private Space and Work Profile
 
 - Separate **user profiles** have separate encryption keys, apps and VPN
-  settings; GrapheneOS adds an "End session" option to lock a profile's keys
-  away again. [D]
+  settings; GrapheneOS adds an "End session" option that locks a **secondary**
+  profile's keys away again (the Owner profile's keys are cleared only by a
+  reboot). [D]
 - **Private Space** and **work profiles** are available as on Android, each with
   its own VPN configuration. [D]
 - Profiles are the main tool for isolating risky apps (e.g. Google Play) from
-  sensitive ones.
+  sensitive ones. [A]
 
 ### 7.6 Default Outbound Connections
 
-GrapheneOS sends these default connections to **its own servers**: [D]
+The main default connections, most of which go to **GrapheneOS's own
+servers**: [D]
 
 | Connection | Default | Alternatives |
 | --- | --- | --- |
 | Connectivity checks | GrapheneOS | Google, or disabled |
+| Private DNS check | GrapheneOS | — |
+| DNS | Network-provided | Private DNS (DNS-over-TLS) |
 | Network time | GrapheneOS | Disabled |
 | Attestation key provisioning | GrapheneOS | Google |
 | GNSS almanac (PSDS) | GrapheneOS proxy | Google |
 | SUPL (assisted GPS) | GrapheneOS proxy | Carrier/Google server, or disabled |
 | OS updates | GrapheneOS update server (sees IP address and current version only) | — |
+| App Store updates | GrapheneOS | — |
 | Vanadium component updates | GrapheneOS | — |
+| Certificate Transparency log lists | GrapheneOS | Google, or off |
 
 ### 7.7 Radio and Network Controls
 
@@ -781,12 +787,20 @@ GrapheneOS sends these default connections to **its own servers**: [D]
   Android 11 and later only use stable IPv6 link-local addresses when MAC
   randomization is off, so with the default setting they are not used. [D]
 - Wi-Fi and Bluetooth scanning for location are off by default. [D]
+- **Bluetooth and Wi-Fi auto-off:** both can be set to turn off after a
+  timeout when not connected; NFC, Bluetooth and UWB are off by default. [D]
 - **LTE-only mode** disables 2G, 3G and 5G, cutting cellular radio attack surface
   (legacy protocols and new 5G code) and exposure to fake base stations. It is a
   documented GrapheneOS feature. [D] Turning off 2G alone is also possible. [D]
+- **IMS (VoLTE and Wi-Fi calling)** are separate toggles. LTE-only mode does
+  **not** remove the IMS path: Project Zero's 2023 internet-to-baseband remote
+  code execution bugs were reached through IMS with only the phone number
+  (§4.5). [D] Turning off Wi-Fi calling, and VoLTE where the carrier allows
+  voice without it, removes that path, but may cost voice service (§12.4). [A]
 - **Always-on VPN with "block connections without VPN"** (standard Android)
-  is available per profile. [A]
-- **Private DNS** (DNS-over-TLS) is available (standard Android). [A]
+  is available per profile. [D] (Android documentation)
+- **Private DNS** (DNS-over-TLS) is available (standard Android). [D] (Android
+  documentation)
 
 ### 7.8 Carrier Exposure
 
@@ -801,10 +815,10 @@ GrapheneOS sends these default connections to **its own servers**: [D]
 | Source | Trust model | Notes |
 | --- | --- | --- |
 | **GrapheneOS App Store** | GrapheneOS-signed, signature and downgrade checks | GrapheneOS apps, sandboxed Play, Android Auto, Accrescent |
-| **Accrescent** | Security-focused third-party store; developer-signed apps | Recommended by GrapheneOS; small catalogue [A] |
+| **Accrescent** | Security-focused third-party store; developer-signed apps | Distributed through the GrapheneOS App Store and recommended by GrapheneOS [D] (project statement); small catalogue [A] |
 | **Google Play (sandboxed)** | Google-reviewed; developer-signed | Largest catalogue; needs a Google account [D] |
-| **F-Droid** | Builds and signs many apps itself; open-source only | GrapheneOS has publicly criticized its signing and update model [A] |
-| **Direct APK / Obtainium** | Trust each developer's releases directly | Higher risk; no store-level review |
+| **F-Droid** | Builds and signs many apps itself; open-source only | GrapheneOS has publicly criticized its signing and update model [D] (project statements) |
+| **Direct APK / Obtainium** | Trust each developer's releases directly | Higher risk; no store-level review [A] |
 
 > **Assessment note.** For most users, the apps they install are a bigger risk
 > than the OS. Profiles B and C should define approved apps and sources (§12.6).
@@ -815,8 +829,42 @@ By default the update, connectivity, time, attestation and location-assist
 servers see the device's **IP address and timing**, and the update server sees
 the installed version. [D] This is far less than stock Android sends to Google,
 but GrapheneOS becomes a party that sees which IP addresses run GrapheneOS
-(§11 #15). Users in Profile B can route traffic through a VPN or switch some
+(§11 #16). [A] Users in Profile B can route traffic through a VPN or switch some
 services off.
+
+### 7.11 Messaging and Media Parsers
+
+Messaging apps decode images, video, audio and documents from strangers before
+the user does anything. This is the most common 0-click entry point on phones.
+
+- **Where parsing runs.** AOSP isolates audio and video codecs in separate,
+  restricted processes. [D] (AOSP media framework hardening) Image decoding
+  and parsing done by an app itself — including libraries the app bundles —
+  runs inside that app's own process, with all of its data and permissions. [A]
+- **Recent Android cases** [D]:
+
+| Case | Entry point | What it shows |
+| --- | --- | --- |
+| Project Zero, Samsung Qmage (2020, CVE-2020-8899) | MMS image, 0-click | Vendor image codec reachable from SMS/MMS |
+| Paragon Graphite (Citizen Lab, Mar 2025) | WhatsApp 0-click | Spyware ran inside WhatsApp's sandbox |
+| WhatsApp CVE-2025-55177 + Apple CVE-2025-43300 (Aug 2025) | WhatsApp link handling + OS image parser | Messenger bug chained with an OS parser bug |
+| LANDFALL (Unit 42, Nov 2025; Samsung Quram DNG CVE-2025-21042) | Malformed image sent via WhatsApp | Exploited for about nine months before the fix |
+
+- **No Android equivalent of BlastDoor.** iOS parses iMessage content in a
+  tightly sandboxed BlastDoor service (Project Zero 2021). [D] Third-party
+  messengers on Android, including on GrapheneOS, have no OS-provided
+  equivalent. [A] (absence — searched GrapheneOS docs and AOSP, 2026-11)
+- **GrapheneOS levers:** hardened_malloc and MTE apply inside app processes
+  (§6.1, §6.3), but have not been tested against these specific exploits. [A]
+  Messengers can be isolated in a separate profile (§7.5), and the Network
+  permission limits what other apps can send out (§7.1). [D]
+- Pixels do not ship Samsung's Quram library, but the bug class (complex image
+  and media formats parsed in C/C++) exists in AOSP and in libraries apps bundle
+  themselves. [A]
+
+> **Assessment note.** Code running inside a compromised messenger already has
+> that messenger's messages. OS hardening only limits the next steps (sandbox
+> escape, persistence). This is §11 area #5. [A]
 
 ---
 
@@ -828,20 +876,36 @@ services off.
   data keys are not in memory; data is cryptographically inaccessible without
   the PIN, which the secure element throttles. [D]
 - **AFU (After First Unlock):** encryption keys stay in memory even when the
-  screen is locked (GrapheneOS's "End session" feature exists to purge them).
-  An attacker who can exploit the locked device can reach data. [D] / [A]
-- Most forensic extraction targets AFU devices. **Getting devices back to BFU is
-  the main goal** of the features below.
+  screen is locked. "End session" purges them for **secondary profiles only**;
+  the Owner profile's keys are cleared only by a reboot, which the auto-reboot
+  timer (§8.2) forces. An attacker who can exploit the locked device can reach
+  data. [D] / [A]
+- **Device-encrypted (DE) storage** is readable before first unlock by design
+  (it holds what the phone needs to boot and ring). GrapheneOS has announced a
+  toggle to effectively disable DE data; we did not find it in a release. [D]
+  (project statement) / [A] (absence — searched releases page, 2026-11)
+- Forensic extraction overwhelmingly targets AFU devices (Johns Hopkins study,
+  Zinkus, Jois and Green 2021). [D] Keys in RAM can also be recovered by
+  physical attacks: FROST cold-boot (ACNS 2013) and FAU's "One key to rule them
+  all" (DFRWS EU 2021, file-based-encryption master key from RAM on 7 of 13
+  phones). [D] **Getting devices back to BFU is the main goal** of the features
+  below.
 
 ### 8.2 Auto-Reboot Timer
 
 - Reboots the device if it has not been unlocked for a set time: **18 hours by
   default**, configurable from **10 minutes to 72 hours** or off. [D]
 - The timer starts at each lock. It runs in `init`; if it crashes, the kernel
-  panics and the device reboots anyway. [D]
-- Cellebrite's Spring 2026 release reportedly advertises a "Safeguard Mode" meant
-  to stop seized devices dropping back to BFU, a direct counter to this feature.
-  [S] A short timer reduces the window for that.
+  panics and the device reboots anyway. The timer is **enforced by the OS**,
+  so an attacker with OS-level code execution could in principle stop it. [D]
+  / [A]
+- By comparison, iOS uses a **fixed 72-hour** inactivity reboot enforced by the
+  Secure Enclave (Classen 2024 reverse-engineering of iOS 18). [D] Forensic
+  vendors try to defeat such timers: GrayKey's reported "Evidence Preservation
+  Mode" keeps iPhones in AFU across the reboot (404 Media, Oct 2026). [S] No
+  equivalent counter-measure against GrapheneOS has been reported. [A]
+  (absence — searched press and project forum, 2026-11) A short timer reduces
+  the window either way.
 
 ### 8.3 USB-C Port Control
 
@@ -856,12 +920,22 @@ Five modes; default **"Charging-only when locked"**. [D]
 | On | Standard behaviour |
 
 Blocking USB data while locked removes the main attack path forensic tools use.
+[A] Real example: in February 2025 Amnesty documented a Cellebrite chain of
+three Linux USB driver bugs (CVE-2024-53104, CVE-2024-53197, CVE-2024-50302; all
+on CISA KEV) used to unlock a locked Samsung phone, and cited GrapheneOS's USB-C
+control as a defence. [D] GrapheneOS states that its control blocks all three at
+the USB controller and kernel level, and that it shipped the fixes earlier via
+LTS kernels. [D] (project statement) This is untested by us; a replay test is a
+Stage 2 item. [A]
 
 ### 8.4 Duress PIN / Password
 
 A separate PIN or password that **irreversibly wipes the device and its eSIMs**
 when entered. No reboot is needed and the wipe cannot be interrupted. It also
-works when entered as the second factor of fingerprint unlock. [D]
+works when entered as the second factor of fingerprint unlock. [D] The wipe is
+enforced by the OS, not the secure element, so it does not help against an
+attacker who already has code execution on the device. [D] Legal exposure:
+§8.8, §10.6.
 
 ### 8.5 PIN Scrambling and Two-Factor Fingerprint Unlock
 
@@ -871,24 +945,29 @@ works when entered as the second factor of fingerprint unlock. [D]
 - **Two-factor fingerprint unlock** requires a PIN after the fingerprint; wrong
   PINs count toward the normal attempt limit. [D]
 - **Fingerprint attempts are capped at 5** in total (stock: 20). [D]
+- Lock-screen logic is itself attack surface: CVE-2022-20465 let anyone with a
+  spare SIM bypass the Pixel lock screen via the SIM PUK flow (AFU only). [D] A
+  short auto-reboot timer is the backstop against such bugs. [A]
 
 ### 8.6 Secure Element Brute-Force Throttling
 
-See §4.3. Even with an exploit against the main OS, guessing the PIN is limited
-by the secure element. A **6-digit PIN is the practical minimum**; Profile B
-should use a passphrase. [A]
+See §4.3 for the throttling schedule. Even with an exploit against the main OS,
+guessing the PIN is limited by the secure element (20 attempts in total). [D] A
+**6-digit PIN is the practical minimum**; Profile B should use a passphrase. [A]
 
 ### 8.7 Leaked Forensic-Vendor Capability Matrices
 
 | Leak | What it reportedly shows | Tag |
 | --- | --- | --- |
 | Oct 2025 Cellebrite "Android OS Access Support Matrix" (screenshotted from a sales briefing; reported by 404 Media; Cellebrite declined to comment) | Covers **Pixel 6–9 only**; Pixel 10, 10a and 11 are not in it. Stock Pixel 6–9 extractable (BFU extraction yields limited data without the passcode; AFU and unlocked yield much more); Cellebrite reportedly cannot brute-force Pixel passcodes. **Locked GrapheneOS Pixels: no access**, apart from builds older than about 2022; possible loss of full extraction even on unlocked GrapheneOS devices | [S] |
+| Nov 2024 GrayKey capability list (reported by 404 Media) | Stock Pixels up to Pixel 9: "partial" access, AFU only. No GrapheneOS entries reported | [S] |
 
-**Limits:** These are leaked sales documents, not tests. They cover one vendor
-and Pixel 6–9 only, so they say nothing directly about Pixel 10, 10a or 11. They
-are months old by the time they surface, and show capability the vendor offers
-widely — not what a state agency might have privately. Absence of a capability in
-a matrix is evidence, not proof. Lab validation is §11 area #10.
+**Limits:** These are leaked sales documents, not tests. They cover two vendors
+and Pixel 6–9 at most, so they say nothing directly about Pixel 10, 10a or 11.
+They are months old by the time they surface, and show capability the vendor
+offers widely — not what a state agency might have privately. Absence of a
+capability in a matrix is evidence, not proof. [A] Lab validation is §11 area
+#12.
 
 ### 8.8 Coercion and Border Scenarios
 
@@ -900,9 +979,30 @@ a matrix is evidence, not proof. Lab validation is §11 area #10.
 | Visible GrapheneOS boot screen | B | The yellow boot warning shows a non-stock OS; in some jurisdictions this may itself attract attention. Consider whether a travel device is wiser |
 
 > **Legal caveat.** Entering a duress PIN under legal compulsion or at a border
-> may be treated as destruction of evidence or obstruction in some
-> jurisdictions. Seek legal advice for each jurisdiction before adopting the
-> duress PIN as policy. [A]
+> may be treated as destruction of evidence or obstruction. This is not
+> hypothetical: a US traveller has been indicted for a GrapheneOS duress wipe
+> during a border search (US v. Tunick, pending) [S], and refusing to give an
+> unlock code is itself an offence in the UK and France. Seek legal advice for
+> each jurisdiction before adopting the duress PIN as policy (§10.6). [A]
+
+### 8.9 Track Record
+
+Public incidents relevant to physical and forensic resistance on Pixels and
+GrapheneOS:
+
+| Incident | Date | Affected | GrapheneOS impact / response | Tag |
+| --- | --- | --- | --- | --- |
+| Pixel lock-screen bypass via SIM PUK (CVE-2022-20465) | Nov 2022 | Stock Pixels and GrapheneOS, AFU only | Fixed by the Pixel patch; short auto-reboot limits exposure (§8.5) | [D] |
+| Titan M code execution (Quarkslab, CVE-2022-20233) | 2021–2022 | First-generation Titan M; needed root or SPI access | No Weaver break; no public break of Titan M2/M3 found (§4.3) | [D] / [A] |
+| Pixel firmware 0-days used by forensic firms: fastboot RAM leak (CVE-2024-29745), wipe interruption (CVE-2024-29748, CVE-2024-32896) | Apr–Jun 2024 | All Pixels; all on CISA KEV | Reported to Google by GrapheneOS; Pixel fastboot now zeroes RAM | [D] |
+| GrayKey capability leak | Nov 2024 | Stock Pixels up to 9 (AFU, partial) | No GrapheneOS entries reported (§8.7) | [S] |
+| Cellebrite USB driver chain (Amnesty) | Feb 2025 | Locked Samsung phone (Linux USB drivers) | GrapheneOS states its USB-C control blocks the chain; untested (§8.3) | [D] |
+| Cellebrite capability leak | Oct 2025 | Pixel 6–9 | Locked GrapheneOS: no access except builds older than about 2022 (§8.7) | [S] |
+| Exploited Pixel modem bug (CVE-2026-58704) | Sep 2026 | Pixel modems | Remote, not forensic; see §4.5 and §9.3 | [D] |
+
+No public in-the-wild exploitation of a current GrapheneOS release was found.
+[A] (absence — searched CISA KEV, Pixel bulletins, Amnesty, Citizen Lab, GTIG
+and the GrapheneOS forum, 2026-11)
 
 ---
 
@@ -910,11 +1010,35 @@ a matrix is evidence, not proof. Lab validation is §11 area #10.
 
 ### 9.1 Update Pipeline
 
-Covered in §3.4: Alpha → Beta → Stable (releases page; users can choose
-Stable or Beta); automatic background updates every ~6 hours; secondary-slot
-install with rollback; delta updates; works before first unlock; signed with
-downgrade protection. [D] No setting to defer updates was found; the updater
-can only be disabled entirely. [A]
+Releases move Alpha → Beta → Stable; users can choose Stable or Beta (channels
+and versioning: §3.4). [D] How updates are delivered:
+
+- Automatic background updates, checking about **every six hours** when
+  connected. [D]
+- Updates install to a **secondary copy of the OS**, which becomes active only
+  after the update completes; if the new version fails to boot, the device rolls
+  back. [D]
+- Uses **incremental (delta) updates** when available; a full package can upgrade
+  from any past version. [D]
+- Works while the device is **locked and idle, including before first unlock**,
+  so devices kept in the most secure state still get patched. [D]
+- Every package is **signed and checked, with downgrade protection**; updates
+  carrying a serial-number constraint (i.e. targeted at one device) are
+  rejected. [D]
+- Users can restrict updates to non-roaming or unmetered networks, require
+  charging or a minimum battery level, and opt in to automatic reboot. [D]
+- There is **no setting to delay updates**: the usage guide documents only
+  disabling the System Updater app, which the project strongly advises
+  against. [D]
+- Updates can also be sideloaded from recovery with adb, without enabling adb in
+  the OS. [D]
+
+> **Assessment note.** The update design is strong: signed, rollback-protected,
+> works before first unlock, and resistant to targeted (per-device) updates.
+> The gap for an organisation is **no staged rollout control**: a fleet cannot
+> pin or defer a version, so a bad Stable release reaches all devices at roughly
+> the same time. The compensating control is to run a few devices on Beta as
+> early warning (§12.5). Patch timing depends on Google (§9.3). [A]
 
 ### 9.2 Signing-Key Custody and Build Transparency
 
@@ -923,15 +1047,27 @@ can only be disabled entirely. [A]
   them, or how a compromise would be handled. [D] (absence) The one
   disclosure is that "GrapheneOS servers do not have access to GrapheneOS
   signing keys" (FAQ). [D]
-- Anyone can **build GrapheneOS from source**. [D] Whether official builds are
-  **reproducible**: the project states official builds can be rebuilt and
-  compared file by file, excluding signatures, and publishes SSH-signed source
-  tags. [S] (project forum) Proprietary firmware cannot be rebuilt, so this
-  verifies the OS only. Independent reproduction is still worth doing (A13, WP2).
+- Anyone can **build GrapheneOS from source**. [D] Official builds are
+  **reproducible**: the build guide documents rebuilding official releases and
+  comparing them, excluding signatures, and verifying SSH-signed source tags.
+  [D] (grapheneos.org/build) Proprietary firmware cannot be rebuilt, so this
+  verifies the OS only. Independent reproduction is still worth doing [A]
+  (A13); Pöll and Roland's "accountable builds" work (ACM WiSec 2022) gives a
+  method for the test. [D]
 - Kernel module signing is forced, with per-build RSA 4096 keys. [D]
+- **No public transparency log.** Google publishes a Pixel Binary Transparency
+  log so anyone can check that a stock Pixel image is the one Google released.
+  [D] No equivalent log for GrapheneOS releases was found. [A] (absence —
+  searched grapheneos.org and GitHub, 2026-11)
+- **Platform keys do leak.** In 2022, platform certificates of Samsung, LG and
+  MediaTek were found signing Android malware. [S] (Rapid7)
+- **Legal compulsion** to sign a malicious update is discussed in §3.1.
 
 > **Assessment note.** Key custody is the single most important trust question
-> for an organization. It is the core of §11 area #2. [A]
+> for an organisation. It is the core of §11 area #4. [A] A useful benchmark for
+> Stage 2 is The Update Framework (TUF; Samuel et al., ACM CCS 2010): separate
+> signing roles, threshold signatures and an offline root key, so one stolen key
+> is not enough to push an update. [D] / [A]
 >
 > - **What a compromise would mean:** an attacker holding the OS signing key
 >   could sign an update that every GrapheneOS device accepts and installs
@@ -953,9 +1089,30 @@ can only be disabled entirely. [A]
   bulletins carry only high-risk fixes) and **AOSP source only in Q2 and Q4**.
   Pixel monthly patches continue. [D] (Google Android Enterprise notice) /
   [S] (press reports of Google's AOSP statement)
+  Under this risk-based update system (RBUS) the July 2025 Android bulletin
+  listed no fixes, while the September 2025 bulletin listed 119. [S]
 - Google no longer publishes Pixel device trees, and Pixel kernel source is
   harder to obtain. [S] This makes GrapheneOS's porting work slower and more
-  dependent on reverse-engineering Google's releases (§11 area #1).
+  dependent on reverse-engineering Google's releases (§11 area #1). [A]
+  GrapheneOS says its adevtool tooling, which extracts device support from
+  Google's stock images, meant the loss of device trees did not halt porting.
+  [D] (project statement)
+
+**Patch-lag evidence (desk data, 2026)**
+
+| Pixel bulletin | Published by Google | GrapheneOS release carrying it | Approx. lag |
+| --- | --- | --- | --- |
+| August 2026 | 2026-08-04 | 2026080500 (full 2026-08-05 Pixel patch level) | ~1 day |
+| September 2026 (includes exploited modem bug CVE-2026-58704) | 2026-09-15 | 2026091700 backported the new modem firmware; 2026092500 completed the firmware update; 2026100200 raised the listed patch level to 2026-09-05 | ~2 days (modem firmware); ~10 days (all firmware) |
+| October 2026 | 2026-10-06 | 2026100600 (full 2026-10-05 patch level) | same day |
+| November 2026 (Android 17 QPR2) | 2026-11-10 | 2026111800 (full 2026-11-05 patch level, QPR2 firmware and kernels) | ~8 days |
+
+Sources: Pixel bulletin pages and the GrapheneOS releases page. [D] Release
+dates are read from the build numbers, and we assume the 2026091700 modem
+firmware carries the CVE-2026-58704 fix. [A] Four months is a small sample; no
+published measurement of GrapheneOS patch lag exists. [A] (absence — searched
+press and research literature, 2026-11) A fuller measurement, including
+Vanadium against Chrome releases, is Stage 2 work (§14.2).
 
 ### 9.4 Auditor and Hardware Attestation
 
@@ -963,19 +1120,48 @@ can only be disabled entirely. [A]
   runs genuine, unmodified GrapheneOS with the expected signing key and patch
   level. [D]
 - It uses **pairing**: the first verification pins a hardware-backed key, and
-  later checks confirm both integrity and that it is the **same device**. [D]
+  later checks confirm both integrity and that it is the **same device**. The
+  first pairing is trust-on-first-use. [D]
 - Verification can be done **locally** (by another Android device running
-  Auditor in auditor mode) or through the **attestation.app** service, which
-  runs scheduled verification with e-mail alerts. [D]
+  Auditor, scanning QR codes) or through the **attestation.app** service, which
+  runs scheduled verification and e-mails an alert when a device fails to
+  provide a valid attestation in time. [D]
 - For a fleet, the remote service gives a basic integrity dashboard, but it is a
   GrapheneOS-run service. [D] Its hosting is being moved to Canada per the
-  project's November 2025 infrastructure post (§3.1). [D] / [A05]
-- **Data protection:** attestation.app stores device identifiers, attestation
-  history and alert e-mail addresses on GrapheneOS-run infrastructure. [A]
-  Organisations may need a data-protection review before using it, or can
-  self-host the open-source attestation server instead. [A]
-- Attestation verifies OS integrity and patch level, **not device settings**
-  (auto-reboot, USB-C mode, duress PIN and so on; §10.2). [A]
+  project's November 2025 infrastructure post (§3.1). [D] / [A] (A05)
+
+**What Auditor reports** [D] (Auditor and AttestationServer source code,
+attestation.app documentation):
+
+| Source of the information | Items |
+| --- | --- |
+| **Hardware-verified** (signed by the secure element or TEE) | Device model; OS (unmodified official release); OS version; OS, vendor and boot patch levels; verified boot key hash and verified boot hash; key security level (StrongBox or TEE); Auditor app version; first and last verification time |
+| **Reported by the verified OS** | Lock screen set ("user profile secure"); enrolled biometrics; accessibility services enabled; device administrators enabled (system only or third-party); adb enabled; adding users from the lock screen; OEM unlocking allowed; whether the main user is in use; **auto-reboot timeout**; **USB-C port security mode**; number of user profiles |
+
+- OS-reported items are only as trustworthy as the OS: an attacker who
+  controls the running OS could report false values. [A]
+- **Not reported** (of the §12.7 settings): PIN length or passphrase strength,
+  PIN scrambling, duress PIN, two-factor fingerprint unlock, cellular mode (2G
+  / LTE-only) and VoLTE / Wi-Fi calling, per-app exploit-protection
+  compatibility mode, WebView JIT, Network and Sensors permission defaults,
+  Bluetooth / NFC state, VPN and Private DNS, and sandboxed Play placement. [D]
+  (absence from the Auditor source) / [A]
+- The service alerts only on **missed or failed attestations**, not on a change
+  of reported setting; changes are visible in each device's history on the
+  dashboard. [D] (AttestationServer source)
+- **Forged attestation elsewhere.** Android key attestation has been forged with
+  leaked device keyboxes and relays (Guardsquare, Jan 2026). [D] Auditor's
+  pairing pins a per-device key, so a forged chain from another key fails after
+  the first pairing. [D] / [A] Google rotated the attestation root in 2026 (the
+  new root signs remotely provisioned chains from 1 February 2026); a self-hosted
+  verifier must trust both roots. [D]
+- **Data protection:** attestation.app stores accounts (username, password hash,
+  alert e-mail addresses), each device's pinned certificates and verified boot
+  key, the items above and the attestation history; the web server also logs
+  connections. [D] (AttestationServer source, privacy policy) Retention periods
+  are not published. [A] (absence) Organisations may need a data-protection
+  review before using it, or can self-host the open-source attestation server
+  instead. [A]
 
 ### 9.5 Installation and Procurement
 
@@ -987,6 +1173,12 @@ can only be disabled entirely. [A]
 - Verify the install with Auditor (§9.4) and the boot-key hash (§4.2).
 - For Profile B, consider buying in person or through an intermediary to reduce
   the risk of interdiction. [A]
+- **Install-time supply chain** [A]:
+  - Never accept devices with GrapheneOS pre-installed by a reseller; install it
+    yourself from a trusted computer.
+  - After install, confirm with Auditor that OEM unlocking is off and the
+    verified boot key matches GrapheneOS's.
+  - Avoid second-hand units for Profile B.
 
 ### 9.6 Backup and Recovery
 
@@ -994,7 +1186,7 @@ can only be disabled entirely. [A]
   limited; many users rely on app-level exports (e.g. Signal's encrypted backup).
   [A]
 - **Trade-off:** less backup means less data exposed in a backup provider, but a
-  higher risk of data loss. For Profile C, organization data should live in
+  higher risk of data loss. For Profile C, organisation data should live in
   managed services, not on the device.
 
 ### 9.7 Detection and Incident Response
@@ -1004,16 +1196,27 @@ can only be disabled entirely. [A]
   unnoticed**. [A]
 - **Auditor proves OS integrity**, not the absence of an in-memory or
   user-space implant. [D] / [A]
+- **Persistence resistance.** Verified boot and rollback protection stop an
+  implant surviving a reboot by modifying the OS, so a reboot clears
+  memory-resident implants and the attacker must re-exploit. [D] / [A]
+- **No intrusion log.** Stock Android 16 Advanced Protection includes intrusion
+  logging for later forensic review. [D] No GrapheneOS equivalent was found.
+  [A] (absence — searched features page and releases, 2026-11)
 - MTE crash reports can show exploitation attempts, and users can share them with
-  GrapheneOS. [A]
+  GrapheneOS. [D]
 - Triage tools such as **MVT** (Mobile Verification Toolkit) can analyse backups
   and adb output, with limits on a non-rooted device. [A]
-- **Realistic response:** treat a suspected device as compromised; **reflash and
-  replace**, revoke credentials, and rotate account sessions. Document this in a
-  runbook (Profile C). [A]
+- **Code inside an app.** Paragon Graphite ran inside WhatsApp's sandbox
+  (§7.11). Such an implant needs no OS exploit to read that app's data; OS
+  hardening only limits its next steps. [D] / [A]
+- **Realistic response:** treat a suspected device as compromised; **capture
+  evidence first** (screenshots, MVT/adb output, MTE crash reports) and only
+  then reboot, because the reboot that removes a memory-resident implant also
+  destroys volatile evidence. Then **reflash and replace**, revoke credentials,
+  and rotate account sessions. Document this in a runbook (Profile C). [A]
 
-> **Assessment note.** This is a gap for any organization with a security
-> operations function. It is §11 area #5.
+> **Assessment note.** This is a gap for any organisation with a security
+> operations function. It is §11 area #6. [A]
 
 ---
 
@@ -1042,11 +1245,19 @@ provisioning tool. [D] / [A] Compensating controls:
   remote wipe (no Find My Device). A work-profile MDM wipe removes only the work
   profile; the rest of the device stays intact. [A] Rely on encryption, a short
   auto-reboot timer and credential revocation instead.
-- **Fleet enforcement.** A work profile cannot enforce or verify device-wide
+- **Fleet enforcement.** A work profile cannot **enforce** device-wide
   settings: auto-reboot timer, USB-C mode, PIN scrambling, cellular mode or duress
-  PIN. Auditor and attestation verify OS integrity and patch level, not
-  settings. The organisation therefore cannot detect configuration drift; these
-  settings rely on users keeping them. [A]
+  PIN. [A]
+- **Fleet verification is partial.** Auditor and attestation.app verify OS
+  integrity and patch level in hardware, and also show some settings reported
+  by the OS: **auto-reboot timeout, USB-C port mode**, adb, OEM unlocking,
+  device administrators, accessibility services, enrolled biometrics, lock
+  screen set and number of profiles (§9.4). [D] They do **not** show PIN
+  scrambling, duress PIN, cellular mode, VoLTE / Wi-Fi calling, per-app
+  compatibility mode, WebView JIT or permission defaults. [D] / [A] The service
+  does not alert on a setting change, so drift in the visible settings is found
+  only by reviewing each device's history, and drift in the others not at all.
+  These settings rely on users keeping them. [A]
 
 ### 10.3 Play Integrity and Banking / Corporate Apps
 
@@ -1065,7 +1276,7 @@ provisioning tool. [D] / [A] Compensating controls:
 | --- | --- | --- |
 | Android Auto | Supported via sandboxed Play compatibility layer | [D] |
 | eSIM | Existing eSIMs work; adding eSIMs needs an opt-in toggle | [D] |
-| Google Wallet tap-to-pay | Not available: requires a Google-certified OS. Some bank apps and Curve Pay offer NFC payments instead | [S] |
+| Google Wallet tap-to-pay | Not available: requires a Google-certified OS [D] (Google Wallet help). Alternatives include contactless cards and watches with their own NFC; some bank apps offer their own NFC payments | [D] / [S] |
 | RCS (Google Messages) | Works via sandboxed Play, including end-to-end encrypted chats, but can break with carrier or Google changes | [S] |
 | Wear OS | Mixed user reports; some watches (incl. Pixel Watch) work with sandboxed Play | [S] |
 | Push notifications | Via sandboxed Play (FCM) or app-specific alternatives | [D] / [A] |
@@ -1077,6 +1288,28 @@ provisioning tool. [D] / [A] Compensating controls:
 | A | Some apps need sandboxed Play; occasional app breakage |
 | B | No Play means fewer apps and no Google push; short auto-reboot means frequent PIN entry; duress PIN needs training |
 | C | MDM compatibility testing; no vendor support; release timing outside IT's control |
+
+### 10.6 Legal and Regulatory Fit
+
+GrapheneOS features that protect a user can conflict with an organisation's
+legal duties, and with the law where a device is used.
+
+| Issue | Conflict with GrapheneOS use | Tag |
+| --- | --- | --- |
+| Regulated-communications recording (US FINRA/SEC record-keeping, UK FCA, EU MiFID II) | Business communications must be captured and kept. Signal, disappearing messages and a duress wipe defeat this unless business messaging goes through an approved, archived channel | [A] |
+| Litigation hold and e-discovery | A duress wipe, or disappearing messages, after a hold may count as destruction of evidence | [A] |
+| Employee privacy (BYOD) | Monitoring is limited to the work profile; employment and data-protection law (e.g. GDPR) limit what may be collected from the personal side anyway | [A] |
+| Import / export of encryption devices | Phones are generally covered by mass-market encryption exemptions, but some destinations restrict import or use of encryption; check before travel | [A] |
+| Wiping during a border search (US) | US v. Tunick (N.D. Ga.): a traveller indicted under 18 U.S.C. §2232(a) for a GrapheneOS duress wipe during a CBP search (Jan 2025); pending as of Nov 2026. Earlier, US v. Basart ended in a guilty plea for remotely wiping an iPhone (M.D. Fla., 2022) | [S] / [D] |
+| Compelled biometrics (US) | Circuit split: US v. Payne (9th Cir. 2024) allowed a compelled thumb unlock; US v. Brown (D.C. Cir. 2025) held it testimonial. Favours PIN-only or two-factor fingerprint for Profile B | [D] |
+| Compelled passwords (UK) | Refusing to give a password under Schedule 7 of the Terrorism Act 2000 is an offence (R v Rabbani, 2017); RIPA s.49/s.53 notices carry up to 2 years (5 in national-security cases) | [D] |
+| Compelled passwords (France) | Cour de cassation, Assemblée plénière, 7 Nov 2022 (n° 21-83.146): refusing to give an unlock code protecting encryption can be an offence (art. 434-15-2 Code pénal) | [D] |
+
+> **Assessment note.** For Profile C, recording and e-discovery duties may rule
+> out the duress PIN and disappearing messages on work devices. For Profile B,
+> travel to the US, UK or France makes the duress PIN a legal decision, not only
+> a technical one. A legal review per jurisdiction is a Stage 2 item (§11 area
+> #14). [A]
 
 ---
 
@@ -1173,24 +1406,15 @@ GrapheneOS menus and may move between releases.
 
 ### 12.1 Hardware Selection
 
-| Profile | Device | Why |
-| --- | --- | --- |
-| A Baseline | Pixel 10a | Longest support (Mar 2033), lowest cost, mature components |
-| B High-risk | Pixel 10a | Same Titan M2 and Exynos 5400 modem as Pixel 10; fewest radios (no UWB); mature, well-studied Mali GPU stack |
-| C Managed fleet | Pixel 10a (one model fleet-wide) | Long support, cost, one attestation baseline |
-| C+B | Pixel 10a | As B, on the same model as the rest of the fleet |
-
-**Alternative:** Pixel 10 (non-Pro) for any profile where more performance is
-needed. **Avoid:** Pro models for Profile B (UWB and extra radios), foldables,
-new purchases of Pixel 8, and Pixel 11 until GrapheneOS supports it and support
-has settled (§5.3). The GPU difference (Mali on 10a, PowerVR on 10) is a
-consideration, not a decisive factor. [A]
+**Pixel 10a for all profiles**, one model fleet-wide for Profile C;
+alternatives and models to avoid are in §5.3.
 
 **Procurement:**
 - Buy **unlocked** units directly from Google or a trusted retailer; never
   carrier-locked (Verizon) or second-hand for Profile B.
 - Profile B: buy in person or through an intermediary, and keep chain of custody
   until install.
+- Never accept units with GrapheneOS pre-installed by a reseller (§9.5).
 - Install before first connection to any network where possible.
 
 ### 12.2 Installation and Verification
@@ -1200,7 +1424,8 @@ consideration, not a decisive factor. [A]
 2. Flash, then **re-lock the bootloader**; disable OEM unlocking again.
 3. Check the **boot-key hash** shown at boot against the published value.
 4. Pair with **Auditor** (local pairing between two devices, or the remote
-   attestation service for fleets) and record the first attestation.
+   attestation service for fleets) and record the first attestation; confirm it
+   shows OEM unlocking and adb as off (§9.4).
 5. Apply the profile settings (§12.7), then check for and install updates.
 
 ### 12.3 Profile A — Baseline
@@ -1220,6 +1445,12 @@ For P1 and P2. Minimises attack surface and the AFU window:
 - **Duress PIN** set and practised.
 - **LTE-only** mode (this also turns off 2G, 3G and 5G, so 5G speeds are lost).
   Check emergency-call behaviour in LTE-only mode during Stage 2 testing.
+- **Wi-Fi calling off; VoLTE off where the carrier allows voice without it —
+  check emergency calling.** LTE-only does not remove the IMS path (§7.7).
+  On many carriers LTE-only without VoLTE means **no voice calls**; then keep
+  VoLTE on and accept the residual risk, or rely on Signal calls over data.
+- **Bluetooth and NFC off** when not in use, with the Bluetooth (and Wi-Fi)
+  auto-off timeout set.
 - **Always-on VPN with "block connections without VPN"**.
 - Strong passphrase; fingerprint **off**, or on with two-factor PIN.
 - Network and Sensors permissions **off by default** for new apps.
@@ -1227,8 +1458,8 @@ For P1 and P2. Minimises attack surface and the AFU window:
 
 ### 12.5 Profile C — Managed Fleet
 
-For P3 and P4 on organization devices:
-- **Work profile** managed by the organization's MDM, with sandboxed Play
+For P3 and P4 on organisation devices:
+- **Work profile** managed by the organisation's MDM, with sandboxed Play
   installed **only in the work profile** if the MDM or apps need it.
 - **Attestation:** enrol each device in Auditor/attestation.app with alerting.
 - **Compensating controls:** written build standard, hardening checklist (§12.7),
@@ -1240,8 +1471,9 @@ For P3 and P4 on organization devices:
   issued to P1/P2 and to P3 privileged admins (the highest-risk P3 group, tier
   T3). Other P3 staff use Profile C.
 - **Enforcement limit:** the MDM controls only the work profile. Device-wide
-  settings in §12.7 (auto-reboot, USB-C, PIN scrambling, cellular mode, duress
-  PIN) are set by the user and cannot be enforced or verified (§10.2).
+  settings in §12.7 are set by the user and cannot be enforced; Auditor shows
+  only some of them (auto-reboot timeout, USB-C mode), and PIN scrambling,
+  cellular mode and duress PIN cannot be verified (§10.2).
 
 ### 12.6 App Policy
 
@@ -1258,13 +1490,14 @@ profiles. [A]
 
 | Setting | A Baseline | B High-risk | C Managed fleet | How enforced / verified (C) |
 | --- | --- | --- | --- | --- |
-| Device | Pixel 10a | Pixel 10a | Pixel 10a | Attestation verifies (model and OS) |
-| Lock credential | 6+ digit PIN | Passphrase (6+ random words) | 6+ digit PIN (MDM-enforced) | MDM (lock-screen policy set through the work profile) |
-| Fingerprint | Allowed | Off, or two-factor with PIN | Two-factor with PIN | User-set; not verifiable (MDM can only disable fingerprint entirely) |
+| Device | Pixel 10a | Pixel 10a | Pixel 10a | Auditor verifies in hardware (model and OS) |
+| adb / OEM unlocking | Off | Off | Off | Auditor shows (OS-reported); no alert on change |
+| Lock credential | 6+ digit PIN | Passphrase (6+ random words) | 8+ digit PIN (MDM "high" password complexity) | MDM sets required complexity for the device lock via the work profile; exact length not enforceable. Auditor shows only that a lock is set |
+| Fingerprint | Allowed | Off, or two-factor with PIN | Two-factor with PIN | Auditor shows whether biometrics are enrolled; two-factor setting not visible (MDM can only disable fingerprint entirely) |
 | PIN scrambling | Optional | On | On | User-set; not verifiable |
 | Duress PIN | Optional | **On** | Per policy (on for C+B) | User-set; not verifiable |
-| Auto-reboot | 18 h (default) or 8 h | **1 h** (30 min when travelling) | 8–12 h | User-set; not verifiable |
-| USB-C port | Charging-only when locked (default) | **Charging-only** | Charging-only when locked | User-set; not verifiable |
+| Auto-reboot | 18 h (default) or 8 h | **1 h** (30 min when travelling) | 8–12 h | User-set; Auditor shows the timeout (OS-reported); no alert on change |
+| USB-C port | Charging-only when locked (default) | **Charging-only** (or Off when charging by other means is acceptable) | Charging-only when locked | User-set; Auditor shows the mode (OS-reported); no alert on change |
 | Screen-lock timeout | 1 min | 30 s | 1 min (MDM) | MDM (lock-screen policy set through the work profile) |
 | Lock-screen notifications | Hide sensitive content | Hide all | Hide sensitive content | MDM (work profile only); user-set for personal apps |
 | Sandboxed Google Play | If needed | None in Owner profile | Work profile only | MDM (work profile only); Owner profile not visible |
@@ -1273,18 +1506,20 @@ profiles. [A]
 | Network permission for new apps | Default (on) | Off at install | Default | User-set; not verifiable |
 | Sensors permission for new apps | Default (on) | Off by default | Default | User-set; not verifiable |
 | Cellular | 2G off | **LTE-only** (no 2G, 3G or 5G) | 2G off | User-set; not verifiable |
+| VoLTE / Wi-Fi calling | Default | **Wi-Fi calling off; VoLTE off where the carrier allows voice without it — check emergency calling** | Per policy | User-set; not verifiable |
 | Wi-Fi MAC | Per-connection random (default) | Per-connection random | Per-connection random | Default; not verifiable |
-| Bluetooth / NFC / UWB | As needed | Off when not in use | As needed | User-set; not verifiable |
+| Bluetooth / NFC / UWB | As needed | Off when not in use; Bluetooth auto-off timeout on | As needed | User-set; not verifiable |
 | Location | As needed | Off by default; SUPL off | As needed | User-set; not verifiable |
 | VPN | Optional | **Always-on, block without VPN** | Org VPN always-on in work profile | MDM (work profile only) |
 | Private DNS | Optional | On (if VPN doesn't cover DNS) | Per org policy | User-set; not verifiable |
-| Updates | Automatic, Stable | Automatic, Stable | Automatic, Stable; pilots on Beta | Attestation verifies (patch level) |
+| Updates | Automatic, Stable | Automatic, Stable | Automatic, Stable; pilots on Beta | Auditor verifies in hardware (patch level) |
 | Auditor / attestation | Optional | Local pairing or remote with alerts | Remote attestation with alerts | Attestation verifies (alerts on missed check-in) |
 | Secondary profiles | Optional | Used for risky apps; end session after use | Work profile | MDM (work profile only) |
 
 The last column applies to Profile C (and C+B). "User-set; not verifiable" means
-the organisation can neither enforce the setting nor detect if it is changed
-(§10.2). Controls there depend on the written build standard, user training and
+the organisation can neither enforce the setting nor detect if it is changed.
+"Auditor shows" means the value appears in attestation results as reported by
+the OS, but no alert is raised when it changes (§9.4, §10.2). Controls there depend on the written build standard, user training and
 periodic manual checks. [A]
 
 ---
@@ -1297,13 +1532,19 @@ Ratings are relative and qualitative (analyst judgement, [A]) unless tagged.
 
 - Same hardware, secure element and verified boot design.
 - **Stock Advanced Protection.** Since Android 16 (2025), stock Android offers an
-  opt-in **Advanced Protection mode**. It turns on MTE for supported apps and
-  components (Pixel 8 and later), a **72-hour inactivity reboot**, USB data
-  protection while locked (new connections charge only), blocks 2G and WEP
-  Wi-Fi, blocks sideloading, and enforces Play Protect and other Google
-  hardening. [D] (Google support page)
+  opt-in **Advanced Protection mode**. Per Google's support page it enables USB
+  data protection while locked, blocks 2G on supported devices, turns off
+  auto-connect to open and WEP Wi-Fi networks (manual connection is still
+  possible), blocks sideloading, keeps Play Protect on, turns off Chrome's
+  JavaScript optimiser, adds a **72-hour inactivity reboot** and turns on
+  intrusion logging. [D] On Pixel 8 and later it also enables MTE for some
+  components and apps. [S]
+- **Certification.** Stock Pixel 9 and Pixel 10 on Android 16 hold NIAP Common
+  Criteria certification against the Mobile Device Fundamentals Protection
+  Profile (VID11647, 2026). GrapheneOS does not inherit it. [D]
 - **Where GrapheneOS differs: scope and default strength.** Many controls exist
-  on both; GrapheneOS applies them more widely, more strongly, or by default: [D]
+  on both; GrapheneOS applies them more widely, more strongly, or by default:
+  [D] (GrapheneOS features page; AOSP documentation for the stock column)
 
 | Area | Stock Pixel + Advanced Protection | GrapheneOS |
 | --- | --- | --- |
@@ -1313,30 +1554,38 @@ Ratings are relative and qualitative (analyst judgement, [A]) unless tagged.
 | Inactivity reboot | Fixed 72 h | Configurable 10 min–72 h; 18 h default |
 | USB-C | Charging-only for new connections when locked | Five modes, including always charging-only |
 | 2G / cellular | 2G blocked | 2G off or LTE-only (no 2G, 3G or 5G) |
+| Wi-Fi | Auto-connect to open / WEP networks off | Per-connection MAC randomisation; Wi-Fi and Bluetooth auto-off timeouts |
+| Intrusion logging | Yes | None found (§9.7) |
 | Duress PIN | None | Yes, wipes device and eSIMs |
 | Per-app Network / Sensors permissions, Scopes | No | Yes |
 | Fingerprint attempt cap | 20 | 5 |
 | Privileged Google services | Yes (Play services with system privileges) | None; Play optional and sandboxed |
 
 - Stock adds: Google Play Protect, Play Integrity certification (banking and
-  Wallet), Google's own detection and theft-protection features, vendor support.
-- Forensics: the Oct 2025 Cellebrite matrix (Pixel 6–9 only) shows stock Pixels
-  extractable — BFU extraction yields limited data without the passcode, while
-  AFU and unlocked yield much more — and locked GrapheneOS Pixels largely not.
-  Cellebrite reportedly cannot brute-force Pixel passcodes. Pixel 10, 10a and 11
-  are not covered. [S]
+  Wallet), Google's own detection and theft-protection features, vendor support,
+  Common Criteria certification. [D]
+- Forensics: leaked vendor matrices show stock Pixel 6–9 extractable and locked
+  GrapheneOS Pixels largely not (§8.7). [S]
 
 ### 13.2 GrapheneOS vs iOS with Lockdown Mode
 
 - **iOS strengths:** integrated hardware/software from one vendor; Apple's
-  Secure Enclave; Lockdown Mode cuts attack surface (message attachments,
-  JIT, wired connections when locked); commercial support; wide app and MDM
-  support; inactivity reboot after 3 days (iOS 18.1). [S]
-- **GrapheneOS strengths:** MTE across the OS and most apps (Apple's comparable
-  Memory Integrity Enforcement — Apple's MTE-based equivalent — arrived only
-  with iPhone 17 / iPhone Air hardware and cannot be backported [S]);
-  per-app network and sensor control; no mandatory vendor account; user
-  control of auto-reboot timing; duress PIN; open source.
+  Secure Enclave; Lockdown Mode cuts attack surface (blocks most message
+  attachment types, disables JIT and other complex web features, blocks wired
+  connections when locked) [D] (Apple); commercial support; wide app and MDM
+  support. [A] Inactivity reboot after 72 hours (since iOS 18.1), enforced by
+  the Secure Enclave. [D] (Classen 2024)
+- **Parsing sandbox (iOS):** iMessage content is parsed in the BlastDoor
+  sandbox; Android has no OS-level equivalent for third-party messengers
+  (§7.11). [D] / [A]
+- **Memory tagging: depth vs breadth.** Apple's Memory Integrity Enforcement
+  (MIE, enhanced MTE designed against tag leakage) arrived only with iPhone 17 /
+  iPhone Air (A19) hardware; older iPhones get only its allocator hardening.
+  [D] GrapheneOS applies standard MTE more broadly, across the OS and most apps,
+  on Pixel 8 and later (§6.3). [D] / [A]
+- **GrapheneOS strengths:** per-app network and sensor control; no mandatory
+  vendor account; user control of auto-reboot timing; duress PIN; open source.
+  [D]
 - **Both** remain targets of nation-state 0-click chains; neither is proof
   against T4.
 
@@ -1357,13 +1606,13 @@ Ratings are relative and qualitative (analyst judgement, [A]) unless tagged.
 | Dimension | GrapheneOS (Pixel) | Stock Pixel + Advanced Protection | iOS + Lockdown Mode | Samsung Knox |
 | --- | --- | --- | --- | --- |
 | Exploit mitigation | Very high | High (MTE for supported apps) | High (very high on iPhone 17+) | Medium–High |
-| Forensic resistance (locked) | Very high [S] | Medium–High (72 h reboot, USB protection; leak shows Pixel 6–9 extractable) [S] | High | Medium–High |
-| Attack surface reduction | High (user-controlled) | Medium (2G, sideloading, WEP blocked) | High (Lockdown) | Medium |
+| Forensic resistance (locked) | Very high [S] | Medium–High (72 h reboot, USB protection; Pixel 6–9 extractable, §8.7) [S] | High | Medium–High |
+| Attack surface reduction | High (user-controlled) | Medium (2G and sideloading blocked; insecure Wi-Fi auto-connect off) | High (Lockdown) | Medium |
 | Privacy from vendor | Very high | Low | Medium | Low–Medium |
 | Patch speed | High (bounded by Google) | High | High | Medium |
 | Fleet management | Low (work profile MDM only) | High | High | Very high |
-| App compatibility | Medium–High | Very high (sideloading blocked) | Very high | Very high |
-| Certification | None known | Some | Yes (several) | Yes (several) |
+| App compatibility | Medium–High | High (Play apps; sideloading blocked) | Very high | Very high |
+| Certification | None known | Yes (NIAP CC MDFPP, Pixel 9/10 on Android 16) [D] | Yes (several) | Yes (several) |
 | Vendor support / SLA | None | Yes | Yes | Yes |
 | Supply-chain concentration | Small team + Google | Google | Apple | Samsung |
 
