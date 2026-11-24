@@ -8,16 +8,18 @@
 > audit or reverse engineering was done in Stage 1. Facts are current as of the
 > date above; GrapheneOS and Google change quickly.
 >
-> **Confidence tags:** **[D]** Documented — stated by GrapheneOS or Google on
-> official channels, including GrapheneOS developer posts on the project forum,
-> X or Mastodon, and vendor advisories · **[S]** Secondary — press or
-> third-party reporting only · **[O]** Observed — first-hand testing (none in
-> Stage 1) · **[A]** Assumed — analyst judgement, listed in the assumption
-> register (Appendix A).
+> **Confidence tags:** **[D]** Primary — first-party statement by the vendor or
+> project concerned, CISA KEV, NVD, or the original research publication ·
+> **[S]** Secondary — press or third-party coverage only · **[O]** Observed —
+> first-hand testing (none in Stage 1) · **[A]** Assessed — analyst judgement
+> or inference; key assumptions are listed in Appendix A. Full definitions in
+> §1.4.
 
 ---
 
 ## 0. Executive Summary
+
+Claims in this summary are tagged in the sections referenced.
 
 **Verdict.** GrapheneOS on a supported Google Pixel is one of the most
 technically secure phone platforms available today. It is a strong fit for
@@ -34,39 +36,46 @@ nation-state**: the modem and firmware below the OS remain trusted and closed.
 - **Strong physical and forensic resistance:** auto-reboot returns devices to
   their encrypted "before first unlock" state, USB data is blocked while locked,
   a duress PIN wipes the device, and the secure element limits PIN guessing.
-  Leaked Cellebrite material (October 2025) reportedly shows no access to
-  locked, current GrapheneOS Pixels; it covers Pixel 6–9 only, so newer models
-  are untested by that evidence. (§4, §8)
+  Leaked forensic-vendor material supports this for Pixel 6–9 (§8.7). (§4, §8)
+- **Persistence resistance:** verified boot and rollback protection stop an
+  implant surviving a reboot by modifying the OS, so auto-reboot also limits
+  how long a memory-resident implant lasts. (§4, §9.7)
 - **Privacy controls and no built-in Google services:** per-app network and
   sensor permissions, scoped storage and contacts, and Google Play only as an
   optional, unprivileged app. (§7)
 - **Well-designed updates:** signed, rollback-protected, installed even before
-  first unlock, with frequent releases. (§3.4)
+  first unlock, with frequent releases. (§9.1)
 
 **Top areas to examine first** (§11)
-1. **Dependence on Google** for hardware, firmware, patches and source code,
-   which Google has recently made harder to obtain.
-2. **Trust concentrated in a small team:** 6–10 full-time developers, donation
-   funded, no published signing-key custody or succession plan, no commercial
-   support.
-3. **Baseband (modem):** the largest closed attack surface.
-4. **GPU drivers:** Mali has a record of real-world spyware exploitation;
-   the newer PowerVR stack is largely unstudied.
-5. **Detection and incident response:** compromise may go unseen.
+1. **Dependence on Google** for hardware, firmware, patches and source code.
+2. **GPU and accelerator drivers:** Mali exploited in the wild; a published MTE bypass via GPU memory.
+3. **Baseband (modem):** now with an in-the-wild Pixel modem exploit (CVE-2026-58704).
+4. **Trust in a small team:** 6–10 developers, no published key custody or succession plan.
+5. **Messaging and media parsers:** the main 0-click entry point for spyware.
+6. **Detection and incident response:** compromise may go unseen.
 
-**Device recommendation** (§5.3, §12.1)
+**Decision constraints**
+- **No certification:** no Common Criteria, FIPS or government accreditation (§3.3; A12).
+- **Limited fleet control:** a fleet cannot enforce or fully verify device-wide
+  settings and has no device-wide remote wipe (§10.2).
+- **Legal exposure:** using a duress PIN during a lawful search can expose a
+  user to prosecution in some jurisdictions (§8.8).
+- **Credible alternatives:** stock Pixel with Advanced Protection, and iOS with
+  Lockdown Mode (§13).
+- **Not solved by GrapheneOS:** app or account compromise, phishing, carrier
+  metadata, and code running inside a compromised messenger.
 
-| Profile | Device |
-| --- | --- |
-| All profiles (A, B, C, C+B) | Pixel 10a (supported to March 2033) |
-| Where more performance is needed | Pixel 10, non-Pro (supported to August 2032) |
-| Avoid | Pro models for high-risk users (extra radios such as UWB), foldables, new Pixel 8 purchases |
-| Pixel 11 | Not yet supported by GrapheneOS (waiting for Google's Android 17 QPR2 source release); re-evaluate once support ships and settles |
+**Device recommendation** (§5.3): Pixel 10a for all profiles; Pixel 10
+(non-Pro) where more performance is needed. Avoid Pro models for high-risk
+users, foldables and new Pixel 8 purchases. Pixel 11 is not yet supported
+(§5.2.9).
 
-**Recommended next step.** A **Tier 1 Stage 2 engagement of about 16–26 analyst
+**Recommended next step.** A **Tier 1 Stage 2 engagement of about 20–34 analyst
 days** (§14.2) covering patch-lag analysis, governance and signing-key custody,
-incident-response design and MDM fit. This answers "can we trust and operate
-this?" before committing to deeper technical research on the modem and GPU.
+incident-response design, MDM fit, an attack-surface review of messaging/media
+parsers, and (for Profile B) a duress-PIN legal review. This answers "can we
+trust and operate this?" before committing to deeper technical research on the
+modem and GPU.
 
 **Open questions for the client** are listed in §14.4. The main ones: which user
 groups are in scope, whether certified products are required, and which MDM and
@@ -87,8 +96,8 @@ Pixel 8 series to the newest Pixel (Pixel 11 series). The Pixel 8 is the floor
 because it is the first generation with hardware memory tagging (MTE) and a
 7-year support commitment. Pixel 6 and 7 are still supported by GrapheneOS but
 are out of scope; Pixel 6/6 Pro are on legacy extended support and should be
-replaced. A non-Pixel device (Motorola Signature 27) is announced and noted in
-§4.7.
+replaced. A non-Pixel device (Motorola Signature 27) has been confirmed but is
+not yet available (§4.7).
 
 ### 1.3 Method
 
@@ -100,14 +109,17 @@ knowledge. Fast-moving facts were checked on 2026-11-23/24.
 
 | Tag | Meaning |
 | --- | --- |
-| **[D] Documented** | Stated by GrapheneOS or Google on official channels, including posts by GrapheneOS developers on the project forum, X or Mastodon (marked "project statement" where useful), and vendor advisories (Arm, Google TAG, Project Zero) |
-| **[S] Secondary** | Press or third-party reporting only |
+| **[D] Primary** | First-party statement by the vendor or project concerned (GrapheneOS, including developer posts on its forum, X or Mastodon, marked "project statement" where useful; Google, including security bulletins, store spec pages, security blogs, Project Zero and GTIG; Arm; Imagination; MediaTek; Apple; Samsung; Motorola), CISA KEV, NVD, or the original research publication (peer-reviewed paper, conference talk, or NGO technical report such as Amnesty Security Lab or Citizen Lab) |
+| **[S] Secondary** | Press or third-party coverage only |
 | **[O] Observed** | First-hand testing (none in Stage 1) |
-| **[A] Assumed** | Analyst judgement; listed in the assumption register |
+| **[A] Assessed** | Analyst judgement or inference. Assumptions that could change a conclusion are also listed in Appendix A and cited by ID, written "[A] (A05)" |
 
-**Confidence profile of this draft:** tag count in §0–Appendix E on 2026-11-24 — 148 Documented, 29 Secondary, 59 Assumed, 0 Observed (legend entries excluded).
+- **Absence claims** are written "[A] (absence — searched <what>, 2026-11)":
+  not finding something is an inference, not proof.
+- **Assessment notes** (quoted blocks headed "Assessment note") are [A] unless
+  a statement inside them is tagged otherwise.
 
-Descriptive sections (§3–§10) are mostly Documented. §5.3, §11, §12, §13 and
+Descriptive sections (§3–§10) are mostly Primary. §5.3, §11, §12, §13 and
 §14 are analyst assessments.
 
 ### 1.5 Out of Scope for Stage 1
@@ -127,7 +139,7 @@ its impact and how to confirm it. The open questions for the client are in §14.
 
 The client could not be consulted, so the document is written against three
 reference profiles that cover the realistic personas, threat tiers and
-deployment models. Persona-to-tier assignments are analyst judgement (A10).
+deployment models. Persona-to-tier assignments are analyst judgement [A] (A10).
 
 ### 2.1 Profiles used throughout the document
 - **A — Baseline:** privacy-conscious individual; opportunistic theft and
@@ -163,7 +175,7 @@ deployment models. Persona-to-tier assignments are analyst judgement (A10).
 | ------- | --------------------- | --------------------------- | --------------------------------- | ----------------------- |
 | P1      | B                     | C+B                         | Not recommended → issue D2 device | B                       |
 | P2      | B                     | C+B (newsroom / NGO fleet)  | Not recommended → issue D2 device | B                       |
-| P3      | A                     | C (C+B for privileged admins) | C (privileged admins: not recommended → issue D2 device) | n/a                     |
+| P3      | A (privileged admins: not recommended → issue D2 device) | C (C+B for privileged admins) | C (privileged admins: not recommended → issue D2 device) | n/a                     |
 | P4      | A                     | C                           | C                                 | C (stripped-down)       |
 | P5      | A                     | n/a                         | A plus work profile               | A                       |
 
@@ -182,7 +194,7 @@ raises the cost substantially but cannot be relied on to defeat it.
 ¹ The default 18-hour auto-reboot leaves a long after-first-unlock window in
 which a seized, unlocked-since-boot device is more exposed.
 ² The organization cannot enforce or verify device-wide settings set by the
-user (auto-reboot, USB-C mode, duress PIN); fleets also tend to need sandboxed
+user (auto-reboot, USB-C mode, duress PIN; §10.2); fleets also tend to need sandboxed
 Google Play for work apps.
 ³ Exploit mitigations apply in every profile, but A and C keep more attack
 surface (Play services, more apps, more radios on).
@@ -192,6 +204,19 @@ working chains.
 ⁵ No profile fully addresses T4: baseband, firmware and supply-chain attacks sit
 below the OS. B raises the cost; it does not remove the risk.
 
+### 2.6 Residual risk with Profile B applied
+
+What remains for a high-risk user even with all Profile B controls (§12.4) in
+place. [A]
+
+| Tier / area | Residual risk |
+| --- | --- |
+| T1 Opportunistic theft / loss | Negligible |
+| T2 Commercial forensic extraction | After-first-unlock window up to the auto-reboot timer (1 h); vendor counter-measures to auto-reboot (§8.2) |
+| T3 Commercial spyware | Browser/WebView, messaging/media parser and driver 0-day chains remain possible; their cost is raised, not removed |
+| T4 Nation-state | Baseband and firmware attacks (now including an exploited Pixel modem bug, §4.5), supply-chain and signing-key compromise |
+| Operational | Settings drift, no remote wipe, app or account compromise |
+
 ---
 
 ## 3. GrapheneOS Overview
@@ -200,7 +225,7 @@ GrapheneOS is a security-hardened mobile operating system based on the Android
 Open Source Project (AOSP). It runs Android apps, but changes large parts of the
 operating system underneath them to make exploitation and data extraction harder.
 It is developed by a small non-profit team and currently runs only on Google Pixel
-phones, with a first Motorola device announced.
+phones, with a first Motorola device confirmed.
 
 ### 3.1 Project Background, Governance, Funding and Infrastructure
 
@@ -208,13 +233,13 @@ phones, with a first Motorola device announced.
 
 | Period | Event | Tag |
 | --- | --- | --- |
-| Late 2014 | Founded by Daniel Micay as a solo project, starting with hardening work such as porting OpenBSD malloc to Android's C library and PaX kernel patches | [D] |
-| Late 2015 – 2018 | A company was incorporated and became the main sponsor; the OS was known as **CopperheadOS** during this period. The project says it was agreed GrapheneOS would stay independently owned and controlled by its founder | [D] |
-| 2018 | Split from the sponsor. The project's account says the company's CEO seized infrastructure and donations. This is the project's own account of a contested dispute and has not been independently verified | [D] (one-sided) |
-| 2018–2019 | Rebranded to AndroidHardening, then to **GrapheneOS** (the site gives no dates; 2019 for the GrapheneOS name is analyst knowledge) | [D] / [A] |
-| March 2023 | **GrapheneOS Foundation** created as a Canadian non-profit to receive and distribute donations | [D] |
+| Late 2014 | Founded by Daniel Micay as a solo hardening project | [D] |
+| 2015–2018 | Known as **CopperheadOS** while a company sponsored it; split in 2018 in a contested dispute (the project's account is one-sided and unverified) | [D] (one-sided) |
+| 2018–2019 | Renamed AndroidHardening, then **GrapheneOS** (2019 for the name is not dated on the site) | [D] / [A] |
+| March 2023 | **GrapheneOS Foundation** created as a Canadian non-profit | [D] |
 | November 2025 | Left France and the hosting provider OVH, citing French pressure on encryption and device access | [D] |
-| March 2026 | Long-term partnership with **Motorola** announced; the Motorola Signature 27 is to be the first non-Pixel device | [S] |
+| March 2026 | Partnership with **Motorola** announced at MWC for an unnamed future device | [S] |
+| September 2026 | Motorola Signature 27 unveiled; GrapheneOS confirmed it as the first non-Pixel device (project statement). Retail and GrapheneOS availability dates not confirmed [A] (A07) | [D] |
 
 **Governance and team**
 
@@ -228,9 +253,10 @@ phones, with a first Motorola device announced.
 - The founder has historically been the public face of the project. Whether he
   still leads it day to day, and how key decisions are made, is not documented
   on the official site. [A]
-- **Vulnerability handling:** we found no published bug bounty, no formal
-  vulnerability disclosure policy and no published independent security audit.
-  [A] (absence of evidence) This is a question for Stage 2.
+- **Vulnerability handling:** no published bug bounty, formal vulnerability
+  disclosure policy or independent security audit found. [A] (absence —
+  searched grapheneos.org and the project forum, 2026-11) A question for
+  Stage 2.
 
 **Funding**
 
@@ -246,12 +272,17 @@ phones, with a first Motorola device announced.
   (US; London as a temporary location). DNS runs on anycast networks with Vultr
   and BuyVM. Email, Matrix, the forum, Mastodon and the **attestation service**
   were moving to Netcup (Germany) short term and **colocated servers in Toronto**
-  long term. [D] Whether that move is complete is unverified. [A05]
+  long term. [D] Whether that move is complete is unverified. [A] (A05)
 - Updates are verified by signature with downgrade protection at three layers
   (System Updater, update_engine, verified boot), and the project states that "the
   update server isn't a trusted party". **A compromised or seized mirror could
   delay updates, but could not push malicious ones** unless the signing keys were
   also compromised. [D]
+- **Legal compulsion.** The project and its signing keys sit under Canadian
+  jurisdiction. Because updates targeted at a single device are rejected
+  (§9.1) [D], a compelled malicious update would have to ship to every device,
+  which makes it far more likely to be noticed, especially by anyone checking
+  reproducible builds. [A]
 
 > **Assessment note — why this matters to the client**
 > - **Concentration risk.** A team of 6–10, funded by donations, with no
@@ -261,13 +292,13 @@ phones, with a first Motorola device announced.
 >   organization would carry the operational risk itself.
 > - **Jurisdiction.** The legal entity and long-term infrastructure are in
 >   Canada. The 2025 move shows the project will relocate under legal pressure;
->   it also shows service availability can be disrupted (it delayed early
->   Pixel 10 support).
+>   it also shows service availability can be disrupted.
 > - **Public disputes.** The project has been in public conflict, notably the
 >   CopperheadOS split. This is a reputational factor for an organization
 >   adopting it, not a technical flaw.
 >
-> Feeds §11 area #2 (Supply chain, governance & infrastructure).
+> Feeds §11 area #4 (Supply chain, governance & vulnerability handling) and
+> #1 (Upstream dependency on Google).
 
 ### 3.2 Design Philosophy
 
@@ -281,10 +312,8 @@ phones, with a first Motorola device announced.
 - **Hardware requirements are non-negotiable.** Devices must offer, among other
   things, hardware memory tagging (ARM MTE or equivalent), a secure element with
   StrongBox and Weaver, verified boot with user-installed keys, and long-term
-  firmware updates. This is why only Pixels qualify today (§4.1, §5). [D]
-  Pixel 11 MTE arrived with Android 17 QPR2 and works in GrapheneOS's port;
-  Pixel 11 support is now waiting for Google to publish the QPR2 platform
-  source (project statement, November 2026). [D]
+  firmware updates. This is why only Pixels qualify today (§4.1, §5; Pixel 11
+  status: §5.2.9). [D]
 - **No Google apps or services by default.** Like AOSP, GrapheneOS ships without
   them and says they will never be bundled. Users who need them can install Google
   Play as ordinary sandboxed apps with no special privileges (§7.4). [D]
@@ -301,10 +330,10 @@ phones, with a first Motorola device announced.
 | Common assumption | Reality | Tag |
 | --- | --- | --- |
 | A "de-Googled privacy ROM" like /e/OS or CalyxOS | It is a hardening project first; privacy follows from sandboxing. It also allows sandboxed Google Play, which pure de-Googled ROMs don't | [D] |
-| Runs on many devices, like LineageOS | Runs only on devices that meet its hardware requirements: currently Pixel 6 and newer (Pixel 6/6 Pro on legacy extended support), with Motorola to follow | [D] |
+| Runs on many devices, like LineageOS | Runs only on devices that meet its hardware requirements: currently Pixel 6 and newer (Pixel 6/6 Pro on legacy extended support); the Motorola Signature 27 is confirmed as the first non-Pixel device (project statement), with no availability date yet | [D] |
 | Can be rooted or customized freely | No root access (root would break verified boot and the security model; users who want it must make unsupported custom builds); the bootloader is re-locked with GrapheneOS keys after install | [D] (project statements) |
 | An anonymity tool | It does not hide your identity from the mobile network, carrier or the services you sign into. Anonymity needs separate measures (e.g. Tor, careful account use) | [A] |
-| A certified or accredited product | No Common Criteria, FIPS 140 or government accreditation found in any source checked. The FAQ discusses external review, not certification | [A] (absence of evidence) |
+| A certified or accredited product | No Common Criteria, FIPS 140 or government accreditation found. The FAQ discusses external review, not certification. Stock Pixels' certifications do not carry over (§13) | [A] (absence — searched grapheneos.org and public certification listings, 2026-11) |
 | An enterprise product with vendor support | No commercial support, SLA, fleet console or management service. It supports Android Enterprise work profiles via standard MDM (§10) | [D] / [A] |
 | Independent of Google | It depends on Google for hardware, firmware, security patches and AOSP source releases (§4, §9.3) | [D] |
 
@@ -333,37 +362,12 @@ phones, with a first Motorola device announced.
 - Releases are frequent: about two dozen between early July and 18 November 2026,
   roughly one a week. [A] (count of changelog entries)
 
-**How updates are delivered**
+Update delivery and its security properties: §9.1.
 
-- Automatic background updates, checking about **every six hours** when
-  connected. [D]
-- Updates install to a **secondary copy of the OS**, which becomes active only
-  after the update completes; if the new version fails to boot, the device rolls
-  back. [D]
-- Uses **incremental (delta) updates** when available; a full package can upgrade
-  from any past version. [D]
-- Works while the device is **locked and idle, including before first unlock**,
-  so devices kept in the most secure state still get patched. [D]
-- Every package is **signed and checked, with downgrade protection**; updates
-  carrying a serial-number constraint (i.e. targeted at one device) are
-  rejected. [D]
-- Users can restrict updates to non-roaming or unmetered networks, require
-  charging or a minimum battery level, and opt in to automatic reboot. There is
-  **no setting to delay updates**; the only way to stop them is to disable the
-  System Updater app, which the project strongly advises against. [D]
-- Updates can also be sideloaded from recovery with adb, without enabling adb in
-  the OS. [D]
-
-> **Assessment note.** The update design is strong: signed, rollback-protected,
-> works before first unlock, and resistant to targeted (per-device) updates.
-> The gaps for an organization are:
-> - **No staged rollout control.** A fleet cannot pin or defer a version, so a
->   bad Stable release reaches all devices at roughly the same time. The
->   compensating control is to run a few devices on Beta as early warning.
-> - **Patch timing depends on Google.** GrapheneOS says it can only fully deliver
->   security updates while the OEM releases them, and Google's switch to
->   quarterly full bulletins and twice-yearly AOSP source drops affects when fixes
->   arrive (§9.3, §11 area #1).
+> **Assessment note.** For an organization, the main gaps are that a fleet
+> cannot pin or defer a version (run a few devices on Beta as early warning),
+> and that patch timing depends on Google's release schedule (§9.3, §11
+> area #1).
 
 ---
 
