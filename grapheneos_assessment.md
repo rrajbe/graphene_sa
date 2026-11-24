@@ -1,7 +1,7 @@
 # GrapheneOS Security Assessment — Stage 1
 
 > **Classification:** Client confidential (TLP:AMBER)
-> **Version:** 0.1 draft · **Date:** 2026-11-24 · **Author:** Raj · **Reviewer:** _TBD_
+> **Version:** 0.9 (for peer review) · **Date:** 2026-11-24 · **Author:** Raj · **Reviewer:** _TBD_
 >
 > **Limitations:** This is a desk-based assessment. It draws on public
 > documentation, prior research and analyst knowledge. No hands-on testing, code
@@ -356,19 +356,15 @@ phones, with a first Motorola device confirmed.
 **Versioning and cadence**
 
 - Builds are numbered as 10-digit values such as **2026111800** (latest as of
-  2026-11-24). This release moved Pixel firmware, drivers, HALs and kernels
-  (6.18 base) to Android 17 QPR2, which Google released for Pixels on
-  2026-11-10, with the 2026-11-05 security patch level. [D] The number reads as date (YYYYMMDD) plus a two-digit counter; the site
+  2026-11-24; Android 17 QPR2 base, 2026-11-05 patch level — §9.3). [D] The number reads as date (YYYYMMDD) plus a two-digit counter; the site
   does not define the format. [D] / [A]
 - Releases are frequent: about two dozen between early July and 18 November 2026,
   roughly one a week. [A] (count of changelog entries)
 
 Update delivery and its security properties: §9.1.
 
-> **Assessment note.** For an organization, the main gaps are that a fleet
-> cannot pin or defer a version (run a few devices on Beta as early warning),
-> and that patch timing depends on Google's release schedule (§9.3, §11
-> area #1).
+> **Assessment note.** Fleet implications of the update model: §9.1; patch
+> timing: §9.3 and §11 #1.
 
 ---
 
@@ -641,10 +637,7 @@ physical-memory primitives that sit outside the software mitigations in §6.
 11 [D]; see §4.3 for track record and certification status.
 
 **5.2.4 Memory tagging (MTE).** All supported devices have MTE, and GrapheneOS
-uses it by default for the base OS and known-compatible apps. [D] Pixel 11's
-MTE was disabled in launch firmware and enabled with Android 17 QPR2;
-GrapheneOS calls its support a bare minimum and is still evaluating it
-(§5.2.9). [D]
+uses it by default for the base OS and known-compatible apps. [D] Pixel 11 MTE status: §5.2.9.
 
 **5.2.5 Fingerprint.** Optical (8, 8a, 9a, 10a), ultrasonic (9, 10, 11 non-Fold),
 side capacitive (Folds). Spoofing resistance differs by type, but GrapheneOS
@@ -748,7 +741,7 @@ It is the only independent evaluation found. [D]
 ### 6.2 Hardened Bionic (libc)
 
 Android's C library carries additional hardening that works with
-hardened_malloc. [D] (Detail to be expanded in Stage 2.)
+hardened_malloc. [D] Stage 2 will review the Bionic hardening in detail.
 
 ### 6.3 Hardware Memory Tagging (MTE)
 
@@ -1120,8 +1113,8 @@ guessing the PIN is limited by the secure element (20 attempts in total). [D] A
 and Pixel 6–9 at most, so they say nothing directly about Pixel 10, 10a or 11.
 They are months old by the time they surface, and show capability the vendor
 offers widely — not what a state agency might have privately. Absence of a
-capability in a matrix is evidence, not proof. [A] Lab validation is §11 area
-#12.
+capability in a matrix is evidence, not proof. [A] Lab validation is §11
+area #13.
 
 ### 8.8 Coercion and Border Scenarios
 
@@ -1281,8 +1274,9 @@ Vanadium against Chrome releases, is Stage 2 work (§14.2).
   runs scheduled verification and e-mails an alert when a device fails to
   provide a valid attestation in time. [D]
 - For a fleet, the remote service gives a basic integrity dashboard, but it is a
-  GrapheneOS-run service. [D] Its hosting is being moved to Canada per the
-  project's November 2025 infrastructure post (§3.1). [D] / [A] (A05)
+  GrapheneOS-run service. [D] Its hosting is moving to Netcup (Germany) short term
+  and to colocated servers in Toronto long term, per the project's November
+  2025 infrastructure post (§3.1). [D] / [A] (A05)
 
 **What Auditor reports** [D] (Auditor and AttestationServer source code,
 attestation.app documentation):
@@ -1308,7 +1302,7 @@ attestation.app documentation):
   pairing pins a per-device key, so a forged chain from another key fails after
   the first pairing. [D] / [A] Google rotated the attestation root in 2026 (the
   new root signs remotely provisioned chains from 1 February 2026); a self-hosted
-  verifier must trust both roots. [D]
+  verifier must trust both roots. [D] (Android Developers, key attestation)
 - **Data protection:** attestation.app stores accounts (username, password hash,
   alert e-mail addresses), each device's pinned certificates and verified boot
   key, the items above and the attestation history; the web server also logs
@@ -1430,7 +1424,7 @@ provisioning tool. [D] / [A] Compensating controls:
 | --- | --- | --- |
 | Android Auto | Supported via sandboxed Play compatibility layer | [D] |
 | eSIM | Existing eSIMs work; adding eSIMs needs an opt-in toggle | [D] |
-| Google Wallet tap-to-pay | Not available: requires a Google-certified OS [D] (Google Wallet help). Alternatives include contactless cards and watches with their own NFC; some bank apps offer their own NFC payments | [D] / [S] |
+| Google Wallet tap-to-pay | Not available: requires a Google-certified OS [S] (TechTimes, 2026; GrapheneOS forum). Alternatives include contactless cards and watches with their own NFC; some bank apps offer their own NFC payments | [D] / [S] |
 | RCS (Google Messages) | Works via sandboxed Play, including end-to-end encrypted chats, but can break with carrier or Google changes | [S] |
 | Wear OS | Mixed user reports; some watches (incl. Pixel Watch) work with sandboxed Play | [S] |
 | Push notifications | Via sandboxed Play (FCM) or app-specific alternatives | [D] / [A] |
@@ -1508,7 +1502,7 @@ client input and Stage 2 results.
 | 12 | Sandboxed Play compatibility layer | GrapheneOS code bridging closed Play services and the OS; IPC surface; eSIM path (§7.4) | L | H | **M** | M | All | A, C | Code review of the compatibility layer; IPC fuzzing |
 | 13 | Forensic claims | Strong on paper and in leaks (§8.7), and vendors are adapting: Amnesty documented a Cellebrite USB exploit chain (Feb 2025) of the class GrapheneOS's USB-C control is designed to block [D]; forensic firms used Pixel firmware 0-days in 2024, fixed after GrapheneOS reports [D]; GrayKey reportedly keeps iPhones in AFU across reboots [S] (§8.1–§8.3, §8.9) | L | H | **M** | H | All | A, B | Lab extraction tests per generation at default and hardened settings; replay of the 2025 USB chain |
 | 14 | Proximity radios: Wi-Fi, Bluetooth and NFC firmware | Closed firmware reachable by anyone in radio range: Broadcom Wi-Fi RCE (Broadpwn; Project Zero 2017), BrakTooth Bluetooth flaws (2021), and a Critical Pixel Bluetooth elevation of privilege (CVE-2026-55330, October 2026 bulletin) [D]; turning radios off when unused is the main lever (§7.7) | L | H | **M** | H | All | B | Firmware CVE history and patch status per chip; attack-surface review of Wi-Fi, Bluetooth and NFC stacks |
-| 15 | MTE / hardened_malloc opt-outs | Per-app compatibility mode silently drops protections and falls back to Scudo, which has a published exploitation technique (USENIX WOOT '24) [D] (§6.3, §6.7) | M | L | **L** | L | All | A, B | Opt-out census of the client's required apps |
+| 15 | MTE / hardened_malloc opt-outs | Per-app compatibility mode silently drops protections and falls back to Scudo, which has a published exploitation technique (USENIX WOOT '24) [D] (§6.3, §6.7) | M | L | **L** | L | All | A, C | Opt-out census of the client's required apps |
 | 16 | Default network & attestation data | GrapheneOS servers see IP addresses and timing; remote attestation sends device attestation data, check-in history and alert email addresses to a GrapheneOS-run service; no published data-processing terms found [A] (absence — searched attestation.app and grapheneos.org, 2026-11) (§7.6, §7.10, §9.4) | M | L | **L** | L | All | A, B, C | Traffic capture and analysis; attestation data-flow review; data-processing terms; assess self-hosting |
 | 17 | Biometric differences | Sensor types differ, but the 5-attempt cap and 2-factor unlock limit the risk (§5.2.5) | L | L | **L** | M | Per device | A, B | Spoof testing per sensor type |
 
@@ -1519,7 +1513,7 @@ client input and Stage 2 results.
   the OS comes from Google, and the Pixel 11 wait shows the dependency biting
   now. **GPU and accelerator drivers** (#2) and **baseband and IMS** (#3) are
   rated likelihood H because both have current in-the-wild exploitation on
-  Pixel hardware; the modem rating rose from M with CVE-2026-58704. **Supply
+  Pixel hardware; the modem is rated H because of CVE-2026-58704. **Supply
   chain and governance** (#4) leads the likelihood-M group because it decides
   whether the client can trust the project at all. **Messaging and media
   parsers** (#5) follow as the most common 2025 entry point. **Detection and
@@ -1557,7 +1551,7 @@ How much each area matters to each profile (High / Medium / Low / —):
 | 6 | Detection & IR | L | H | H | H |
 | 7 | Enterprise manageability | — | — | H | H |
 | 8 | Browser / WebView | M | H | M | H |
-| 9 | App sourcing | H | H | M | M |
+| 9 | App sourcing | H | H | M | M (MDM approved-app list) |
 | 10 | Legal & regulatory fit | L | H | M | H |
 | 11 | Pixel 11 components | L | M | L | M |
 | 12 | Sandboxed Play layer | M | L (no Play in Owner profile) | H | M |
@@ -1605,7 +1599,8 @@ alternatives and models to avoid are in §5.3.
 
 ### 12.3 Profile A — Baseline
 
-For privacy-conscious individuals and P3/P4 staff on personal devices
+For privacy-conscious individuals and P3/P4 staff on individually owned devices
+not enrolled with the organisation (D1)
 (privileged P3 admins should not use personal devices; issue a C+B device). Keeps
 defaults where they are already strong; adds app discipline. Sandboxed Play
 is allowed where apps need it.
@@ -1694,7 +1689,7 @@ profiles. [A]
 The last column applies to Profile C (and C+B). "User-set; not verifiable" means
 the organisation can neither enforce the setting nor detect if it is changed.
 "Auditor shows" means the value appears in attestation results as reported by
-the OS, but no alert is raised when it changes (§9.4, §10.2). Controls there depend on the written build standard, user training and
+the OS, but no alert is raised when it changes (§9.4, §10.2). Settings marked "User-set; not verifiable" depend on the written build standard, user training and
 periodic manual checks. [A]
 
 ---
@@ -1755,7 +1750,7 @@ Ratings are relative and qualitative (analyst judgement, [A]) unless tagged.
   (§7.11). [D] / [A]
 - **Memory tagging: depth vs breadth.** Apple's Memory Integrity Enforcement
   (MIE, enhanced MTE designed against tag leakage) arrived only with iPhone 17 /
-  iPhone Air (A19) hardware; older iPhones get only its allocator hardening.
+  iPhone Air (A19 chip) hardware; older iPhones get only its allocator hardening.
   [D] GrapheneOS applies standard MTE more broadly, across the OS and most apps,
   on Pixel 8 and later (§6.3). [D] / [A]
 - **GrapheneOS strengths:** per-app network and sensor control; no mandatory
@@ -1904,7 +1899,7 @@ Most are taken from the assumption register (Appendix A):
 2. Are certified products (Common Criteria, FIPS 140) required? (A12)
 3. Are any staff subject to regulated-communications recording obligations
    (for example FINRA/SEC, FCA or MiFID II)? (§10.6, §11 #10)
-4. Which countries do staff live in and travel to? (§8.8, §11 #10, A09)
+4. Which countries do staff live in and travel to? (§8.8, §11 #10)
 5. What is your legal position on duress wipes in those jurisdictions? (§11
    #10, WP6)
 6. What data-protection requirements would apply to sending device data to
@@ -1965,7 +1960,7 @@ client is the first step of Stage 2. Area numbers refer to §11.2.
 | A17 | GrapheneOS's Pixel 11 MTE support will reach coverage comparable to Pixel 8–10a; today the project calls it "bare minimum" | §5.2.4, §5.2.9; §11 #11; Pixel 11 recommendation | GrapheneOS release notes; readiness review (WP13) |
 
 **Dependencies to monitor.** These are documented facts, not assumptions, but
-a change in either would change conclusions. IDs are kept for reference.
+a change in either would change conclusions. They keep their IDs A03 and A06 so references stay valid.
 
 | ID | Dependency | Why it matters | Where to watch |
 | --- | --- | --- | --- |
@@ -2028,7 +2023,7 @@ Personas are defined in §2.3.
 
 ## Appendix D — Device Specification Detail
 
-Merged into §5.1.
+See the device matrix in §5.1.
 
 ## Appendix E — Hardening Settings Reference
 
@@ -2066,6 +2061,8 @@ All URLs accessed 2026-11-23/24. Each claim in the body carries its confidence t
 - The Register, GrapheneOS leaves OVH: https://www.theregister.com/2025/11/28/grapheneos_ovhcloud/
 
 **Upstream and devices**
+- Google Store, Pixel 11 tech specs: https://store.google.com/product/pixel_11_specs
+- Google Store, Pixel 10a tech specs: https://store.google.com/us/product/pixel_10a_specs
 - Android Authority, Google's risk-based Android security updates (July 2025 bulletin with no fixes; September 2025 with 119): https://www.androidauthority.com/android-Risk-Security-updates-3597466
 
 - Android Authority, AOSP twice a year: https://www.androidauthority.com/aosp-source-code-schedule-3630018/
@@ -2098,6 +2095,8 @@ All URLs accessed 2026-11-23/24. Each claim in the body carries its confidence t
 - Microsoft Edge, Super Duper Secure Mode (2021): https://microsoftedge.github.io/edgevr/posts/Super-Duper-Secure-Mode/
 
 **GPU and drivers**
+- Pixel Update Bulletin, March 2022 (CVE-2021-39793): https://source.android.com/docs/security/bulletin/pixel/2022-03-01
+- Arm, Mali GPU driver vulnerabilities: https://developer.arm.com/Arm%20Security%20Center/Mali%20GPU%20Driver%20Vulnerabilities
 
 - Google Threat Intelligence, 2025 zero-day review: https://cloud.google.com/blog/topics/threat-intelligence/2025-zero-day-review/
 - GitHub Security Lab, bypassing MTE with CVE-2025-0072: https://github.blog/security/vulnerability-research/bypassing-mte-with-cve-2025-0072/
@@ -2112,6 +2111,8 @@ All URLs accessed 2026-11-23/24. Each claim in the body carries its confidence t
 - TechTarget, spyware vendor exploiting Mali driver (CVE-2023-4211): https://www.techtarget.com/cybersecurity/news/366554254/Spyware-vendor-exploiting-kernel-flaw-in-Arm-Mali-GPU-drivers
 
 **Baseband and radios**
+- Kaspersky, Google Pixel September 2026 security update: https://www.kaspersky.com/blog/google-pixel-september-2026-security-update/56488/
+- Song et al., PeriScope: an effective probing and fuzzing framework for the hardware-OS boundary, NDSS 2019: https://lirias.kuleuven.be/retrieve/596810
 
 - Android Security Bulletin, Pixel, September 2026 (CVE-2026-58704 and others): https://source.android.com/docs/security/bulletin/pixel/2026/2026-09-01
 - 9to5Google, targeted Pixel modem zero-day (Sept 2026): https://9to5google.com/2026/09/16/google-pixel-targeted-zero-day-modem-attack/
@@ -2131,6 +2132,9 @@ All URLs accessed 2026-11-23/24. Each claim in the body carries its confidence t
 - MediaTek product security bulletin, February 2025 (CVE-2025-20634): https://corp.mediatek.com/product-security-bulletin/February-2025
 
 **Forensics and physical access**
+- 404 Media, GrayKey bypasses iPhone inactivity reboot (Oct 2026): https://www.404media.co/cops-can-bypass-iphone-automatic-inactivity-reboot-graykey/
+- 404 Media, leaked GrayKey capability documents (Nov 2024): https://404media.co/leaked-documents-show-what-phones-secretive-tech-graykey-can-unlock-2
+- Android Developers, key attestation (root certificates and rotation): https://developer.android.com/privacy-and-security/security-key-attestation
 
 - Android Authority, Cellebrite leak and GrapheneOS: https://www.androidauthority.com/cellebrite-leak-google-pixel-grapheneos-security-3611794/
 - 404 Media, Cellebrite Teams call leak (Oct 2025): https://www.404media.co/someone-snuck-into-a-cellebrite-microsoft-teams-call-and-leaked-phone-unlocking-details/
@@ -2172,6 +2176,8 @@ All URLs accessed 2026-11-23/24. Each claim in the body carries its confidence t
 - Auditor / attestation.app: https://attestation.app/about
 
 **Enterprise, apps and comparators**
+- Google, Advanced Protection for Android (help page): https://support.google.com/android/answer/16339980
+- Apple, About Lockdown Mode: https://support.apple.com/en-us/105120
 
 - GrapheneOS attestation compatibility guide: https://grapheneos.org/articles/attestation-compatibility-guide
 - Android Authority, Revolut blocking GrapheneOS: https://androidauthority.com/revolut-blocking-grapheneos-3695551
