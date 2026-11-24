@@ -75,7 +75,7 @@ noting how each applies to each profile and device generation.
 
 | #   | Task                       | Details                                                                                          | Owner | Depends on | Est.  | Done |
 | --- | -------------------------- | ------------------------------------------------------------------------------------------------ | ----- | ---------- | ----- | ---- |
-| 2.1 | Overview                   | Background, governance, infrastructure, design philosophy (doc §3)                               | Raj   | 1.4        | 20 m  | [ ]  |
+| 2.1 | Overview                   | Background, governance, infrastructure, design philosophy (doc §3)                               | Raj   | 1.4        | 20 m  | [x]  |
 | 2.2 | Platform & trust model     | Hardware requirements, AVB, Titan M2, baseband isolation (doc §4)                                | Raj   | 1.2, 1.3   | 30 m  | [ ]  |
 | 2.3 | Device generation analysis | SoC, modem, GPU, fingerprint, radios, support windows; what differs for security (doc §5)        | Raj   | 1.2        | 45 m  | [ ]  |
 | 2.4 | Exploit mitigations        | hardened_malloc, MTE, exec spawning, kernel, Vanadium (doc §6)                                   | Raj   | 2.2        | 30 m  | [ ]  |
@@ -104,7 +104,7 @@ someone other than the author.
 | #   | Task                     | Details                                                                                   | Owner         | Depends on | Est.  | Done |
 | --- | ------------------------ | ----------------------------------------------------------------------------------------- | ------------- | ---------- | ----- | ---- |
 | 4.1 | Check feature facts      | Current defaults: auto-reboot, USB-C mode, duress, eSIM handling, Auditor                 | Raj           | 2.4–2.7    | 20 m  | [ ]  |
-| 4.2 | Claimed vs verified pass | Tag every claim Documented / Observed / Assumed; re-check anything Phase 1 left as †      | Raj           | 4.1        | 20 m  | [ ]  |
+| 4.2 | Claimed vs verified pass | Tag every claim Documented / Secondary / Observed / Assumed; re-check anything Phase 1 left as †      | Raj           | 4.1        | 20 m  | [ ]  |
 | 4.3 | Executive summary        | Write doc §0 last, from §11 and §12                                                       | Raj           | 4.2        | 15 m  | [ ]  |
 | 4.4 | Peer read                | Accuracy, tone, and that the core cut stands on its own                                   | _Reviewer TBD_ | 4.3       | 20 m  | [ ]  |
 | 4.5 | Deliver                  | Add classification and limitations disclaimer; attach assumption register                 | Raj           | 4.4        | 5 m   | [ ]  |
@@ -182,7 +182,8 @@ coverage. **Primary** = GrapheneOS or Google; **Secondary** = press only.
 - 1.2 Device scope: Pixel 8 → newest supported; why Pixel 8 is the floor (MTE,
   7-year support); note on Pixel 6/7 if the client already owns them
 - 1.3 Method: documentation review, prior research, analyst knowledge
-- 1.4 Confidence labels: **Documented / Observed / Assumed**. Stage 1 is
+- 1.4 Confidence labels: **Documented / Secondary / Observed / Assumed**
+  (Secondary = press or third-party reporting only). Stage 1 is
   desk-based, so "Observed" is used only where we have first-hand evidence;
   most claims will be Documented or Assumed
 - 1.5 Out of scope for Stage 1: hands-on testing, code audit, RE
@@ -429,6 +430,7 @@ costing only. Ratings below are working hypotheses, to be re-scored in Phase 3.
   | A09 | The client is not restricted to US/EU-sourced hardware or to a specific carrier | §12.1 device choice | Ask client |
   | A10 | Highest credible tier per persona is as in §2.3 (e.g. P1 at T3, P2 at T4) | Profile assignment and §11 priorities shift | Ask client which personas they actually have |
   | A11 | Organization-owned devices can be issued to high-risk staff instead of BYOD | C+B and the BYOD "not recommended" guidance may not be acceptable | Ask client about device ownership policy |
+  | A12 | The client has no hard requirement for certified products (Common Criteria, FIPS 140, government accreditation) | GrapheneOS may be ruled out for regulated uses regardless of technical strength | Ask client about compliance obligations |
 - **B.** Persona, threat-tier and deployment-model definitions
   - Personas: P1 Executive/VIP · P2 Journalist/activist/high-risk individual ·
     P3 Security/IT staff · P4 Field/operational staff · P5 Privacy-conscious user
