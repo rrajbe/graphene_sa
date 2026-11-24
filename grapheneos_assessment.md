@@ -980,7 +980,11 @@ provisioning tool. [D] / [A] Compensating controls:
   matters in practice, given §4–§10.
 - **Impact (I)** — what happens if it does: device compromise, data exposure,
   fleet-wide failure, or loss of the security guarantees the client is buying.
-- **Risk = L × I**, rated High / Medium / Low. **Risk sets the rank.**
+- **Risk** is impact-weighted, rated High / Medium / Low:
+  - **High** — Impact H with Likelihood M or H.
+  - **Medium** — Impact H with Likelihood L, or Impact M with Likelihood M or H.
+  - **Low** — everything else.
+- **Risk sets the rank.** Within a risk band, order is analyst judgement.
 - **Verify effort** — how much Stage 2 work it takes to confirm or rule out. It
   feeds costing (§14) and does **not** affect rank.
 
@@ -991,32 +995,35 @@ client input and Stage 2 results.
 
 | # | Area | Why it raises eyebrows | L | I | Risk | Verify effort | Devices | Profiles | Proposed Stage 2 test |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Upstream dependency on Google | Device trees no longer published; Pixel kernel source by request; AOSP source only Q2/Q4; full bulletins quarterly; all firmware closed (§9.3) | H | H | **H** | M | All; G5+ most | A, B, C | Patch-lag timeline over 12 months; track upstream changes and porting delays |
-| 2 | Supply chain, governance & infrastructure | ~10-person donation-funded team; **signing-key custody not published**; reproducibility claimed but not independently confirmed; no succession plan; infrastructure relocated under legal pressure (§3.1, §9.2) | M | H | **H** | M | All | B, C | Governance and key-custody interview; reproducible-build test; hosting review |
+| 1 | Upstream dependency on Google | Device trees no longer published; Pixel kernel source by request; AOSP source only Q2/Q4; full bulletins quarterly; all firmware closed; Pixel 11 support is waiting for Google to publish the Android 17 QPR2 source (§5, §9.3) | H | H | **H** | M | All; G5+ most | A, B, C | Patch-lag timeline over 12 months; track upstream changes and porting delays |
+| 2 | Supply chain, governance & infrastructure | 6–10-person donation-funded team; **signing-key custody not published**; reproducibility claimed but not independently confirmed; no succession plan; infrastructure relocated under legal pressure (§3.1, §9.2) | M | H | **H** | M | All | B, C | Governance and key-custody interview; reproducible-build test; hosting review |
 | 3 | Baseband / cellular stack | Largest closed attack surface; nation-state target; satellite path on 5400; MediaTek on Pixel 11 (§4.5, §5.2.3) | M | H | **H** | H | All; Pixel 11 new | B | Modem CVE history per generation; IOMMU isolation review; firmware RE scope |
 | 4 | GPU driver (Mali and PowerVR) | Mali: repeated in-the-wild spyware use; PowerVR: new stack, little public research (§5.2.2) | M | H | **H** | H | All | B, C | Mali patch-status review; PowerVR attack-surface mapping and fuzzing scope |
 | 5 | Detection & incident response | No root, no MTD agent; compromise may go unseen; Auditor proves OS integrity only (§9.7) | H | M | **M** | M | All | B, C | IR runbook dry run; evaluate log, MTE crash and MVT triage options |
 | 6 | Browser / WebView | Vanadium patch latency vs Chromium 0-days; **WebView keeps JIT on and lacks site isolation** (§6.6) | M | M | **M** | L | All | A, B | Patch-latency study; WebView usage census of required apps |
-| 7 | Enterprise manageability | No fleet console; fully managed MDM undocumented; no staged rollout; Play Integrity blocks some apps (§10) | H | M | **M** | M | All | C | MDM compatibility matrix with client's MDM; corporate app tests |
+| 7 | Enterprise manageability | No fleet console; fully managed MDM undocumented; no staged rollout; **a work profile cannot enforce or verify device-wide settings** (auto-reboot, USB-C, PIN scrambling, cellular mode, duress PIN), and attestation checks OS integrity and patch level, not settings, so configuration drift goes undetected; no device-wide remote wipe from a work-profile MDM; Play Integrity blocks some apps (§9.4, §10) | H | M | **M** | M | All | C | MDM compatibility matrix with client's MDM; corporate app tests; configuration-verification and remote-wipe options |
 | 8 | Sandboxed Play compatibility layer | GrapheneOS code bridging closed Play services and the OS; IPC surface; eSIM path (§7.4) | L | H | **M** | M | All | A, C | Code review of the compatibility layer; IPC fuzzing |
 | 9 | Pixel 11 new components | Titan M3, MediaTek M90 and new PowerVR arrive together; not yet supported (§5.2) | M | M | **M** | H | Pixel 11 | B | Readiness review after support ships; secure element and modem research scope |
 | 10 | Forensic claims | Strong on paper and in leaks, but vendors are adapting (e.g. claimed "Safeguard Mode") (§8) | L | H | **M** | H | All | A, B | Lab extraction tests per generation at default and hardened settings |
 | 11 | App sourcing supply chain | Apps, not the OS, are the usual compromise path; store trust models differ (§7.9) | M | M | **M** | L | All | A, B, C | Store trust review; approved-app list |
-| 12 | MTE / hardened_malloc opt-outs | Per-app compatibility mode silently drops protections (§6.7) | M | L | **L** | L | All | A, B | Opt-out census of the client's required apps |
-| 13 | Default network behaviour | GrapheneOS servers see IP addresses and timing (§7.6, §7.10) | M | L | **L** | L | All | A, B | Traffic capture and analysis |
-| 14 | Biometric differences | Sensor types differ, but 5-attempt cap and 2-factor unlock limit the risk (§5.2.5) | L | L | **L** | M | Per device | A, B | Spoof testing per sensor type |
+| 12 | Project vulnerability handling | No published bug bounty, vulnerability-disclosure policy or independent security audit found; outside researchers have less incentive to report, and the client cannot see how reports are handled (§3.1, §9.2) | M | M | **M** | L | All | B, C | Ask the project for its disclosure process and response times; search for any audits; review advisory and fix history |
+| 13 | Duress PIN legal exposure | Wiping a device during questioning, at a border or in legal process may be treated as destroying evidence or obstruction in some jurisdictions; the staff member, not the device, carries the risk (§8.4, §8.8) | L | H | **M** | L | All | B | Legal review for each jurisdiction of travel; policy on when the duress PIN is enabled |
+| 14 | MTE / hardened_malloc opt-outs | Per-app compatibility mode silently drops protections (§6.7) | M | L | **L** | L | All | A, B | Opt-out census of the client's required apps |
+| 15 | Default network behaviour | GrapheneOS servers see IP addresses and timing (§7.6, §7.10) | M | L | **L** | L | All | A, B | Traffic capture and analysis |
+| 16 | Biometric differences | Sensor types differ, but 5-attempt cap and 2-factor unlock limit the risk (§5.2.5) | L | L | **L** | M | Per device | A, B | Spoof testing per sensor type |
+| 17 | attestation.app data protection | Remote attestation sends device attestation data, check-in history and alert email addresses to a GrapheneOS-run service; no published data-processing terms found [A] (§9.4, §10.2) | M | L | **L** | L | All | C | Data-flow review; data-processing terms; assess self-hosting |
 
-**Changes from the working hypothesis in the plan:**
-- **Detection & IR** moved up (from #6 to #5) because likelihood is high: by
-  design there is no way to see a compromise.
-- **Enterprise manageability** moved up (from #12 to #7) because it decides
-  whether Profile C is practical at all.
-- **Pixel 11** moved down (from #5 to #9): it cannot be deployed yet, so it is a
-  future risk.
-- **Browser / WebView** reframed after finding that WebView is weaker than the
-  browser.
-- **MTE opt-outs** lowered to Low: impact is limited to the apps that use the
-  opt-out.
+**Rationale for ranking.** **Detection & IR** (#5) leads the Medium band
+because its likelihood is high: by design there is no way to see a compromise
+on the device, so a successful attack is likely to go unnoticed. **Enterprise
+manageability** (#7) sits close behind because it decides whether Profile C is
+practical at all: the organisation can neither enforce nor verify the
+device-wide settings its security depends on. **Pixel 11 components** (#9) rank
+lower than their novelty suggests because Pixel 11 is not yet supported and
+cannot be deployed, so they are a future risk rather than a present one. **MTE /
+hardened_malloc opt-outs** (#14) are Low because the impact is limited to the
+individual apps that use compatibility mode, and the client can see and control
+which apps those are.
 
 ### 11.3 Areas by Profile
 
@@ -1031,17 +1038,22 @@ How much each area matters to each profile (High / Medium / Low / —):
 | 5 | Detection & IR | L | H | H | H |
 | 6 | Browser / WebView | M | H | M | H |
 | 7 | Enterprise manageability | — | — | H | H |
-| 8 | Sandboxed Play layer | M | L (no Play) | H | M |
+| 8 | Sandboxed Play layer | M | L (no Play in Owner profile) | H | M |
 | 9 | Pixel 11 components | L | M | L | M |
 | 10 | Forensic claims | M | H | M | H |
 | 11 | App sourcing | H | H | M | M |
-| 12 | MTE opt-outs | M | L (no opt-outs) | M | L |
-| 13 | Default network behaviour | L | M | L | M |
-| 14 | Biometrics | L | L (fingerprint off or 2FA) | L | L |
+| 12 | Vulnerability handling | L | H | M | H |
+| 13 | Duress PIN legal exposure | L | H | L | H |
+| 14 | MTE opt-outs | M | L (no opt-outs) | M | L |
+| 15 | Default network behaviour | L | M | L | M |
+| 16 | Biometrics | L | L (fingerprint off or 2FA) | L | L |
+| 17 | attestation.app data protection | — | L | M | M |
 
 **Reading the table:** for **Profile B**, the deeper review should start with
-areas 1–6 and 10. For **Profile C**, areas 1, 2, 5 and 7 decide whether a
-GrapheneOS fleet is viable at all.
+areas 1–6 and 10–13; areas 12 and 13 are quick to settle (an interview and a
+legal review). For **Profile C**, areas 1, 2, 5, 7 and 8 decide whether a
+GrapheneOS fleet is viable at all, and area 17 should be checked before devices
+are enrolled in attestation.app.
 
 ---
 
@@ -1223,12 +1235,16 @@ Ratings are relative and qualitative (analyst judgement, [A]) unless tagged.
    Its exploit mitigations (hardened_malloc, MTE by default, exec spawning,
    kernel hardening) and physical protections (auto-reboot, USB-C control,
    duress PIN, secure-element throttling) go well beyond stock Android. Leaked
-   forensic-vendor documents are consistent with this. (§6, §8)
+   forensic-vendor documents (October 2025) are consistent with this, but they
+   cover Pixel 6–9 only; Pixel 10, 10a and 11 are not in them. [S] (§6, §8)
 2. **Its biggest risks sit outside its own code.** It depends on Google for
    hardware, firmware, patches and source releases, and Google has recently made
    that harder (no device trees, twice-yearly AOSP source, quarterly bulletins).
-   (§4, §9.3)
-3. **Trust concentrates in a small team.** About ten developers, donation
+   The dependency is visible now: Google shipped Android 17 QPR2 to Pixels on
+   10 November 2026, but Pixel 11 support in GrapheneOS is waiting for Google to
+   publish the QPR2 platform source to AOSP, which the project says Google has
+   delayed. [D] (§4, §9.3)
+3. **Trust concentrates in a small team.** 6–10 full-time developers, donation
    funding, no published key-custody or succession arrangements, and no
    commercial support. (§3.1, §9.2)
 4. **What lies beneath the OS is the main technical unknown:** modem firmware,
@@ -1237,33 +1253,39 @@ Ratings are relative and qualitative (analyst judgement, [A]) unless tagged.
 5. **It suits high-risk individuals better than managed fleets.** There is no
    fleet console, no staged rollout, limited detection, and Play Integrity blocks
    some apps. A fleet is possible but needs compensating controls. (§9.7, §10)
-6. **The reference device today is a Pixel 10-series phone.** Pixel 11 is not yet
-   supported. (§5)
+6. **The recommended device today is the Pixel 10a, for all profiles.** The
+   Pixel 10 (non-Pro) is the alternative where more performance is needed.
+   Pixel 11 is not yet supported. (§5, §12.1)
 
 ### 14.2 Stage 2 Work Packages
 
-Effort is in analyst days, indicative only [A]. Tiers reflect §11 risk and
-which profiles the client turns out to need.
+Effort is in analyst days, indicative only [A]. Tier 1 covers the questions
+that decide whether the client can trust and operate GrapheneOS at all, at
+modest cost; Tier 2 is deeper technical research on the highest-risk
+components. Tier 3 can wait. Some work packages apply only if the client needs
+a given profile.
 
 | WP | §11 area | Scope | Effort (days) | Tier |
 | --- | --- | --- | --- | --- |
 | WP1 | 1 Upstream dependency | 12-month patch-lag timeline (Google bulletin → Pixel → GrapheneOS); impact of AOSP schedule change; porting-delay history | 3–5 | **1** |
-| WP2 | 2 Supply chain & governance | Key-custody and governance questionnaire/interview; reproducible-build attempt; infrastructure and jurisdiction review | 5–8 | **1** |
+| WP2 | 2, 12, 17 Supply chain, governance & project practices | Key-custody and governance questionnaire/interview; vulnerability-handling and disclosure questions; reproducible-build attempt; infrastructure and jurisdiction review; attestation.app data-protection review | 6–10 | **1** |
 | WP3 | 5 Detection & IR | Design and dry-run an IR runbook; test MVT, MTE crash reporting and log options on GrapheneOS | 3–5 | **1** |
 | WP4 | 7 Enterprise manageability | MDM compatibility matrix with the client's MDM (work profile and fully managed); corporate-app and Play Integrity tests | 5–8 | **1** (if Profile C) |
+| WP14 | 13 Duress PIN legal exposure | Brief the client's legal counsel on duress-wipe behaviour; collect their position for each jurisdiction of use and travel; draft a duress-PIN policy | 1–2 (plus client legal time) | **1** (if Profile B) |
 | WP5 | 4 GPU driver | Mali patch-status review; PowerVR driver attack-surface mapping; fuzzing scope and harness design | 10–20 | 2 |
 | WP6 | 3 Baseband | Exynos 5300/5400 CVE history and patch status; IOMMU isolation review; firmware RE scoping | 15–25 | 2 (Profile B) |
 | WP7 | 6 Browser / WebView | Vanadium patch latency vs Chromium in-the-wild 0-days; WebView use in required apps | 2–3 | 2 |
 | WP8 | 8 Sandboxed Play layer | Source review of the compatibility layer; IPC fuzzing | 5–10 | 2 |
 | WP9 | 10 Forensic claims | Lab extraction tests per generation at default and Profile B settings (needs access to commercial forensic tools) | 10–15 | 2 |
-| WP10 | 11, 12 Apps | Approved-app list; compatibility-mode and WebView census of required apps | 2–4 | 2 |
+| WP10 | 11, 14 Apps | Approved-app list; compatibility-mode and WebView census of required apps | 2–4 | 2 |
 | WP11 | 9 Pixel 11 | Readiness review after GrapheneOS support ships; Titan M3 and MediaTek modem research scope | 5–10 | 3 (later) |
-| WP12 | 13 Network | Traffic capture of default connections per profile | 2 | 3 |
-| WP13 | 14 Biometrics | Spoof testing per sensor type | 3–5 | 3 |
+| WP12 | 15 Network | Traffic capture of default connections per profile | 2 | 3 |
+| WP13 | 16 Biometrics | Spoof testing per sensor type | 3–5 | 3 |
 
-**Suggested first engagement:** Tier 1 (WP1–WP4), about **16–26 days**. It
-answers "can we trust and operate this?" before spending on deep technical
-research (Tier 2, about 44–77 days).
+**Suggested first engagement:** Tier 1 (WP1–WP4 and WP14), about **18–30
+days** (less if Profile B or C is not needed). It answers "can we trust and
+operate this?" before spending on deep technical research (Tier 2, about 44–77
+days). Tier 3 adds about 10–17 days later.
 
 ### 14.3 Lab Requirements
 
@@ -1282,13 +1304,19 @@ research (Tier 2, about 44–77 days).
 Taken from the assumption register (Appendix A):
 
 1. Which personas and deployment models do you actually have? (A10, A11)
-2. Do you need a device now (Pixel 10) or can you wait for Pixel 11? (A01)
+2. Do you need a device now (Pixel 10a) or can you wait for Pixel 11? (A01)
 3. Are certified products (Common Criteria, FIPS 140) required? (A12)
 4. Which MDM do you use, and do you need fully managed devices? (A14)
 5. Any restrictions on hardware origin, carriers or regions of use? (A09)
 6. Which apps are mandatory (banking, corporate, messaging)? (§10.3, WP10)
 7. Is there a security operations function that would need device telemetry?
    (§9.7)
+8. What is your legal position on duress wipes in the jurisdictions where staff
+   live and travel? (§11 #13, WP14)
+9. What data-protection requirements would apply to sending device data to
+   attestation.app, a GrapheneOS-run service? (§11 #17)
+10. Do you need device-wide remote wipe, rather than wiping only a work
+    profile? (§11 #7)
 
 ---
 
@@ -1301,19 +1329,19 @@ client is the first step of Stage 2.
 
 | ID  | Assumption | Impact if wrong | How to confirm |
 | --- | ---------- | --------------- | -------------- |
-| A01 | The client wants a phone they can deploy now, so the reference device is a supported Pixel 10-series model, not Pixel 11 | Recommendation changes to "wait for Pixel 11" | Ask client; re-check GrapheneOS FAQ before delivery |
-| A02 | Pixel 11 uses a MediaTek M90 modem and PowerVR C-Series GPU (press reports only) | §5.2 and §11 #3–#5 change | Google spec sheet or teardown |
-| A03 | Pixel 11 GrapheneOS support follows Android 17 QPR2 in AOSP, within weeks | Pixel 11 stays out of scope for longer | GrapheneOS releases page / announcements |
-| A04 | Pixel 10a has an optical fingerprint sensor and Titan M2 (one review) | §5.2.5 biometric comparison | Google spec sheet or teardown |
+| A01 | The client wants a phone they can deploy now, so the reference device is the Pixel 10a (Pixel 10 where more performance is needed), not Pixel 11 | Recommendation changes to "wait for Pixel 11" | Ask client; re-check GrapheneOS FAQ before delivery |
+| A02 | Pixel 11 uses a MediaTek M90 modem and PowerVR C-Series GPU (press reports only) | §5.2 and §11 #3, #4, #9 change | Google spec sheet or teardown |
+| A03 | Pixel 11 GrapheneOS support is waiting for Google to publish the Android 17 QPR2 platform source to AOSP; timing depends on Google (project statement, Nov 2026) [D] | Pixel 11 stays out of scope for longer, or becomes available sooner than planned | GrapheneOS releases page / announcements |
+| A04 | Pixel 10a has an optical fingerprint sensor and Titan M2 [S] (Google spec page and one review) | §5.2.5 biometric comparison | Google spec sheet or teardown |
 | A05 | Infrastructure move off OVH (Nov 2025) has completed | §3.1 and §11 #2 risk rating | GrapheneOS announcements; DNS/IP ownership lookup |
-| A06 | Team size is about 10 full-time developers (self-reported, figures vary) | Bus-factor rating in §11 #2 | Public statements; commit-author analysis |
+| A06 | Team size is 6–10 full-time developers (project statements; figures vary) [D] | Bus-factor rating in §11 #2 | Public statements; commit-author analysis |
 | A07 | Motorola Signature 27 will ship with GrapheneOS support in 2026–2027 | §4.7 and non-Pixel recommendation | Motorola / GrapheneOS announcements |
 | A08 | Pixel monthly patches continue despite quarterly AOSP bulletins, so GrapheneOS patch level stays current | §9.3 patch-lag analysis | Compare GrapheneOS patch levels against Pixel bulletins over 6 months |
 | A09 | The client is not restricted to US/EU-sourced hardware or to a specific carrier | §12.1 device choice | Ask client |
 | A10 | Highest credible tier per persona is as in §2.3 (e.g. P1 at T3, P2 at T4) | Profile assignment and §11 priorities shift | Ask client which personas they actually have |
 | A11 | Organization-owned devices can be issued to high-risk staff instead of BYOD | C+B and the BYOD "not recommended" guidance may not be acceptable | Ask client about device ownership policy |
 | A12 | The client has no hard requirement for certified products (Common Criteria, FIPS 140, government accreditation) | GrapheneOS may be ruled out for regulated uses regardless of technical strength | Ask client about compliance obligations |
-| A13 | Official GrapheneOS builds are reproducible from source (not stated on the features page) | §9.2 and §11 #2 rating; build-verification Stage 2 work package | GrapheneOS build docs; attempt a reproducible build in Stage 2 |
+| A13 | Official GrapheneOS builds are reproducible from source (project states builds are reproducible; not independently confirmed) | §9.2 and §11 #2 rating; build-verification Stage 2 work package | GrapheneOS build docs; attempt a reproducible build in Stage 2 |
 | A14 | Device-owner (fully managed) MDM provisioning works on GrapheneOS | Profile C design changes to work-profile-only | Test with the client's MDM in Stage 2 |
 
 ## Appendix B — Personas, Threat Tiers and Deployment Models
@@ -1375,9 +1403,11 @@ client is the first step of Stage 2.
 
 ## Appendix D — Device Specification Detail
 
-See the device matrix in §5.1. Pixel 11 entries marked † rely on press reports
-and should be re-checked against Google's published specifications before
-procurement (A02, A04).
+See the device matrix in §5.1. Entries marked † are Pixel 11 details that rely
+on press reports and should be re-checked against Google's published
+specifications before procurement (A02). Pixel 10a details (Titan M2, optical
+fingerprint sensor) are secondary [S], from Google's spec page and a review
+(A04).
 
 ## Appendix E — Hardening Settings Reference
 
@@ -1430,3 +1460,7 @@ All URLs accessed 2026-11-23/24. Each claim in the body carries its confidence t
 - Android Authority, GrapheneOS RCS support: https://androidauthority.com/grapheneos-messaging-rcs-support-secure-paste-3708317
 - Apple Security Research, Memory Integrity Enforcement: https://security.apple.com/blog/memory-integrity-enforcement
 - TechCrunch, iOS inactivity reboot: https://techcrunch.com/2024/11/14/new-apple-security-feature-reboots-iphones-after-3-days-researchers-confirm
+- Android Developers, Android 17 QPR2 release notes: https://developer.android.com/about/versions/17/qpr2/release-notes
+- 9to5Google, Android 17 QPR2 November Pixel update: https://9to5google.com/2026/11/10/android-17-qpr2-november-pixel-update/
+- Privacy Guides, GrapheneOS on Pixel 11 support (Nov 2026): https://www.privacyguides.org/news/2026/11/12/grapheneos-announces-pixel-11-support-can-be-completed-now/
+- GrapheneOS on X, Pixel 11 support and QPR2 source (Nov 2026): https://x.com/GrapheneOS/status/2120727750235574616
