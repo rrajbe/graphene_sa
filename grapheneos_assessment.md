@@ -2108,33 +2108,34 @@ legal duties, and with the law where a device is used.
 
 ### 11.1 How Areas Are Rated
 
-Each area gets four ratings:
+Each area gets four ratings. The table shows what each rating measures.
 
-- **Likelihood** — how plausible it is that the weakness is exploited or
-  matters in practice, given §4–§10.
-- **Impact** — what happens if it does. The outcomes considered are:
-  - device compromise;
-  - data exposure;
-  - fleet-wide failure;
-  - loss of the security guarantees the client is buying.
-- **Risk** — impact-weighted, rated High, Medium or Low:
-  - **High** — High impact with Medium or High likelihood.
-  - **Medium** — High impact with Low likelihood, or Medium impact with
-    Medium or High likelihood.
-  - **Low** — every other combination.
-- **Verification effort** — how much Stage 2 work it takes to confirm or rule
-  out the area. It feeds costing (§14) and is used only as the last tie-break.
+| Rating | What it measures |
+| --- | --- |
+| Likelihood | How plausible it is that the weakness is exploited or matters in practice, given §4–§10 |
+| Impact | What happens if it does. The outcomes considered are:<br>• device compromise<br>• data exposure<br>• fleet-wide failure<br>• loss of the security guarantees the client is buying |
+| Risk | Impact-weighted, rated High, Medium or Low (combinations in the next table) |
+| Verification effort | How much Stage 2 work it takes to confirm or rule out the area. It feeds costing (§14) and is used only as the last tie-break |
 
-How the ratings are applied:
+Risk combines impact and likelihood as follows.
 
-- Likelihood and impact are rated for the most exposed profile the area
-  applies to. That is normally Profile B (high-risk). §11.3 shows how much
-  each area matters to each profile.
-- Risk sets the rank. Within a risk band, areas are ordered by:
-  1. higher likelihood first;
-  2. then areas that decide whether the client can adopt GrapheneOS at all;
-  3. then lower verification effort.
-- Remaining ties are analyst judgement.
+| Risk | Impact and likelihood |
+| --- | --- |
+| **High** | High impact with Medium or High likelihood |
+| **Medium** | • High impact with Low likelihood<br>• Medium impact with Medium or High likelihood |
+| **Low** | Every other combination |
+
+The table shows how the ratings are applied, including the tie-breaks in the
+order they are used.
+
+| Rule | Meaning |
+| --- | --- |
+| Profile basis | Likelihood and impact are rated for the most exposed profile the area applies to. That is normally Profile B (high-risk). §11.3 shows how much each area matters to each profile |
+| Rank | Risk sets the rank |
+| Tie-break 1 | Within a risk band, higher likelihood first |
+| Tie-break 2 | Then areas that decide whether the client can adopt GrapheneOS at all |
+| Tie-break 3 | Then lower verification effort |
+| Remaining ties | Analyst judgement |
 
 All ratings are analyst judgement from desk research [Assessed]. They will be
 revised with client input and Stage 2 results.
@@ -2166,112 +2167,105 @@ confidence tags, is in "Evidence by area" directly below the table.
 
 **Evidence by area**
 
+Each area with three or more evidence points has a table. In the
+Confidence column, a dash (—) means the point carries no confidence tag. In
+the See column, a dash means no cross-reference is given for that point.
+
 **Area 1 — Upstream dependency on Google**
 
-- Every fix comes from Google, from firmware and drivers up to the platform.
-  If Google withholds or delays fixes, GrapheneOS ships them late or not at all.
-- Google has reduced what it publishes:
-  - device trees are no longer published;
-  - Pixel kernel source is harder to obtain;
-  - Android Open Source Project (AOSP) source is released only twice a year;
-  - full security bulletins are quarterly;
-  - all firmware is closed.
-- Live example: Pixel 11 support is waiting for Google to publish the
-  Android 17 Quarterly Platform Release 2 (QPR2) source (§5.2.9, §9.3).
+Evidence for area 1:
+
+| Evidence | Confidence | See |
+| --- | --- | --- |
+| Every fix comes from Google, from firmware and drivers up to the platform. If Google withholds or delays fixes, GrapheneOS ships them late or not at all | — | — |
+| Google has reduced what it publishes:<br>• device trees are no longer published<br>• Pixel kernel source is harder to obtain<br>• Android Open Source Project (AOSP) source is released only twice a year<br>• full security bulletins are quarterly<br>• all firmware is closed | — | — |
+| Live example: Pixel 11 support is waiting for Google to publish the Android 17 Quarterly Platform Release 2 (QPR2) source | — | §5.2.9, §9.3 |
 
 **Area 2 — Graphics processing unit and accelerator drivers**
 
-- Mali drivers have repeated in-the-wild spyware use, including on Pixel.
-- A Mali bug (CVE-2025-0072) gave kernel code execution on a Pixel 8 with
-  kernel MTE on. The reason: **MTE does not cover memory the GPU reaches
-  through its own page tables**.
-- GPU page-table abuse turns ordinary heap bugs into physical-memory access
-  (PhantomMap, Network and Distributed System Security Symposium (NDSS) 2026).
-- The PowerVR stack on Pixel 10 and Pixel 11 has little public research.
-- Project Zero's 2026 Pixel 10 0-click chain went through the new Tensor G5
-  video-accelerator driver [Documented].
-- Detail: §5.2.1, §6.3.
+Evidence for area 2 (detail: §5.2.1, §6.3):
+
+| Evidence | Confidence | See |
+| --- | --- | --- |
+| Mali drivers have repeated in-the-wild spyware use, including on Pixel | — | — |
+| A Mali bug (CVE-2025-0072) gave kernel code execution on a Pixel 8 with kernel MTE on. The reason: **MTE does not cover memory the GPU reaches through its own page tables** | — | — |
+| GPU page-table abuse turns ordinary heap bugs into physical-memory access (PhantomMap, Network and Distributed System Security Symposium (NDSS) 2026) | — | — |
+| The PowerVR stack on Pixel 10 and Pixel 11 has little public research | — | — |
+| Project Zero's 2026 Pixel 10 0-click chain went through the new Tensor G5 video-accelerator driver | Documented | — |
 
 **Area 3 — Baseband and Internet Protocol Multimedia Subsystem**
 
-- The baseband is the largest closed attack surface.
-- **CVE-2026-58704**, a Pixel modem bug, is under limited, targeted
-  exploitation [Documented]. Sources: the September 2026 bulletin, and the US
-  Cybersecurity and Infrastructure Security Agency (CISA) Known Exploited
-  Vulnerabilities (KEV) catalogue.
-- Project Zero's 2023 internet-to-baseband remote code execution bugs needed
-  only the phone number [Documented]. They went through IMS, which carries
-  Wi-Fi calling and voice over Long-Term Evolution (LTE), known as Voice over
-  LTE (VoLTE). LTE-only mode therefore does not remove that path.
-- 5G pre-authentication parsing stays reachable with 2G off [Documented].
-- Pixel 11 uses a MediaTek modem (§4.5, §5.2.2).
+Evidence for area 3:
+
+| Evidence | Confidence | See |
+| --- | --- | --- |
+| The baseband is the largest closed attack surface | — | — |
+| **CVE-2026-58704**, a Pixel modem bug, is under limited, targeted exploitation. Sources: the September 2026 bulletin, and the US Cybersecurity and Infrastructure Security Agency (CISA) Known Exploited Vulnerabilities (KEV) catalogue | Documented | — |
+| Project Zero's 2023 internet-to-baseband remote code execution bugs needed only the phone number. They went through IMS, which carries Wi-Fi calling and voice over Long-Term Evolution (LTE), known as Voice over LTE (VoLTE). LTE-only mode therefore does not remove that path | Documented | — |
+| 5G pre-authentication parsing stays reachable with 2G off | Documented | — |
+| Pixel 11 uses a MediaTek modem | — | §4.5, §5.2.2 |
 
 **Area 4 — Supply chain, governance and vulnerability handling**
 
-- The team is 6–10 people and donation-funded.
-- **Signing-key custody is not published.**
-- Reproducibility is documented but not independently confirmed.
-- There is no succession plan.
-- Infrastructure was relocated under legal pressure.
-- None of the following was found [Assessed] (absence — searched
-  grapheneos.org and the project forum, 2026-11):
-  - a bug bounty;
-  - a disclosure policy;
-  - an independent audit.
-- Context:
-  - Google publishes a binary-transparency log for stock Pixel images;
-    GrapheneOS has no equivalent found.
-  - Leaked original equipment manufacturer (OEM) platform keys signed malware
-    in 2022.
-- Detail: §3.1, §9.2.
+Evidence for area 4 (detail: §3.1, §9.2):
+
+| Evidence | Confidence | See |
+| --- | --- | --- |
+| The team is 6–10 people and donation-funded | — | — |
+| **Signing-key custody is not published.** | — | — |
+| Reproducibility is documented but not independently confirmed | — | — |
+| There is no succession plan | — | — |
+| Infrastructure was relocated under legal pressure | — | — |
+| None of the following was found (absence — searched grapheneos.org and the project forum, 2026-11):<br>• a bug bounty<br>• a disclosure policy<br>• an independent audit | Assessed | — |
+| Context: Google publishes a binary-transparency log for stock Pixel images; GrapheneOS has no equivalent found | — | — |
+| Context: leaked original equipment manufacturer (OEM) platform keys signed malware in 2022 | — | — |
 
 **Area 5 — Messaging and media parser 0-click surface**
 
-- 2025 Android spyware arrived through messaging apps [Documented]:
-  - LANDFALL: a Samsung image library reached via WhatsApp, exploited for
-    about nine months;
-  - Paragon Graphite: code running inside WhatsApp;
-  - the WhatsApp and Apple chain of August 2025.
-- Image and media parsing inside an app runs in that app's process.
-- Android has no BlastDoor-style sandbox for third-party messengers.
-- hardened_malloc and MTE apply, but are untested against these exploits
-  [Assessed] (§7.11).
+Evidence for area 5:
+
+| Evidence | Confidence | See |
+| --- | --- | --- |
+| 2025 Android spyware arrived through messaging apps:<br>• LANDFALL: a Samsung image library reached via WhatsApp, exploited for about nine months<br>• Paragon Graphite: code running inside WhatsApp<br>• the WhatsApp and Apple chain of August 2025 | Documented | — |
+| Image and media parsing inside an app runs in that app's process | — | — |
+| Android has no BlastDoor-style sandbox for third-party messengers | — | — |
+| hardened_malloc and MTE apply, but are untested against these exploits | Assessed | §7.11 |
 
 **Area 6 — Detection and incident response**
 
-- There is no root access and no mobile threat defence agent, so a compromise
-  may go unseen.
-- Auditor proves OS integrity only.
-- A reboot clears memory-resident implants, but also destroys volatile
-  evidence (§9.7).
+Evidence for area 6:
+
+| Evidence | Confidence | See |
+| --- | --- | --- |
+| There is no root access and no mobile threat defence agent, so a compromise may go unseen | — | — |
+| Auditor proves OS integrity only | — | — |
+| A reboot clears memory-resident implants, but also destroys volatile evidence | — | §9.7 |
 
 **Area 7 — Enterprise manageability**
 
-- There is no fleet console and no staged rollout.
-- Fully managed MDM is undocumented.
-- A work profile cannot enforce device-wide settings.
-- Auditor reports some device-wide settings:
-  - auto-reboot;
-  - USB-C mode;
-  - Android Debug Bridge (adb);
-  - OEM unlocking.
-- Auditor does not report others:
-  - cellular mode;
-  - Wi-Fi calling;
-  - duress PIN;
-  - compatibility mode.
-- Auditor alerts only on failed or missed check-ins, so drift in the
-  unreported settings goes undetected.
-- There is no device-wide remote wipe from a work-profile MDM.
-- Play Integrity blocks some apps (§10.2, §10.3).
+Evidence for area 7:
+
+| Evidence | Confidence | See |
+| --- | --- | --- |
+| There is no fleet console and no staged rollout | — | — |
+| Fully managed MDM is undocumented | — | — |
+| A work profile cannot enforce device-wide settings | — | — |
+| Auditor reports some device-wide settings:<br>• auto-reboot<br>• USB-C mode<br>• Android Debug Bridge (adb)<br>• OEM unlocking | — | — |
+| Auditor does not report others:<br>• cellular mode<br>• Wi-Fi calling<br>• duress PIN<br>• compatibility mode | — | — |
+| Auditor alerts only on failed or missed check-ins, so drift in the unreported settings goes undetected | — | — |
+| There is no device-wide remote wipe from a work-profile MDM | — | — |
+| Play Integrity blocks some apps | — | §10.2, §10.3 |
 
 **Area 8 — Browser and WebView**
 
-- The question is Vanadium patch latency versus Chromium 0-days.
-- Spyware first stages are often Chrome renderer bugs [Documented].
-- **WebView keeps JIT on and lacks site isolation.**
-- No public Vanadium patch-latency data was found [Assessed] (absence —
-  searched grapheneos.org and the project forum, 2026-11) (§6.6).
+Evidence for area 8:
+
+| Evidence | Confidence | See |
+| --- | --- | --- |
+| The question is Vanadium patch latency versus Chromium 0-days | — | — |
+| Spyware first stages are often Chrome renderer bugs | Documented | — |
+| **WebView keeps JIT on and lacks site isolation.** | — | — |
+| No public Vanadium patch-latency data was found (absence — searched grapheneos.org and the project forum, 2026-11) | Assessed | §6.6 |
 
 **Area 9 — App sourcing supply chain**
 
@@ -2280,58 +2274,59 @@ confidence tags, is in "Evidence by area" directly below the table.
 
 **Area 10 — Legal and regulatory fit, including the duress personal identification number**
 
-- Duress wipes have led to prosecution: **US v. Tunick** [Secondary]. The
-  case involves a GrapheneOS wipe during a US Customs and Border Protection
-  (CBP) search in January 2025, and is pending.
-- Refusing to unlock is an offence under UK Schedule 7, and can be under
-  French law [Documented].
-- Analyst assessment of compliance conflicts [Assessed]:
-  - messaging with disappearing messages may breach recording obligations,
-    under these regimes:
-    - US Financial Industry Regulatory Authority (FINRA) and Securities and
-      Exchange Commission (SEC) rules;
-    - UK Financial Conduct Authority (FCA) rules;
-    - EU Markets in Financial Instruments Directive II (MiFID II);
-  - a duress wipe conflicts with litigation holds;
-  - export rules and BYOD monitoring limits apply.
-- Detail: §8.8, §10.6.
+Evidence for area 10 (detail: §8.8, §10.6). The last three rows are the
+analyst's assessment of compliance conflicts.
+
+| Evidence | Confidence | See |
+| --- | --- | --- |
+| Duress wipes have led to prosecution: **US v. Tunick**. The case involves a GrapheneOS wipe during a US Customs and Border Protection (CBP) search in January 2025, and is pending | Secondary | — |
+| Refusing to unlock is an offence under UK Schedule 7, and can be under French law | Documented | — |
+| Messaging with disappearing messages may breach recording obligations, under these regimes:<br>• US Financial Industry Regulatory Authority (FINRA) and Securities and Exchange Commission (SEC) rules<br>• UK Financial Conduct Authority (FCA) rules<br>• EU Markets in Financial Instruments Directive II (MiFID II) | Assessed | — |
+| A duress wipe conflicts with litigation holds | Assessed | — |
+| Export rules and BYOD monitoring limits apply | Assessed | — |
 
 **Area 11 — Pixel 11 new components**
 
-- Titan M3 Common Criteria certification is still "Ongoing" [Documented].
-- The MediaTek M90 modem and PowerVR C-Series GPU arrive at the same time as
-  Titan M3.
-- MTE support is only "bare minimum" so far, by GrapheneOS's own description.
-- GrapheneOS does not yet support Pixel 11 (§5.2.9).
+Evidence for area 11:
+
+| Evidence | Confidence | See |
+| --- | --- | --- |
+| Titan M3 Common Criteria certification is still "Ongoing" | Documented | — |
+| The MediaTek M90 modem and PowerVR C-Series GPU arrive at the same time as Titan M3 | — | — |
+| MTE support is only "bare minimum" so far, by GrapheneOS's own description | — | — |
+| GrapheneOS does not yet support Pixel 11 | — | §5.2.9 |
 
 **Area 12 — Sandboxed Play compatibility layer**
 
-- The layer is GrapheneOS code bridging closed Play services and the OS.
-- The layer exposes an IPC surface.
-- The layer includes an eSIM path (§7.4).
+Evidence for area 12:
+
+| Evidence | Confidence | See |
+| --- | --- | --- |
+| The layer is GrapheneOS code bridging closed Play services and the OS | — | — |
+| The layer exposes an IPC surface | — | — |
+| The layer includes an eSIM path | — | §7.4 |
 
 **Area 13 — Forensic claims**
 
-- Forensic resistance is strong on paper and in leaks (§8.7).
-- Forensic vendors are adapting:
-  - Amnesty documented a Cellebrite USB exploit chain (February 2025). The
-    chain is of the class GrapheneOS's USB-C control is designed to block
-    [Documented].
-  - Forensic firms used Pixel firmware 0-days in 2024, fixed after GrapheneOS
-    reports [Documented].
-  - GrayKey reportedly keeps iPhones in AFU state across reboots [Secondary].
-- Detail: §8.1–§8.3, §8.9.
+Evidence for area 13 (detail: §8.1–§8.3, §8.9). Rows 2–4 show that
+forensic vendors are adapting.
+
+| Evidence | Confidence | See |
+| --- | --- | --- |
+| Forensic resistance is strong on paper and in leaks | — | §8.7 |
+| Amnesty documented a Cellebrite USB exploit chain (February 2025). The chain is of the class GrapheneOS's USB-C control is designed to block | Documented | — |
+| Forensic firms used Pixel firmware 0-days in 2024, fixed after GrapheneOS reports | Documented | — |
+| GrayKey reportedly keeps iPhones in AFU state across reboots | Secondary | — |
 
 **Area 14 — Proximity radio firmware**
 
-- The area covers Wi-Fi and Bluetooth firmware, and NFC firmware.
-- The firmware is closed and reachable by anyone in radio range. Examples
-  [Documented]:
-  - Broadcom Wi-Fi remote code execution (Broadpwn; Project Zero 2017);
-  - BrakTooth Bluetooth flaws (2021);
-  - a Critical Pixel Bluetooth elevation of privilege (CVE-2026-55330,
-    October 2026 bulletin).
-- Turning radios off when unused is the main lever (§7.7).
+Evidence for area 14:
+
+| Evidence | Confidence | See |
+| --- | --- | --- |
+| The area covers Wi-Fi and Bluetooth firmware, and NFC firmware | — | — |
+| The firmware is closed and reachable by anyone in radio range. Examples:<br>• Broadcom Wi-Fi remote code execution (Broadpwn; Project Zero 2017)<br>• BrakTooth Bluetooth flaws (2021)<br>• a Critical Pixel Bluetooth elevation of privilege (CVE-2026-55330, October 2026 bulletin) | Documented | — |
+| Turning radios off when unused is the main lever | — | §7.7 |
 
 **Area 15 — Memory Tagging Extension and hardened_malloc opt-outs**
 
@@ -2342,69 +2337,47 @@ confidence tags, is in "Evidence by area" directly below the table.
 
 **Area 16 — Default network and attestation data**
 
-- GrapheneOS servers see IP addresses and timing.
-- Remote attestation sends the following to a GrapheneOS-run service:
-  - device attestation data;
-  - check-in history;
-  - alert email addresses.
-- No published data-processing terms were found [Assessed] (absence —
-  searched attestation.app and grapheneos.org, 2026-11) (§7.6, §7.10, §9.4).
+Evidence for area 16:
+
+| Evidence | Confidence | See |
+| --- | --- | --- |
+| GrapheneOS servers see IP addresses and timing | — | — |
+| Remote attestation sends the following to a GrapheneOS-run service:<br>• device attestation data<br>• check-in history<br>• alert email addresses | — | — |
+| No published data-processing terms were found (absence — searched attestation.app and grapheneos.org, 2026-11) | Assessed | §7.6, §7.10, §9.4 |
 
 **Area 17 — Biometric differences**
 
 - Sensor types differ, but the 5-attempt cap and 2-factor unlock limit the
   risk (§5.2.5).
 
-**Rationale for ranking.**
+**Rationale for ranking.** The table gives each area's risk band and why it
+ranks where it does. Areas the rationale does not discuss separately are
+omitted.
 
-**High band (areas 1–6)**
+| Area | Risk band | Why it ranks here |
+| --- | --- | --- |
+| **Area 1, dependence on Google** | High (areas 1–6) | Ranks first. Its likelihood is high, and it decides whether GrapheneOS can be adopted at all:<br>• every fix below the OS comes from Google<br>• the Pixel 11 wait shows the dependency causing problems now |
+| **Area 2, GPU and accelerator drivers**, and **area 3, baseband and IMS** | High | Rated High likelihood. Both have current in-the-wild exploitation on Pixel hardware; the modem rating is High because of CVE-2026-58704 |
+| **Area 4, supply chain and governance** | High | Leads the Medium-likelihood group. It decides whether the client can trust the project at all |
+| **Area 5, messaging and media parsers** | High | Follows as the most common 2025 entry point |
+| **Area 6, detection and incident response** | High | Rated Medium likelihood rather than High:<br>• it matters only once another area has been exploited<br>• when that happens the impact is high, because a compromise is likely to go unnoticed |
+| **Area 7, enterprise manageability** | Medium (areas 7–14) | Highest likelihood in the band. The gaps exist on every fleet device. The area decides whether Profile C (managed fleet) is practical at all |
+| **Area 10, legal and regulatory fit** | Medium | Medium likelihood and Medium impact; the reasons are in the list directly below the table |
+| **Area 11, Pixel 11 components** | Medium | Sits at the end of the Medium-likelihood group. Pixel 11 cannot be deployed yet, and verifying it takes the most work |
+| **Areas 12–14**, the Low-likelihood areas | Medium | Follow, lowest verification effort first |
+| **Area 15, MTE and hardened_malloc opt-outs** | Low (areas 15–17) | Low risk:<br>• the impact is confined to the individual app that is opted out<br>• that app then has roughly stock-Android hardening rather than none<br>• the client can limit opt-outs through the approved-app list and training, but cannot enforce or verify them (§12.7) |
 
-- **Area 1, dependence on Google**, ranks first. Its likelihood is high, and
-  it decides whether GrapheneOS can be adopted at all:
-  - every fix below the OS comes from Google;
-  - the Pixel 11 wait shows the dependency causing problems now.
-- **Area 2, GPU and accelerator drivers**, and **area 3, baseband and IMS**,
-  are rated High likelihood. Both have current in-the-wild exploitation on
-  Pixel hardware; the modem rating is High because of CVE-2026-58704.
-- **Area 4, supply chain and governance**, leads the Medium-likelihood group.
-  It decides whether the client can trust the project at all.
-- **Area 5, messaging and media parsers**, follows as the most common 2025
-  entry point.
-- **Area 6, detection and incident response**, is rated Medium likelihood
-  rather than High:
-  - it matters only once another area has been exploited;
-  - when that happens the impact is high, because a compromise is likely to
-    go unnoticed.
+Why area 10 has Medium likelihood and Medium impact:
 
-**Medium band (areas 7–14)**
-
-- **Area 7, enterprise manageability**, has the highest likelihood in the
-  band. The gaps exist on every fleet device. The area decides whether
-  Profile C (managed fleet) is practical at all.
-- **Area 10, legal and regulatory fit**, has Medium likelihood and Medium
-  impact:
-  - likelihood is Medium for staff who live in or travel to the countries
-    below, given a live prosecution and two unlock-offence regimes:
-    - the US;
-    - the UK;
-    - France.
-  - impact is Medium because the harm is legal or regulatory exposure for a
-    person or the organisation, not device compromise or data loss;
-  - recording obligations apply to the messaging set-up on any platform, so
-    this area shapes policy rather than deciding adoption.
-- **Area 11, Pixel 11 components**, sits at the end of the Medium-likelihood
-  group. Pixel 11 cannot be deployed yet, and verifying it takes the most
-  work.
-- **Areas 12–14**, the Low-likelihood areas, follow, lowest verification
-  effort first.
-
-**Low band (areas 15–17)**
-
-- **Area 15, MTE and hardened_malloc opt-outs**, is Low risk. The impact is
-  confined to the individual app that is opted out. That app then has roughly
-  stock-Android hardening rather than none.
-- The client can limit opt-outs through the approved-app list and training,
-  but cannot enforce or verify them (§12.7).
+- Likelihood is Medium for staff who live in or travel to the countries
+  below, given a live prosecution and two unlock-offence regimes:
+  - the US;
+  - the UK;
+  - France.
+- Impact is Medium because the harm is legal or regulatory exposure for a
+  person or the organisation, not device compromise or data loss.
+- Recording obligations apply to the messaging set-up on any platform, so
+  this area shapes policy rather than deciding adoption.
 
 ### 11.3 Areas by Profile
 
@@ -2431,26 +2404,13 @@ How much each area matters to each profile. Ratings are High, Medium or Low;
 | 16 | Default network and attestation data | Low | Medium | Medium | Medium |
 | 17 | Biometrics | Low | Low (fingerprint off or 2-factor unlock) | Low | Low |
 
-**Reading the table:**
+**Reading the table.** For each profile, the table below gives the areas to
+start with and what to do alongside them.
 
-- For **Profile B**, start with these areas, in this order:
-  1. area 2, GPU and accelerator drivers;
-  2. area 3, baseband and IMS;
-  3. area 5, messaging and media parsers;
-  4. area 6, detection and incident response;
-  5. area 1, upstream dependency on Google;
-  6. area 4, supply chain and governance.
-
-  Settle area 10 (legal and regulatory fit) by legal review in parallel.
-- For **Profile C**, start with these areas:
-  - area 1, upstream dependency on Google;
-  - area 4, supply chain and governance;
-  - area 6, detection and incident response;
-  - area 7, enterprise manageability;
-  - area 12, sandboxed Play layer.
-
-  Check area 16 (default network and attestation data) before enrolling
-  devices in attestation.app.
+| Profile | Start with | Then |
+| --- | --- | --- |
+| **Profile B** | In this order:<br>1. area 2, GPU and accelerator drivers<br>2. area 3, baseband and IMS<br>3. area 5, messaging and media parsers<br>4. area 6, detection and incident response<br>5. area 1, upstream dependency on Google<br>6. area 4, supply chain and governance | Settle area 10 (legal and regulatory fit) by legal review in parallel |
+| **Profile C** | • area 1, upstream dependency on Google<br>• area 4, supply chain and governance<br>• area 6, detection and incident response<br>• area 7, enterprise manageability<br>• area 12, sandboxed Play layer | Check area 16 (default network and attestation data) before enrolling devices in attestation.app |
 
 ---
 
@@ -2787,95 +2747,65 @@ tagged.
 
 ### 14.1 Key Findings
 
-1. **Technically, GrapheneOS is among the strongest mobile platforms available.**
-   It goes well beyond stock Android, including stock Android's Advanced
-   Protection mode (§6, §8, §13.1). Its strengths:
-   - exploit mitigations:
-     - hardened_malloc;
-     - Memory Tagging Extension (MTE) by default;
-     - exec spawning;
-     - kernel hardening;
-   - physical protections:
-     - auto-reboot;
-     - USB-C (Universal Serial Bus Type-C) port control;
-     - duress personal identification number (PIN);
-     - secure-element throttling.
+The table summarises the nine key findings with their evidence, confidence
+and cross-references. In the Confidence column, a dash (—) means the finding
+carries no confidence tag. Findings 1, 3 and 4 have more detail in the lists
+directly below the table.
 
-   Leaked forensic-vendor material is consistent with this assessment, within
-   its limits (§8.7).
-2. **The mitigations raise cost; they are not hard barriers.** Published
-   research shows the following [Documented] (§6.3, §5.2.1):
-   - MTE tags can be leaked speculatively;
-   - kernel MTE is weaker than user-space MTE;
-   - memory the graphics processing unit (GPU) reaches through its own page
-     tables is not covered at all (Common Vulnerabilities and Exposures
-     identifier CVE-2025-0072).
-3. **Its biggest risks sit outside its own code.** GrapheneOS depends on
-   Google for:
-   - hardware;
-   - firmware;
-   - patches;
-   - source releases.
+| # | Finding | Evidence | Confidence | See |
+| --- | --- | --- | --- | --- |
+| 1 | **Technically, GrapheneOS is among the strongest mobile platforms available.** | • It goes well beyond stock Android, including stock Android's Advanced Protection mode<br>• Its strengths are in exploit mitigations and physical protections (listed below the table)<br>• Leaked forensic-vendor material is consistent with this assessment, within its limits | — | • §6, §8, §13.1<br>• §8.7 (leaked material) |
+| 2 | **The mitigations raise cost; they are not hard barriers.** | Published research shows:<br>• Memory Tagging Extension (MTE) tags can be leaked speculatively<br>• kernel MTE is weaker than user-space MTE<br>• memory the graphics processing unit (GPU) reaches through its own page tables is not covered at all (Common Vulnerabilities and Exposures identifier CVE-2025-0072) | Documented | §6.3, §5.2.1 |
+| 3 | **Its biggest risks sit outside its own code.** | • GrapheneOS depends on Google for four things (listed below the table)<br>• Google has recently made that dependency harder to manage (changes listed below the table)<br>• The dependency is visible now: Pixel 11 support is waiting for Google to publish the Android 17 Quarterly Platform Release 2 (QPR2) platform source | Documented (Pixel 11 point) | §5.2.9, §9.3 (Pixel 11 point) |
+| 4 | **What lies beneath the operating system (OS) is under active attack.** | • A Pixel modem bug (CVE-2026-58704) is under limited, targeted exploitation (September 2026)<br>• The IP Multimedia Subsystem (IMS) offers a remote path to the modem. IMS carries Wi-Fi calling and voice over Long-Term Evolution (LTE), known as Voice over LTE (VoLTE). LTE-only mode does not close that path<br>• GPU and accelerator drivers feature in recent Pixel exploit chains<br>• On Pixel 11, three new components arrive together (listed below the table)<br>• GrapheneOS describes its MTE support on Pixel 11 as "bare minimum" so far | Documented | §4.5, §5.2 |
+| 5 | **Messaging apps are a common way in.** | • The 2025 Android spyware cases came through media parsers inside messaging apps<br>• OS hardening limits the next step but does not stop code running inside the app | Documented / Assessed | §7.11 |
+| 6 | **Trust concentrates in a small team.** | • 6–10 full-time developers<br>• donation funding<br>• no published key-custody or succession arrangements<br>• no published disclosure policy<br>• no commercial support | — | §3.1, §9.2 |
+| 7 | **It suits high-risk individuals better than managed fleets.** | The gaps for a fleet are:<br>• no fleet console<br>• no staged rollout<br>• limited detection<br>• no way to enforce or verify device-wide settings from a work profile<br>• Play Integrity blocks some apps<br>A fleet is possible but needs compensating controls. | — | §9.7, §10.2 |
+| 8 | **Legal exposure is real for some users.** | • A duress wipe during a US border search has led to a pending prosecution<br>• Refusing to unlock is an offence in some jurisdictions<br>• Regulated firms must square disappearing messages with recording obligations | — | §8.8, §10.6 |
+| 9 | **The recommended device today is the Pixel 10a, for all profiles.** | • The Pixel 10 (non-Pro) is the alternative where more performance is needed<br>• Pixel 11 is not yet supported | — | §5.3 |
 
-   Google has recently made that dependency harder to manage:
-   - no device trees;
-   - Android Open Source Project (AOSP) source only twice a year;
-   - quarterly bulletins.
+**Finding 1 — GrapheneOS's strengths:**
 
-   The dependency is visible now: Pixel 11 support is waiting for Google to
-   publish the Android 17 Quarterly Platform Release 2 (QPR2) platform source.
-   [Documented] (§5.2.9, §9.3)
-4. **What lies beneath the operating system (OS) is under active attack.**
-   [Documented] (§4.5, §5.2)
-   - A Pixel modem bug (CVE-2026-58704) is under limited, targeted
-     exploitation (September 2026).
-   - The IP Multimedia Subsystem (IMS) offers a remote path to the modem. IMS
-     carries Wi-Fi calling and voice over Long-Term Evolution (LTE), known as
-     Voice over LTE (VoLTE). LTE-only mode does not close that path.
-   - GPU and accelerator drivers feature in recent Pixel exploit chains.
-   - On Pixel 11, three new components arrive together:
-     - a new modem vendor;
-     - a new secure element;
-     - a new GPU generation.
-   - GrapheneOS describes its MTE support on Pixel 11 as "bare minimum" so far.
-5. **Messaging apps are a common way in.** The 2025 Android spyware cases came
-   through media parsers inside messaging apps. OS hardening limits the next
-   step but does not stop code running inside the app. [Documented] /
-   [Assessed] (§7.11)
-6. **Trust concentrates in a small team.** (§3.1, §9.2)
-   - 6–10 full-time developers;
-   - donation funding;
-   - no published key-custody or succession arrangements;
-   - no published disclosure policy;
-   - no commercial support.
-7. **It suits high-risk individuals better than managed fleets.** The gaps for
-   a fleet are (§9.7, §10.2):
-   - no fleet console;
-   - no staged rollout;
-   - limited detection;
-   - no way to enforce or verify device-wide settings from a work profile;
-   - Play Integrity blocks some apps.
+- Exploit mitigations:
+  - hardened_malloc;
+  - MTE by default;
+  - exec spawning;
+  - kernel hardening.
+- Physical protections:
+  - auto-reboot;
+  - USB-C (Universal Serial Bus Type-C) port control;
+  - duress personal identification number (PIN);
+  - secure-element throttling.
 
-   A fleet is possible but needs compensating controls.
-8. **Legal exposure is real for some users.** (§8.8, §10.6)
-   - A duress wipe during a US border search has led to a pending prosecution.
-   - Refusing to unlock is an offence in some jurisdictions.
-   - Regulated firms must square disappearing messages with recording
-     obligations.
-9. **The recommended device today is the Pixel 10a, for all profiles.** The
-   Pixel 10 (non-Pro) is the alternative where more performance is needed.
-   Pixel 11 is not yet supported. (§5.3)
+**Finding 3 — the dependency on Google:**
+
+- GrapheneOS depends on Google for:
+  - hardware;
+  - firmware;
+  - patches;
+  - source releases.
+- Google has recently made that dependency harder to manage:
+  - no device trees;
+  - Android Open Source Project (AOSP) source only twice a year;
+  - quarterly bulletins.
+
+**Finding 4 — the three new components on Pixel 11:**
+
+- a new modem vendor;
+- a new secure element;
+- a new GPU generation.
 
 ### 14.2 Stage 2 Work Packages
 
 Effort is in analyst days, indicative only [Assessed]. Each Stage 2 work
 package is numbered: work package 1 (WP1) to work package 16 (WP16). The work
-packages are grouped into three tiers:
+packages are grouped into three tiers. The table shows what each tier covers.
 
-- **Tier 1** covers the questions that decide whether the client can trust
-  and operate GrapheneOS at all, at modest cost.
-- **Tier 2** is deeper technical research on the highest-risk components.
-- **Tier 3** can wait.
+| Tier | What it covers |
+| --- | --- |
+| **Tier 1** | The questions that decide whether the client can trust and operate GrapheneOS at all, at modest cost |
+| **Tier 2** | Deeper technical research on the highest-risk components |
+| **Tier 3** | Work that can wait |
 
 Some work packages apply only if the client needs a given profile: Profile B
 (high-risk) or Profile C (managed fleet). Area numbers refer to §11.2.
@@ -2930,64 +2860,42 @@ Some work packages apply only if the client needs a given profile: Profile B
 
 ### 14.4 Open Questions for the Client
 
-Most are taken from the assumption register (Appendix A):
+Most are taken from the assumption register (Appendix A). The table lists
+each question with any examples or note, and the related assumption, section
+or work package. A dash (—) means none is given.
 
-1. Which personas and deployment models do you actually have? (assumptions
-   A10 and A11)
-2. Are certified products (Common Criteria, Federal Information Processing
-   Standards (FIPS) 140) required? (assumption A12)
-3. Are any staff subject to regulated-communications recording obligations?
-   (§10.6, §11 area 10) Examples:
-   - US Financial Industry Regulatory Authority (FINRA) and Securities and
-     Exchange Commission (SEC) rules;
-   - UK Financial Conduct Authority (FCA) rules;
-   - EU Markets in Financial Instruments Directive II (MiFID II).
-4. Which countries do staff live in and travel to? (§8.8, §11 area 10)
-5. What is your legal position on duress wipes in those jurisdictions?
-   (§11 area 10, WP6)
-6. What data-protection requirements would apply to sending device data to
-   attestation.app, a GrapheneOS-run service? (§11 area 16)
-7. Do you need a device now (Pixel 10a) or can you wait for Pixel 11?
-   (assumption A01)
-8. Which MDM do you use, and do you need fully managed devices? (assumption
-   A14)
-9. Are there any restrictions on the following? (assumption A09)
-   - hardware origin;
-   - carriers;
-   - regions of use.
-10. Which apps are mandatory? (§10.3, WP10) Typical categories:
-    - banking;
-    - corporate;
-    - messaging.
-11. Is there a security operations function that would need device telemetry?
-    (§9.7)
-12. Do you need device-wide remote wipe, rather than wiping only a work
-    profile? (§11 area 7)
-13. What platform do staff use today, and what is your risk appetite for
-    moving away from it?
-14. Would you consider funding or contracting with the GrapheneOS project (for
-    example for support or audits)? Such an arrangement would reduce the
-    §11 area 4 risk.
-15. What budget and timeline do you have for Stage 2?
+| # | Question | Examples or note | Related |
+| --- | --- | --- | --- |
+| 1 | Which personas and deployment models do you actually have? | — | Assumptions A10 and A11 |
+| 2 | Are certified products (Common Criteria, Federal Information Processing Standards (FIPS) 140) required? | — | Assumption A12 |
+| 3 | Are any staff subject to regulated-communications recording obligations? | Examples:<br>• US Financial Industry Regulatory Authority (FINRA) and Securities and Exchange Commission (SEC) rules<br>• UK Financial Conduct Authority (FCA) rules<br>• EU Markets in Financial Instruments Directive II (MiFID II) | §10.6, §11 area 10 |
+| 4 | Which countries do staff live in and travel to? | — | §8.8, §11 area 10 |
+| 5 | What is your legal position on duress wipes in those jurisdictions? | — | §11 area 10, WP6 |
+| 6 | What data-protection requirements would apply to sending device data to attestation.app, a GrapheneOS-run service? | — | §11 area 16 |
+| 7 | Do you need a device now (Pixel 10a) or can you wait for Pixel 11? | — | Assumption A01 |
+| 8 | Which MDM do you use, and do you need fully managed devices? | — | Assumption A14 |
+| 9 | Are there any restrictions on the following? | • hardware origin<br>• carriers<br>• regions of use | Assumption A09 |
+| 10 | Which apps are mandatory? | Typical categories:<br>• banking<br>• corporate<br>• messaging | §10.3, WP10 |
+| 11 | Is there a security operations function that would need device telemetry? | — | §9.7 |
+| 12 | Do you need device-wide remote wipe, rather than wiping only a work profile? | — | §11 area 7 |
+| 13 | What platform do staff use today, and what is your risk appetite for moving away from it? | — | — |
+| 14 | Would you consider funding or contracting with the GrapheneOS project (for example for support or audits)? | Such an arrangement would reduce the §11 area 4 risk | §11 area 4 |
+| 15 | What budget and timeline do you have for Stage 2? | — | — |
 
 ### 14.5 Stage 2 Exit Criteria
 
-Stage 2 is complete when:
+Stage 2 is complete when every criterion in the table that applies is met.
 
-- Every Tier 1 work package has reported against its threshold in §14.2.
-- Each §11 area covered by a Tier 1 work package has revised §11.1 ratings.
-- The client has a go or no-go decision for each profile it needs (the
-  profiles are defined in §2.1), with any conditions written down.
-- These assumptions (Appendix A) are confirmed or replaced:
-  - A01;
-  - A10;
-  - A11;
-  - A12;
-  - A14.
-- The dependencies to monitor (Appendix A) have an owner.
-- Profile B (if needed) has a signed-off duress-PIN and messaging policy.
-- Profile C (if needed) has a tested MDM configuration.
-- The Tier 2 scope is agreed, or the client has decided not to proceed.
+| # | Exit criterion | Applies |
+| --- | --- | --- |
+| 1 | Every Tier 1 work package has reported against its threshold in §14.2 | Always |
+| 2 | Each §11 area covered by a Tier 1 work package has revised §11.1 ratings | Always |
+| 3 | The client has a go or no-go decision for each profile it needs (the profiles are defined in §2.1), with any conditions written down | Always |
+| 4 | These assumptions (Appendix A) are confirmed or replaced:<br>• A01<br>• A10<br>• A11<br>• A12<br>• A14 | Always |
+| 5 | The dependencies to monitor (Appendix A) have an owner | Always |
+| 6 | Profile B has a signed-off duress-PIN and messaging policy | If Profile B is needed |
+| 7 | Profile C has a tested MDM configuration | If Profile C is needed |
+| 8 | The Tier 2 scope is agreed, or the client has decided not to proceed | Always |
 
 ---
 
