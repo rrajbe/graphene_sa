@@ -193,8 +193,9 @@ raises the cost substantially but cannot be relied on to defeat it.
 
 ¹ The default 18-hour auto-reboot leaves a long after-first-unlock window in
 which a seized, unlocked-since-boot device is more exposed.
-² The organization cannot enforce or verify device-wide settings set by the
-user (auto-reboot, USB-C mode, duress PIN; §10.2); fleets also tend to need sandboxed
+² The organisation cannot enforce device-wide settings set by the user. Auditor
+reports some of them (auto-reboot timeout, USB-C mode) but not others (duress
+PIN, cellular mode, Wi-Fi calling; §10.2); fleets also tend to need sandboxed
 Google Play for work apps.
 ³ Exploit mitigations apply in every profile, but A and C keep more attack
 surface (Play services, more apps, more radios on).
@@ -555,15 +556,15 @@ is an analyst summary [A]; the controls are documented in the sections cited.
 | Messaging apps and media/image parsers | All states once the app runs (incl. AFU-locked); remote 0-click | hardened_malloc / MTE in app processes; profile isolation; Network permission (§6, §7) | Parser bugs inside the app's own process; untested against 2025 chains | 5 Messaging & media parsers |
 | Cellular radio (2G/LTE/5G pre-auth) | BFU, AFU and unlocked (radio on); nearby or network attacker | LTE-only mode, 2G off, airplane mode (§4.5, §7.7) | Closed firmware; exploited Pixel modem bug (CVE-2026-58704); 5G/LTE pre-auth parsing | 3 Baseband & IMS |
 | IMS (VoLTE / Wi-Fi calling) and SMS/MMS/RCS | BFU, AFU and unlocked; remote with the phone number | VoLTE and Wi-Fi calling toggles (§7.7) | Internet-to-baseband RCE class; LTE-only does not remove it | 3 Baseband & IMS |
-| Wi-Fi | When enabled, all states; nearby | Toggle; auto-off timer; MAC randomisation (§7.7) | Closed Wi-Fi firmware; shared-buffer path past the IOMMU | 13 Proximity radios |
-| Bluetooth | When enabled, all states; nearby | Toggle; auto-off timer (§7.7) | Closed firmware and host stack bugs | 13 Proximity radios |
-| NFC | When enabled; very close range | Toggle (§7.7) | Closed firmware; small but pre-auth | 13 Proximity radios |
-| USB-C | Physical access, BFU and AFU-locked | USB-C port control, charging-only when locked by default (§8.3) | Unlocked-state and charging-path bugs | 12 Forensic claims |
+| Wi-Fi | When enabled, all states; nearby | Toggle; auto-off timer; MAC randomisation (§7.7) | Closed Wi-Fi firmware; shared-buffer path past the IOMMU | 14 Proximity radios |
+| Bluetooth | When enabled, all states; nearby | Toggle; auto-off timer (§7.7) | Closed firmware and host stack bugs | 14 Proximity radios |
+| NFC | When enabled; very close range | Toggle (§7.7) | Closed firmware; small but pre-auth | 14 Proximity radios |
+| USB-C | Physical access, BFU and AFU-locked | USB-C port control, charging-only when locked by default (§8.3) | Unlocked-state and charging-path bugs | 13 Forensic claims |
 | GPU and accelerator drivers (Mali, PowerVR, Tensor VPU) | From any compromised app or renderer | MTE on kernel allocators (§6.3); none specific to GPU page tables | GPU page-table bugs bypass MTE; accelerator drivers new and unstudied (§5.2.1) | 2 GPU & accelerator drivers |
-| Sandboxed Play layer | When installed, as an ordinary app | No privileged Google access (§7.4) | Compromise limited to its profile; dependency on Google code | 10 Sandboxed Play layer |
+| Sandboxed Play layer | When installed, as an ordinary app | No privileged Google access (§7.4) | Compromise limited to its profile; dependency on Google code | 12 Sandboxed Play layer |
 | App stores / sideloading | User or admin action | Per-app permissions; GrapheneOS App Store (§7.9) | Malicious or compromised apps | 9 App sourcing |
 | Update channel | Periodic, remote | Signed updates, verified boot, rollback protection (§4.2, §9.1) | Signing-key or build compromise | 4 Supply chain & governance |
-| Secure element | Physical access; or root on the main OS | Weaver throttling; insider attack resistance (§4.3) | Titan bugs (Quarkslab, first-gen Titan M); M3 unstudied | 12 Forensic claims; 11 Pixel 11 components |
+| Secure element | Physical access; or root on the main OS | Weaver throttling; insider attack resistance (§4.3) | Titan bugs (Quarkslab, first-gen Titan M); M3 unstudied | 13 Forensic claims; 11 Pixel 11 components |
 
 > **Assessment note.** GrapheneOS can only be as strong as the hardware and
 > firmware under it. The client's deeper review should focus on what sits below
@@ -901,7 +902,7 @@ be set off by default for new apps. [D]
 
 > **Assessment note.** The compatibility layer is GrapheneOS code that sits
 > between Google's closed-source Play services and the OS. It is a sensible
-> design, but it is an IPC surface worth reviewing (§11 #10).
+> design, but it is an IPC surface worth reviewing (§11 #12).
 
 ### 7.5 User Profiles, Private Space and Work Profile
 
@@ -1462,7 +1463,7 @@ legal duties, and with the law where a device is used.
 > out the duress PIN and disappearing messages on work devices. For Profile B,
 > travel to the US, UK or France makes the duress PIN a legal decision, not only
 > a technical one. A legal review per jurisdiction is a Stage 2 item (§11 area
-> #14). [A]
+> #10). [A]
 
 ---
 
@@ -1499,7 +1500,7 @@ client input and Stage 2 results.
 | 4 | Supply chain, governance & vulnerability handling | 6–10-person donation-funded team; **signing-key custody not published**; reproducibility documented but not independently confirmed; no succession plan; infrastructure relocated under legal pressure; no bug bounty, disclosure policy or independent audit found [A] (absence — searched grapheneos.org and the project forum, 2026-11). Context: Google publishes a binary-transparency log for stock Pixel images and GrapheneOS has no equivalent found; leaked OEM platform keys signed malware in 2022 (§3.1, §9.2) | M | H | **H** | M | All | B, C | Governance, key-custody and disclosure-process interview; reproducible-build test; hosting review; advisory and fix history |
 | 5 | Messaging and media parser 0-click surface | 2025 Android spyware arrived through messaging apps: LANDFALL (Samsung image library via WhatsApp, exploited for about nine months), Paragon Graphite (code running inside WhatsApp), and the WhatsApp/Apple chain of August 2025 [D]. Image and media parsing inside an app runs in that app's process, and Android has no BlastDoor-style sandbox for third-party messengers. hardened_malloc and MTE apply but are untested against these exploits [A] (§7.11) | M | H | **H** | M | All | A, B, C | Attack-surface review of the client's messengers and their bundled parsers; per-profile isolation design |
 | 6 | Detection & incident response | No root, no MTD agent; compromise may go unseen; Auditor proves OS integrity only; a reboot clears memory-resident implants but also destroys volatile evidence (§9.7) | M | H | **H** | M | All | B, C | IR runbook dry run; evaluate log, MTE crash and MVT triage options |
-| 7 | Enterprise manageability | No fleet console; fully managed MDM undocumented; no staged rollout; a work profile cannot enforce or verify device-wide settings, so configuration drift goes undetected; no device-wide remote wipe from a work-profile MDM; Play Integrity blocks some apps (§10.2, §10.3) | H | M | **M** | M | All | C | MDM compatibility matrix with the client's MDM; corporate app tests; configuration-verification and remote-wipe options |
+| 7 | Enterprise manageability | No fleet console; fully managed MDM undocumented; no staged rollout; a work profile cannot enforce device-wide settings; Auditor reports some (auto-reboot, USB-C mode, adb, OEM unlocking) but not others (cellular mode, Wi-Fi calling, duress PIN, compatibility mode) and alerts only on failed or missed check-ins, so drift in those goes undetected; no device-wide remote wipe from a work-profile MDM; Play Integrity blocks some apps (§10.2, §10.3) | H | M | **M** | M | All | C | MDM compatibility matrix with the client's MDM; corporate app tests; configuration-verification and remote-wipe options |
 | 8 | Browser / WebView | Vanadium patch latency vs Chromium 0-days; spyware first stages are often Chrome renderer bugs [D]; **WebView keeps JIT on and lacks site isolation**; no public Vanadium patch-latency data [A] (absence — searched grapheneos.org and the project forum, 2026-11) (§6.6) | M | M | **M** | L | All | A, B | Patch-latency study; WebView usage census of required apps |
 | 9 | App sourcing supply chain | Apps, not the OS, are the usual compromise path; store trust models differ (§7.9) | M | M | **M** | L | All | A, B, C | Store trust review; approved-app list |
 | 10 | Legal & regulatory fit (incl. duress PIN) | Duress wipes have led to prosecution: **US v. Tunick** (a GrapheneOS wipe during a CBP search, Jan 2025; pending) [S]; refusing to unlock is an offence under UK Schedule 7 and can be under French law [D]. Messaging with disappearing messages may breach recording obligations (FINRA/SEC, FCA, MiFID II); a duress wipe conflicts with litigation holds; export rules and BYOD monitoring limits apply [A] (§8.8, §10.6) | M | M | **M** | L | All | B, C | Legal review for each jurisdiction of residence and travel; duress-PIN and messaging policy |
@@ -2065,6 +2066,7 @@ All URLs accessed 2026-11-23/24. Each claim in the body carries its confidence t
 - The Register, GrapheneOS leaves OVH: https://www.theregister.com/2025/11/28/grapheneos_ovhcloud/
 
 **Upstream and devices**
+- Android Authority, Google's risk-based Android security updates (July 2025 bulletin with no fixes; September 2025 with 119): https://www.androidauthority.com/android-Risk-Security-updates-3597466
 
 - Android Authority, AOSP twice a year: https://www.androidauthority.com/aosp-source-code-schedule-3630018/
 - Android Enterprise, bulletin cadence (may require sign-in): https://www.androidenterprise.community/kb/announcements/change-in-cadence-of-android-security-bulletins/12154
@@ -2157,6 +2159,8 @@ All URLs accessed 2026-11-23/24. Each claim in the body carries its confidence t
 - Amnesty International, Predator Files (2023)
 
 **Supply chain and updates**
+- GrapheneOS Auditor source (what it verifies and reports): https://github.com/GrapheneOS/Auditor
+- GrapheneOS AttestationServer source (what attestation.app stores and alerts on): https://github.com/GrapheneOS/AttestationServer
 
 - GrapheneOS build documentation (reproducing official builds): https://grapheneos.org/build
 - GrapheneOS forum, reproducible builds: https://discuss.grapheneos.org/d/23877-reproducible-builds
