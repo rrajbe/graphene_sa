@@ -76,14 +76,14 @@ noting how each applies to each profile and device generation.
 | #   | Task                       | Details                                                                                          | Owner | Depends on | Est.  | Done |
 | --- | -------------------------- | ------------------------------------------------------------------------------------------------ | ----- | ---------- | ----- | ---- |
 | 2.1 | Overview                   | Background, governance, infrastructure, design philosophy (doc §3)                               | Raj   | 1.4        | 20 m  | [x]  |
-| 2.2 | Platform & trust model     | Hardware requirements, AVB, Titan M2, baseband isolation (doc §4)                                | Raj   | 1.2, 1.3   | 30 m  | [ ]  |
-| 2.3 | Device generation analysis | SoC, modem, GPU, fingerprint, radios, support windows; what differs for security (doc §5)        | Raj   | 1.2        | 45 m  | [ ]  |
-| 2.4 | Exploit mitigations        | hardened_malloc, MTE, exec spawning, kernel, Vanadium (doc §6)                                   | Raj   | 2.2        | 30 m  | [ ]  |
-| 2.5 | Privacy, network & apps    | Permissions, Scopes, sandboxed Play, default connections, VPN/DNS, app sourcing (doc §7)          | Raj   | 2.2        | 35 m  | [ ]  |
-| 2.6 | Physical & forensic        | BFU, auto-reboot, USB-C control, duress, PIN scrambling, border scenarios (doc §8)               | Raj   | 2.2        | 30 m  | [ ]  |
-| 2.7 | Operations & lifecycle     | Updates, signing, Auditor, procurement, detection & incident response (doc §9)                   | Raj   | 2.2        | 30 m  | [ ]  |
-| 2.8 | Enterprise & compatibility | MDM, Play Integrity, payments, usability trade-offs (doc §10)                                    | Raj   | 2.5, 2.7   | 20 m  | [ ]  |
-| 2.9 | Comparative baseline       | Stock Pixel, iOS with Lockdown Mode, Samsung Knox (doc §13)                                      | Raj   | 2.4–2.6    | 20 m  | [ ]  |
+| 2.2 | Platform & trust model     | Hardware requirements, AVB, Titan M2, baseband isolation (doc §4)                                | Raj   | 1.2, 1.3   | 30 m  | [x]  |
+| 2.3 | Device generation analysis | SoC, modem, GPU, fingerprint, radios, support windows; what differs for security (doc §5)        | Raj   | 1.2        | 45 m  | [x]  |
+| 2.4 | Exploit mitigations        | hardened_malloc, MTE, exec spawning, kernel, Vanadium (doc §6)                                   | Raj   | 2.2        | 30 m  | [x]  |
+| 2.5 | Privacy, network & apps    | Permissions, Scopes, sandboxed Play, default connections, VPN/DNS, app sourcing (doc §7)          | Raj   | 2.2        | 35 m  | [x]  |
+| 2.6 | Physical & forensic        | BFU, auto-reboot, USB-C control, duress, PIN scrambling, border scenarios (doc §8)               | Raj   | 2.2        | 30 m  | [x]  |
+| 2.7 | Operations & lifecycle     | Updates, signing, Auditor, procurement, detection & incident response (doc §9)                   | Raj   | 2.2        | 30 m  | [x]  |
+| 2.8 | Enterprise & compatibility | MDM, Play Integrity, payments, usability trade-offs (doc §10)                                    | Raj   | 2.5, 2.7   | 20 m  | [x]  |
+| 2.9 | Comparative baseline       | Stock Pixel, iOS with Lockdown Mode, Samsung Knox (doc §13)                                      | Raj   | 2.4–2.6    | 20 m  | [x]  |
 
 *Tasks 2.4–2.7 can run in parallel once 2.2 is done.*
 
@@ -431,6 +431,8 @@ costing only. Ratings below are working hypotheses, to be re-scored in Phase 3.
   | A10 | Highest credible tier per persona is as in §2.3 (e.g. P1 at T3, P2 at T4) | Profile assignment and §11 priorities shift | Ask client which personas they actually have |
   | A11 | Organization-owned devices can be issued to high-risk staff instead of BYOD | C+B and the BYOD "not recommended" guidance may not be acceptable | Ask client about device ownership policy |
   | A12 | The client has no hard requirement for certified products (Common Criteria, FIPS 140, government accreditation) | GrapheneOS may be ruled out for regulated uses regardless of technical strength | Ask client about compliance obligations |
+  | A13 | Official GrapheneOS builds are reproducible from source (not stated on the features page) | §9.2 and §11 #2 rating; build-verification Stage 2 work package | GrapheneOS build docs; attempt a reproducible build in Stage 2 |
+  | A14 | Device-owner (fully managed) MDM provisioning works on GrapheneOS | Profile C design changes to work-profile-only | Test with the client's MDM in Stage 2 |
 - **B.** Persona, threat-tier and deployment-model definitions
   - Personas: P1 Executive/VIP · P2 Journalist/activist/high-risk individual ·
     P3 Security/IT staff · P4 Field/operational staff · P5 Privacy-conscious user
