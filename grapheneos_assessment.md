@@ -159,7 +159,7 @@ deployment models. Persona-to-tier assignments are analyst judgement [A] (A10).
   device-wide controls (auto-reboot, USB-C mode, no Play, duress PIN), so issue
   a dedicated device instead.
 
-### 2.3 Persona summary (full definitions in Appendix B)
+### 2.3 Persona summary
 
 | Persona                               | Main assets                                         | Likely adversaries                                       | Highest credible tier  | Default profile               |
 | ------------------------------------- | --------------------------------------------------- | -------------------------------------------------------- | ---------------------- | ----------------------------- |
