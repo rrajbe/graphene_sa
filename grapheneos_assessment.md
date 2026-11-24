@@ -35,6 +35,37 @@
 
 ---
 
+## How to Read This Document (One Minute)
+
+This assessment answers three questions:
+- What does GrapheneOS secure?
+- Which parts need a deeper look first?
+- What does a secure phone built on it look like?
+
+Start with §0 (five minutes). Then follow the row for your role below.
+
+| If you are… | Read next | You will get | Time |
+| --- | --- | --- | --- |
+| An executive deciding whether to adopt | §0, then §14.1 (key findings) | • verdict<br>• top risks<br>• decision constraints<br>• recommended next step | 10 minutes |
+| A security lead planning a deeper review | §11 (ranked areas), then §14.2 (Stage 2 work packages) | • what to examine first<br>• why<br>• the cost | 20 minutes |
+| A mobile-security engineer checking the claims | §4–§9, then Appendix G (evidence by area) | • mechanisms<br>• research<br>• incidents behind each finding | 1–2 hours |
+| An information-technology team building phones | §5.3 (device), then §12 (configurations and checklist) | Which Pixel to buy and the settings for each profile | 30 minutes |
+| A buyer comparing alternatives | §13, comparing:<br>• stock Pixel<br>• iPhone<br>• Samsung Knox<br>• certified phones | Strengths and gaps side by side | 15 minutes |
+| Legal or compliance staff | §10.6, then §8.8 | • duress-wipe and unlock-law exposure<br>• certification gaps | 10 minutes |
+
+Three labels appear throughout:
+
+| Label | Meaning |
+| --- | --- |
+| Profile A, B or C | • A: privacy-conscious individual<br>• B: high-risk user (for example an executive or journalist)<br>• C: organisation-managed fleet<br>Defined in §2 |
+| "§11 area N" | One of the 17 ranked areas to examine (§11.2) |
+| [Documented], [Secondary], [Assessed] | How well-supported a statement is (table above; §1.4) |
+
+Abbreviations are expanded at first use in each section and listed in
+Appendix C. Sources are in Appendix F.
+
+---
+
 ## 0. Executive Summary
 
 Claims in this summary are tagged in the sections referenced.
