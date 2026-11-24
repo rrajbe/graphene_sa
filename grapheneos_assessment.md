@@ -393,8 +393,11 @@ providing a reasonably secure device". [D]
   (§9.4). [D]
 - **Generations:** Titan M2 on Pixel 8 to 10a; **Titan M3 on Pixel 11** — new
   silicon and firmware with little public security research yet. [S]
-- The October 2025 leaked Cellebrite matrix reportedly shows the vendor
-  **cannot brute-force passcodes on Pixels** even on stock Android, which is
+- The October 2025 leaked Cellebrite matrix covers **Pixel 6–9 only**; Pixel
+  10, 10a and 11 are not in it. It reportedly shows stock Pixels as extractable
+  in all lock states — Before First Unlock (BFU) without the passcode yields
+  only limited data, while After First Unlock (AFU) and unlocked yield much
+  more — but the vendor **cannot brute-force Pixel passcodes**, which is
   consistent with Weaver doing its job. [S]
 
 ### 4.4 Storage Encryption
@@ -418,8 +421,9 @@ providing a reasonably secure device". [D]
 - Pixels isolate these components with an **IOMMU**, so a compromised modem should
   not be able to read or write main memory directly. The attack path then runs
   through the drivers that talk to the component. [D] / [A]
-- GrapheneOS reduces exposure with options such as **LTE-only mode** (disables
-  2G/3G and 5G legacy fallback paths) and the ability to turn radios off. [A]
+- GrapheneOS reduces exposure with **LTE-only mode**, which disables 2G, 3G and
+  5G, leaving only the LTE radio stack exposed. [D] Radios can also be turned
+  off individually. [D]
 - **Residual risk:** The modem is the largest closed attack surface left on the
   device and a known nation-state target. It is §11 area #3.
 
@@ -495,25 +499,36 @@ Status as of 2026-11-24. † = press reports only (Secondary).
 | Pixel 9a | Tensor G4 | Exynos 5300 | Mali | Titan M2 | Optical | Apr 2025 | Apr 2032 | Supported |
 | Pixel 10 / 10 Pro / 10 Pro XL | Tensor G5 | Exynos 5400 | PowerVR DXT† | Titan M2 | Ultrasonic | Aug 2025 | Aug 2032 | Supported |
 | Pixel 10 Pro Fold | Tensor G5 | Exynos 5400 | PowerVR† | Titan M2 | Side capacitive | Oct 2025 | Oct 2032 | Supported |
-| Pixel 10a | Tensor G4 | Exynos 5400 | Mali | Titan M2† | Optical† | Mar 2026 | Mar 2033 | Supported |
+| Pixel 10a | Tensor G4 | Exynos 5400 | Mali | Titan M2 | Optical | Mar 2026 | Mar 2033 | Supported |
 | Pixel 11 / 11 Pro / 11 Pro XL | Tensor G6 | MediaTek M90† | PowerVR C-Series† | Titan M3† | Ultrasonic† | Aug 2026 | Aug 2033† | **Not yet** |
 | Pixel 11 Pro Fold | Tensor G6 | MediaTek M90† | PowerVR† | Titan M3† | Side capacitive† | 2026† | † | **Not yet** |
 
 Support end dates for Pixel 8–10a are from the GrapheneOS FAQ ("OEM minimum
-support end"); GrapheneOS updates typically end shortly after. [D]
+support end"); GrapheneOS updates typically end shortly after. [D] The two
+foldables follow different rules: the Pixel 9 Pro Fold's end date (Aug 2031)
+matches the Pixel 9 series launch rather than its own Sep 2024 release, while
+the Pixel 10 Pro Fold's (Oct 2032) runs from its own release. [D] (dates) / [A]
+(interpretation)
+
+The Pixel 10a's Titan M2 secure element and optical fingerprint sensor are taken
+from Google's specification page and independent reviews. [S]
 
 ### 5.2 Security-Relevant Differences
 
 **5.2.1 Memory tagging (MTE).** All in-scope devices have MTE, and GrapheneOS uses
 it by default for the base OS and known-compatible apps. [D] Pixel 11 shipped
-without MTE enabled in Google's software; it was added in Android 17 QPR2, which
-is why GrapheneOS support is late. [S]
+without MTE enabled in Google's software; MTE arrived with Android 17 QPR2
+(released to Pixels on 2026-11-10) and works in GrapheneOS's port. [D]
+GrapheneOS moved Pixel firmware, drivers and kernels to QPR2 in release
+2026111800, but Pixel 11 support **is waiting for Google to publish the QPR2
+platform source to AOSP**, which GrapheneOS says Google has delayed (project
+statement, Nov 2026). [D]
 
 **5.2.2 GPU driver.** The GPU kernel driver is one of the most-exploited Android
 attack surfaces.
 - **Mali (G3, G4, Pixel 10a):** a documented history of in-the-wild exploitation
   by commercial spyware vendors — e.g. CVE-2021-39793 (used against Pixel 6),
-  CVE-2022-22706, CVE-2023-4211. [S] Well studied, so both attackers and
+  CVE-2022-22706, CVE-2023-4211. [D] (Arm and Google TAG advisories) Well studied, so both attackers and
   defenders know it.
 - **PowerVR (G5, G6):** a new driver stack on Pixels, with little public research
   history. Unknown is not the same as safe. [A]
@@ -521,7 +536,7 @@ attack surfaces.
 **5.2.3 Modem.**
 - Exynos 5300 (Pixel 8, 8a, 9a) and 5400 (Pixel 9, 10, 10a) are Samsung modems
   with a public vulnerability record (e.g. Project Zero's 2023 Exynos modem
-  findings). [A]
+  findings). [D] (Google Project Zero, 2023)
 - The 5400 adds **satellite messaging / SOS**, a new radio path. [S]
 - **Pixel 11 switches to MediaTek** — the first change of modem vendor in the
   Tensor era, with its own separate vulnerability history. [S]
@@ -534,7 +549,8 @@ caps fingerprint attempts at **5** (stock: 20) and offers fingerprint + PIN
 two-factor unlock, which removes most of the risk. [D] / [A]
 
 **5.2.6 Radios.** Pro models add UWB, and newer models add satellite. Each radio
-is extra attack surface; most can be disabled. [A]
+is extra attack surface; most can be disabled. [A] This is one reason §5.3
+recommends against Pro models for high-risk users.
 
 **5.2.7 Support window remaining.** From today: Pixel 8 ≈ 4 years left; Pixel 10a
 ≈ 6.3 years; Pixel 10 Pro Fold ≈ 6 years. For procurement, newer = longer
@@ -544,18 +560,40 @@ lifetime value. [D]
 attack surface for no security benefit. [A]
 
 **5.2.9 Time to GrapheneOS support.** Pixel 10 support was delayed partly by the
-November 2025 infrastructure move; Pixel 11 has been unsupported for over three
-months because of MTE gating. **New Pixels should not be planned on day-one
-GrapheneOS support.** [D] / [S]
+November 2025 infrastructure move. [D] / [S] Pixel 11, released in August
+2026, is still not supported: GrapheneOS is waiting for Google to publish the
+Android 17 QPR2 platform source to AOSP (project statement, Nov 2026). [D] This
+is a concrete example of the project's dependence on Google's release schedule
+(§11 #1). **New Pixels should not be planned on day-one GrapheneOS support.**
+[A]
 
 ### 5.3 Device Recommendation by Profile
 
-| Profile | Recommended | Acceptable | Avoid | Reasoning |
-| --- | --- | --- | --- | --- |
-| **A Baseline** | Pixel 10a | Pixel 9a, Pixel 9 / 10 | — | Longest support (Mar 2033), lowest cost, mature Mali/Exynos stack |
-| **B High-risk** | Pixel 10 / 10 Pro | Pixel 9 / 9 Pro | Foldables; Pixel 8 series for new purchases; Pixel 11 until supported and settled | Newest supported flagship generation, long support (Aug 2032). GPU trade-off (PowerVR unknown vs Mali known-exploited) does not clearly favour either |
-| **C Managed fleet** | Pixel 10a | Pixel 9a, Pixel 10 | Foldables (cost, repair) | Single model across the fleet simplifies attestation and support; long support |
-| **C+B** | Pixel 10 | Pixel 9 | As for B | As for B, standardized |
+This is an analyst assessment [A].
+
+| Profile | Recommended | Alternative | Avoid |
+| --- | --- | --- | --- |
+| **A Baseline** | Pixel 10a | Pixel 10 (non-Pro) | Foldables; Pixel 8 series for new purchases; Pixel 11 until supported and settled |
+| **B High-risk** | Pixel 10a | Pixel 10 (non-Pro) | Pro models (UWB, extra radios); foldables; Pixel 8 series for new purchases; Pixel 11 until supported and settled |
+| **C Managed fleet** | Pixel 10a | Pixel 10 (non-Pro) | Foldables; Pixel 8 series for new purchases; Pixel 11 until supported and settled |
+| **C+B** | Pixel 10a | Pixel 10 (non-Pro) | As for B |
+
+**Why the Pixel 10a for every profile:**
+- **Same security core as the Pixel 10:** Titan M2 secure element and Exynos
+  5400 modem. [D] / [S]
+- **Mature GPU stack:** the Mali driver is well studied and actively patched,
+  whereas the PowerVR driver in the Pixel 10 is new on Pixels and largely
+  unstudied (§5.2.2).
+- **Fewest radios:** no UWB, so the smallest wireless attack surface of the
+  current devices (§5.2.6).
+- **Longest support:** March 2033, the latest end date of any supported
+  device. [D]
+- **Lowest cost**, which also makes a single fleet model and spares practical.
+
+The GPU trade-off (known-exploited but well-understood Mali versus unstudied
+PowerVR) is noted but is **not decisive** on its own. Choose the **Pixel 10
+(non-Pro)** where more performance is needed; it keeps the same secure element
+and modem.
 
 **Pixel 11:** Re-evaluate once GrapheneOS support ships **and** has been through
 two or three monthly releases. Its new modem, secure element and GPU generation
@@ -591,8 +629,8 @@ hardened_malloc. [D] (Detail to be expanded in Stage 2.)
 - For user apps, an **exploit-protection compatibility mode** can be toggled per
   app. It disables MTE (unless the app opted in), switches to the standard Scudo
   allocator, reduces address space from 48-bit to 39-bit, and allows ptrace. [D]
-- MTE crashes are reported to the user, which turns silent memory corruption into
-  a visible crash. [A]
+- MTE crashes are always reported to the user, which turns silent memory
+  corruption into a visible crash. [D]
 
 ### 6.4 Exec-Based App Spawning
 
@@ -604,13 +642,17 @@ protection. [D]
 
 ### 6.5 Kernel and Toolchain Hardening
 
-[D] unless noted:
+**GrapheneOS-specific** ([D] unless noted):
 - 48-bit address space and **33 bits of ASLR entropy** (stock: 24).
-- Zeroing of freed and newly allocated kernel memory; heap canaries.
+- Extra zeroing of freed and newly allocated kernel memory; heap canaries.
 - **Forced kernel module signing** with per-build keys; kernel lockdown mode.
-- ARMv9 protections: **BTI, PAC, ShadowCallStack, type-based CFI**.
 - **ART JIT disabled** in favour of ahead-of-time compilation; dynamic code loading
   blocked for nearly all base OS processes.
+
+**Also present in stock Pixel kernels** (largely inherited from stock) [A]:
+- **Type-based CFI** and **ShadowCallStack** — compiler (Clang) features.
+- **PAC** (pointer authentication) and **BTI** (branch target identification) —
+  ARMv8.x hardware features.
 
 ### 6.6 Vanadium Browser and WebView
 
@@ -635,7 +677,7 @@ protection. [D]
 | Network / Sensors permissions | Privacy rather than exploit protection |
 
 > **Assessment note.** These toggles are necessary for app compatibility, but each
-> one is a silent opt-out. An organization should know how many of its required
+> one is an opt-out the organisation cannot see. An organization should know how many of its required
 > apps need compatibility mode, and should prefer apps that don't (§11 #12).
 
 ### 6.8 Coverage by Device Generation
